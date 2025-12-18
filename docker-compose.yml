@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hotel-api
+    restart: unless-stopped
+    ports:
+      - '${APP_PORT}:${APP_PORT}'
+    environment:
+      - NODE_ENV=development
+      - DATABASE_HOST=${POSTGRES_HOST}
+      - DATABASE_PORT=${POSTGRES_PORT}
+      - DATABASE_USER=${POSTGRES_USER}
+      - DATABASE_PASSWORD=${POSTGRES_PASSWORD}
+      - DATABASE_NAME=${POSTGRES_DB}
+      - PORT=${APP_PORT}
+    depends_on:
+      - postgres
+    volumes:
+      - .:/app
+      - /app/node_modules
+    # On laisse le CMD du Dockerfile (node dist/main) pour éviter d'avoir besoin du CLI Nest dans le conteneur
+    # command: npm run start:dev
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: hotel-postgres
+    restart: unless-stopped
+    ports:
+      - '${POSTGRES_PORT}:5432'
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: hotel-pgadmin
+    restart: unless-stopped
+    ports:
+      - '5050:80'
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
