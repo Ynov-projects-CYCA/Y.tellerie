@@ -1,17 +1,10 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as nodeCrypto from 'crypto';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
-
-// Polyfill global crypto for Node versions where it's not defined by default (e.g. Node 18 in some environments)
-if (!(globalThis as any).crypto) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (globalThis as any).crypto = nodeCrypto.webcrypto;
-}
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

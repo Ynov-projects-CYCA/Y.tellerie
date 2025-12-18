@@ -8,15 +8,15 @@ services:
     container_name: hotel-api
     restart: unless-stopped
     ports:
-      - '3000:3000'
+      - '${APP_PORT}:${APP_PORT}'
     environment:
       - NODE_ENV=development
-      - DATABASE_HOST=postgres
-      - DATABASE_PORT=5432
-      - DATABASE_USER=hotel_user
-      - DATABASE_PASSWORD=hotel_pass
-      - DATABASE_NAME=hotel_db
-      - PORT=3000
+      - DATABASE_HOST=${POSTGRES_HOST}
+      - DATABASE_PORT=${POSTGRES_PORT}
+      - DATABASE_USER=${POSTGRES_USER}
+      - DATABASE_PASSWORD=${POSTGRES_PASSWORD}
+      - DATABASE_NAME=${POSTGRES_DB}
+      - PORT=${APP_PORT}
     depends_on:
       - postgres
     volumes:
@@ -30,15 +30,15 @@ services:
     container_name: hotel-postgres
     restart: unless-stopped
     ports:
-      - '5432:5432'
+      - '${POSTGRES_PORT}:5432'
     environment:
-      - POSTGRES_USER=hotel_user
-      - POSTGRES_PASSWORD=hotel_pass
-      - POSTGRES_DB=hotel_db
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U hotel_user']
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER}']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -50,13 +50,10 @@ services:
     ports:
       - '5050:80'
     environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@hotel.com
-      - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
     depends_on:
       - postgres
 
 volumes:
   postgres_data:
-
-
-
