@@ -19,7 +19,6 @@ export class LoggingInterceptor implements NestInterceptor {
     return next.handle().pipe(
       tap(() => {
         const elapsed = Date.now() - now;
-        // eslint-disable-next-line no-console
         console.log(`[HTTP] ${method} ${url} - ${elapsed}ms`);
       }),
     );

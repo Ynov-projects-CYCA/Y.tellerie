@@ -1,5 +1,4 @@
 import { Email } from './email.vo';
-import { Password } from './password.vo';
 import { Role } from './role.vo';
 import { UserId } from './user-id.vo';
 

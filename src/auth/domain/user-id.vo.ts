@@ -8,7 +8,6 @@ export class UserId {
   }
 
   public static from(value: string): UserId {
-    // We could add UUID validation here if needed
     return new UserId(value);
   }
 

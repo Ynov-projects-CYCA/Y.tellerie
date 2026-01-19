@@ -1,7 +1,5 @@
 # Documentation de l'Infrastructure de Base
 
-Ce document résume l'état de l'infrastructure sur la branche `feature/infrastructure`.
-
 ## 1. Ce qui a été réalisé
 
 La branche `feature/infrastructure` met en place une base de projet robuste et prête pour le développement des fonctionnalités.

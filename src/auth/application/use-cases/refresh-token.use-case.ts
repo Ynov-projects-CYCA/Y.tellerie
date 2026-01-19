@@ -54,11 +54,9 @@ export class RefreshTokenUseCase {
       throw new InvalidRefreshTokenError();
     }
 
-    // Invalidate the old token
     oldRefreshToken.revoke();
     await this.refreshTokenRepository.save(oldRefreshToken);
 
-    // Issue new tokens
     const accessToken = await this.tokenGenerator.generateAccessToken(user);
     const newRefreshToken = RefreshToken.create(user.getProperties().id, 7);
 

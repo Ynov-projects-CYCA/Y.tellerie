@@ -1,21 +1,24 @@
 import { EntitySchema } from 'typeorm';
-import { User, UserProperties } from '../../../domain/user.entity';
-import { UserId } from '../../../domain/user-id.vo';
-import { Email } from '../../../domain/email.vo';
 import { Role } from '../../../domain/role.vo';
 
-export const UserSchema = new EntitySchema<User>({
+export class UserOrmEntity {
+  id: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  passwordHash: string;
+  roles: Role[]
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export const UserSchema = new EntitySchema<UserOrmEntity>({
   name: 'User',
   tableName: 'users',
-  target: User,
   columns: {
     id: {
       type: 'uuid',
       primary: true,
-      transformer: {
-        to: (value: UserId): string => value.toString(),
-        from: (value: string): UserId => UserId.from(value),
-      },
     },
     firstname: {
       type: 'varchar',
@@ -26,10 +29,6 @@ export const UserSchema = new EntitySchema<User>({
     email: {
       type: 'varchar',
       unique: true,
-      transformer: {
-        to: (value: Email): string => value.toString(),
-        from: (value: string): Email => Email.from(value),
-      },
     },
     passwordHash: {
       type: 'varchar',
@@ -37,7 +36,6 @@ export const UserSchema = new EntitySchema<User>({
     },
     roles: {
       type: 'jsonb',
-      default: [Role.USER],
     },
     createdAt: {
       type: 'timestamp with time zone',
@@ -50,8 +48,4 @@ export const UserSchema = new EntitySchema<User>({
       name: 'updated_at',
     },
   },
-  // This is needed to map the raw DB data back to our domain entity
-  // which has a constructor that expects a single properties object.
-  // We need a custom repository method or a factory to use this properly.
-  // For now, we assume TypeORM can handle this mapping if the properties match.
 });

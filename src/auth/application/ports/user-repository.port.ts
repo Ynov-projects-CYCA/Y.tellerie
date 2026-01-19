@@ -8,6 +8,4 @@ export interface IUserRepository {
   save(user: UserAggregate): Promise<void>;
   findById(id: UserId): Promise<UserAggregate | null>;
   findByEmail(email: Email): Promise<UserAggregate | null>;
-  // We can add a delete method if needed
-  // delete(id: UserId): Promise<void>;
 }

@@ -62,6 +62,7 @@ export class LoginUseCase {
       command.password.toString(),
       userProps.passwordHash,
     );
+
     if (!isPasswordValid) {
       throw new InvalidCredentialsError();
     }

@@ -4,9 +4,6 @@ import { Email } from './email.vo';
 import { Role } from './role.vo';
 import { UserProperties } from './user.entity';
 
-// The IPasswordHasher is a port defined in the application layer.
-// We are referencing it here to show the dependency of the domain factory
-// on an external service for password hashing.
 export interface IPasswordHasher {
   hash(password: string): Promise<string>;
 }
@@ -27,7 +24,7 @@ export class UserFactory {
       lastname: properties.lastname,
       email: properties.email,
       passwordHash: await passwordHasher.hash(properties.rawPassword),
-      roles: [Role.USER], // Default role
+      roles: [Role.USER],
       createdAt: new Date(),
       updatedAt: new Date(),
     };

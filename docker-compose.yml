@@ -16,14 +16,13 @@ services:
       - DATABASE_USER=${POSTGRES_USER}
       - DATABASE_PASSWORD=${POSTGRES_PASSWORD}
       - DATABASE_NAME=${POSTGRES_DB}
-      - PORT=${APP_PORT}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     volumes:
       - .:/app
       - /app/node_modules
-    # On laisse le CMD du Dockerfile (node dist/main) pour éviter d'avoir besoin du CLI Nest dans le conteneur
-    # command: npm run start:dev
+    command: sh -c "npm run migration:run && npm run start:dev"
 
   postgres:
     image: postgres:15-alpine
@@ -38,7 +37,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER}']
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -46,6 +45,7 @@ services:
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: hotel-pgadmin
+    user: root
     restart: unless-stopped
     ports:
       - '5050:80'
@@ -54,6 +54,9 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
     depends_on:
       - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
 
 volumes:
   postgres_data:
+  pgadmin_data:

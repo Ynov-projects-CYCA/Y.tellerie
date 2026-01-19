@@ -1,7 +1,7 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Request } from 'express';
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { RefreshTokenUseCase } from '../use-cases/refresh-token.use-case';
 import { JwtPayload } from './jwt.strategy';
@@ -15,9 +15,13 @@ export class RefreshTokenStrategy extends PassportStrategy(
     configService: ConfigService,
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
   ) {
+    const jwtRefreshSecret = configService.get<string>('JWT_REFRESH_SECRET');
+    if (!jwtRefreshSecret) {
+      throw new Error('JWT_REFRESH_SECRET is not defined in the configuration.');
+    }
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: configService.get<string>('JWT_REFRESH_SECRET'), // We need a separate secret
+      secretOrKey: jwtRefreshSecret,
       passReqToCallback: true,
     });
   }
@@ -29,10 +33,11 @@ export class RefreshTokenStrategy extends PassportStrategy(
    * @param payload The decoded JWT payload.
    */
   async validate(req: Request, payload: JwtPayload) {
-    const refreshTokenId = req
-      .get('Authorization')
-      .replace('Bearer', '')
-      .trim();
+    const authHeader = req.get('Authorization');
+    if (!authHeader) {
+      throw new UnauthorizedException('Refresh token missing from Authorization header.');
+    }
+    const refreshTokenId = authHeader.replace('Bearer', '').trim();
     return this.refreshTokenUseCase.execute({ refreshTokenId });
   }
 }

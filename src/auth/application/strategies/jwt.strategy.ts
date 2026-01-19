@@ -5,9 +5,8 @@ import { IUserRepository } from '../ports/user-repository.port';
 import { UserId } from '../../domain/user-id.vo';
 import { ConfigService } from '@nestjs/config';
 
-// The payload that we encode in the JWT
 export interface JwtPayload {
-  sub: string; // This will be the UserId
+  sub: string;
   email: string;
 }
 
@@ -17,10 +16,14 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     @Inject(IUserRepository) private readonly userRepository: IUserRepository,
     configService: ConfigService,
   ) {
+    const jwtSecret = configService.get<string>('JWT_SECRET');
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET is not defined in the configuration.');
+    }
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_SECRET'), // We need to add this to config
+      secretOrKey: jwtSecret,
     });
   }
 
@@ -32,7 +35,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   async validate(payload: JwtPayload) {
     const userId = UserId.from(payload.sub);
     const user = await this.userRepository.findById(userId);
-    // The user object will be attached to the request object (e.g., req.user)
     return user;
   }
 }

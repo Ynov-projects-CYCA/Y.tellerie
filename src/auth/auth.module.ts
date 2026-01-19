@@ -24,6 +24,7 @@ import { RegisterUserUseCase } from './application/use-cases/register-user.use-c
 import { LoginUseCase } from './application/use-cases/login.use-case';
 import { RefreshTokenUseCase } from './application/use-cases/refresh-token.use-case';
 import { ChangePasswordUseCase } from './application/use-cases/change-password.use-case';
+import { LogoutUseCase } from './application/use-cases/logout.use-case';
 import { AuthenticationDomainService } from './domain/authentication.domain-service';
 import { LocalStrategy } from './application/strategies/local.strategy';
 import { JwtStrategy } from './application/strategies/jwt.strategy';
@@ -52,6 +53,7 @@ import { RefreshTokenSchema } from './infrastructure/persistence/typeorm/refresh
     LoginUseCase,
     RefreshTokenUseCase,
     ChangePasswordUseCase,
+    LogoutUseCase,
     // Domain Services
     AuthenticationDomainService,
     // Strategies

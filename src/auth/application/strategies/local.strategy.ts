@@ -9,9 +9,9 @@ import { UserAggregate } from '../../domain/user.aggregate';
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
   constructor(private readonly loginUseCase: LoginUseCase) {
-    // We can configure the field names for username and password here
-    // e.g., { usernameField: 'email', passwordField: 'password' }
-    super();
+    super({
+      usernameField: 'email',
+    });
   }
 
   /**

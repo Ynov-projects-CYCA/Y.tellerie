@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { ITokenGenerator } from '../../../application/ports/token-generator.port';
-import { UserAggregate } from '../../../domain/user.aggregate';
-import { JwtPayload } from '../../../application/strategies/jwt.strategy';
+import { ITokenGenerator } from '../../application/ports/token-generator.port';
+import { UserAggregate } from '../../domain/user.aggregate';
+import { JwtPayload } from '../../application/strategies/jwt.strategy';
 
 @Injectable()
 export class JwtTokenGenerator implements ITokenGenerator {
