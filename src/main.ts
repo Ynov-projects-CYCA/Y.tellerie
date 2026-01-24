@@ -35,6 +35,8 @@ async function bootstrap() {
     .setDescription('Backend pour la gestion hôtelière - Infrastructure & Auth')
     .setVersion('1.0')
     .addBearerAuth()
+    .addTag('Default')
+    .addTag('Auth')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
