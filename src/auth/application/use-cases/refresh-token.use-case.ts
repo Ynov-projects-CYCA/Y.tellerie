@@ -33,9 +33,11 @@ export class RefreshTokenUseCase {
     private readonly authDomainService: AuthenticationDomainService,
   ) {}
 
-  async execute(command: {
-    refreshTokenId: string;
-  }): Promise<{ user: UserAggregate; accessToken: string; refreshToken: RefreshToken }> {
+  async execute(command: { refreshTokenId: string }): Promise<{
+    user: UserAggregate;
+    accessToken: string;
+    refreshToken: RefreshToken;
+  }> {
     const oldRefreshToken = await this.refreshTokenRepository.findByTokenId(
       command.refreshTokenId,
     );

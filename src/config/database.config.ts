@@ -7,6 +7,3 @@ export default registerAs('database', () => ({
   password: process.env.DATABASE_PASSWORD ?? 'hotel_pass',
   name: process.env.DATABASE_NAME ?? 'hotel_db',
 }));
-
-
-

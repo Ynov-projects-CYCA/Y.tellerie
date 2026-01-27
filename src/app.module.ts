@@ -3,16 +3,19 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
+import stripeConfig from './config/stripe.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { StripeModule } from './stripe/stripe.module';
 
 @Module({
   imports: [
     AuthModule,
+    StripeModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, databaseConfig],
+      load: [appConfig, databaseConfig, stripeConfig],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

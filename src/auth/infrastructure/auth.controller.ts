@@ -53,9 +53,7 @@ export class AuthController {
     status: HttpStatus.CONFLICT,
     description: 'User with this email already exists.',
   })
-  async register(
-    @Body() registerDto: RegisterDto,
-  ): Promise<AuthResponseDto> {
+  async register(@Body() registerDto: RegisterDto): Promise<AuthResponseDto> {
     const user = await this.registerUserUseCase.execute({
       firstname: registerDto.firstname,
       lastname: registerDto.lastname,
@@ -99,10 +97,12 @@ export class AuthController {
     @Request() req: { user: UserAggregate },
     @Body() _loginDto: LoginDto,
   ): Promise<AuthResponseDto> {
-    const { user, accessToken, refreshToken } = await this.loginUseCase.execute({
-      email: req.user.getProperties().email,
-      password: Password.from(_loginDto.password),
-    });
+    const { user, accessToken, refreshToken } = await this.loginUseCase.execute(
+      {
+        email: req.user.getProperties().email,
+        password: Password.from(_loginDto.password),
+      },
+    );
 
     return {
       accessToken,

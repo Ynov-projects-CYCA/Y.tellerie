@@ -18,7 +18,10 @@ export class RefreshToken {
     Object.assign(this, properties);
   }
 
-  public static create(userId: UserId, tokenLifetimeDays: number): RefreshToken {
+  public static create(
+    userId: UserId,
+    tokenLifetimeDays: number,
+  ): RefreshToken {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + tokenLifetimeDays);
 

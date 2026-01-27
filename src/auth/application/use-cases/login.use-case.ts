@@ -47,10 +47,11 @@ export class LoginUseCase {
     private readonly authDomainService: AuthenticationDomainService,
   ) {}
 
-  async execute(command: {
-    email: Email;
-    password: Password;
-  }): Promise<{ user: UserAggregate; accessToken: string; refreshToken: RefreshToken }> {
+  async execute(command: { email: Email; password: Password }): Promise<{
+    user: UserAggregate;
+    accessToken: string;
+    refreshToken: RefreshToken;
+  }> {
     const user = await this.userRepository.findByEmail(command.email);
     if (!user) {
       throw new InvalidCredentialsError();

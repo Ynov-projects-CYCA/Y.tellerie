@@ -4,7 +4,10 @@ import { Repository } from 'typeorm';
 import { IRefreshTokenRepository } from '../../application/ports/refresh-token-repository.port';
 import { RefreshToken } from '../../domain/refresh-token.entity';
 import { UserId } from '../../domain/user-id.vo';
-import { RefreshTokenOrmEntity, RefreshTokenSchema } from '../persistence/typeorm/refresh-token.schema';
+import {
+  RefreshTokenOrmEntity,
+  RefreshTokenSchema,
+} from '../persistence/typeorm/refresh-token.schema';
 
 @Injectable()
 export class TypeOrmRefreshTokenRepository implements IRefreshTokenRepository {
@@ -28,12 +31,14 @@ export class TypeOrmRefreshTokenRepository implements IRefreshTokenRepository {
     const tokensOrmEntity = await this.refreshTokenRepository.find({
       where: { userId: userId.toString() },
     });
-    return tokensOrmEntity.map((t) => new RefreshToken({
-        id: t.id,
-        userId: UserId.from(t.userId),
-        expiresAt: t.expiresAt,
-        isRevoked: t.isRevoked,
-      }),
+    return tokensOrmEntity.map(
+      (t) =>
+        new RefreshToken({
+          id: t.id,
+          userId: UserId.from(t.userId),
+          expiresAt: t.expiresAt,
+          isRevoked: t.isRevoked,
+        }),
     );
   }
 

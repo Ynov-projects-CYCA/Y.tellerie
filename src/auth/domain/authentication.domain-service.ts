@@ -1,7 +1,6 @@
 import { UserAggregate } from './user.aggregate';
 import { RefreshToken } from './refresh-token.entity';
 
-
 export class AuthenticationDomainService {
   public canUserLogin(user: UserAggregate): boolean {
     return true;
