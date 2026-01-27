@@ -20,7 +20,8 @@ import {
   IUserRepository as IUserRepositorySymbol,
 } from './application/ports/user-repository.port';
 import { TypeOrmUserRepository } from './infrastructure/adapters/typeorm-user-repository.adapter';
-import { RegisterUserUseCase } from './application/use-cases/register-user.use-case';
+import { RegisterClientUseCase } from './application/use-cases/register-client.use-case';
+import { RegisterPersonnelUseCase } from './application/use-cases/register-personnel.use-case';
 import { LoginUseCase } from './application/use-cases/login.use-case';
 import { RefreshTokenUseCase } from './application/use-cases/refresh-token.use-case';
 import { ChangePasswordUseCase } from './application/use-cases/change-password.use-case';
@@ -49,7 +50,8 @@ import { RefreshTokenSchema } from './infrastructure/persistence/typeorm/refresh
   ],
   providers: [
     // Use Cases
-    RegisterUserUseCase,
+    RegisterClientUseCase,
+    RegisterPersonnelUseCase,
     LoginUseCase,
     RefreshTokenUseCase,
     ChangePasswordUseCase,

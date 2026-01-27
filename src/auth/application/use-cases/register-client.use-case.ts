@@ -18,7 +18,7 @@ export class UserAlreadyExistsError extends Error {
 }
 
 @Injectable()
-export class RegisterUserUseCase {
+export class RegisterClientUseCase {
   constructor(
     @Inject(IUserRepositorySymbol)
     private readonly userRepository: IUserRepository,

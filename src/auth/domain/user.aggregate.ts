@@ -1,5 +1,6 @@
 import { User } from './user.entity';
 import { RefreshToken } from './refresh-token.entity';
+import { Role } from './role.vo';
 
 /**
  * In this domain, the User is the aggregate root.
@@ -19,5 +20,11 @@ export class UserAggregate extends User {
 
   addRefreshToken(token: RefreshToken) {
     this._refreshTokens.push(token);
+  }
+
+  addRole(role: Role) {
+    if (!this.getProperties().roles.includes(role)) {
+      this.getProperties().roles.push(role);
+    }
   }
 }
