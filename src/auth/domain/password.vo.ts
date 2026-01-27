@@ -6,6 +6,13 @@ import {
   ValidationError,
 } from 'class-validator';
 
+export class InvalidPasswordError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidPasswordError';
+  }
+}
+
 export class Password {
   @IsString()
   @IsNotEmpty()
@@ -16,7 +23,7 @@ export class Password {
     this.value = value;
     const errors = validateSync(this);
     if (errors.length > 0) {
-      throw new Error(this.formatErrors(errors));
+      throw new InvalidPasswordError(this.formatErrors(errors));
     }
   }
 
@@ -26,6 +33,10 @@ export class Password {
 
   public toString(): string {
     return this.value;
+  }
+
+  public equals(other: Password): boolean {
+    return this.value === other.value;
   }
 
   private formatErrors(errors: ValidationError[]): string {

@@ -13,7 +13,7 @@ export class UserResponse {
   @ApiProperty({ description: 'The email address of the user', example: 'john.doe@example.com' })
   email: string;
 
-  @ApiProperty({ description: 'The roles assigned to the user', example: ['user', 'admin'] })
+  @ApiProperty({ description: 'The roles assigned to the user', example: ['client'] })
   roles: string[];
 }
 

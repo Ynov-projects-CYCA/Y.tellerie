@@ -6,6 +6,7 @@ import databaseConfig from './config/database.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { RolesGuard } from './auth/infrastructure/guards/roles.guard';
 
 @Module({
   imports: [
@@ -30,6 +31,6 @@ import { AuthModule } from './auth/auth.module';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, RolesGuard],
 })
 export class AppModule {}

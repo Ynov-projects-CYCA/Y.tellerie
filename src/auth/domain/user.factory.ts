@@ -17,6 +17,7 @@ export class UserFactory {
       rawPassword: string;
     },
     passwordHasher: IPasswordHasher,
+    initialRole: Role = Role.CLIENT,
   ): Promise<UserAggregate> {
     const userProps: UserProperties = {
       id: UserId.generate(),
@@ -24,7 +25,7 @@ export class UserFactory {
       lastname: properties.lastname,
       email: properties.email,
       passwordHash: await passwordHasher.hash(properties.rawPassword),
-      roles: [Role.USER],
+      roles: [initialRole],
       createdAt: new Date(),
       updatedAt: new Date(),
     };
