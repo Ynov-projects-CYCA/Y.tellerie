@@ -5,6 +5,7 @@ import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -24,6 +25,9 @@ async function bootstrap() {
     }),
   );
 
+  // Keep raw body for Stripe webhook signature verification
+  app.use('/stripe/webhook', express.raw({ type: 'application/json' }));
+
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalInterceptors(
     new LoggingInterceptor(),
@@ -37,6 +41,8 @@ async function bootstrap() {
     .addBearerAuth()
     .addTag('Default')
     .addTag('Auth')
+    .addTag('Stripe')
+    .addTag('Mailjet')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
@@ -44,10 +50,10 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? '3000';
   await app.listen(port);
-  // eslint-disable-next-line no-console
+
   console.log(`Application is running on http://localhost:${port}`);
-  // eslint-disable-next-line no-console
+
   console.log(`Swagger UI available at http://localhost:${port}/api/docs`);
 }
 
-bootstrap();
+void bootstrap();

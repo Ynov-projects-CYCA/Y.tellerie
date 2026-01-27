@@ -7,7 +7,7 @@ export class UserOrmEntity {
   lastname: string;
   email: string;
   passwordHash: string;
-  roles: Role[]
+  roles: Role[];
   createdAt: Date;
   updatedAt: Date;
 }

@@ -141,10 +141,12 @@ export class AuthController {
     @Request() req: { user: UserAggregate },
     @Body() _loginDto: LoginDto,
   ): Promise<AuthResponseDto> {
-    const { user, accessToken, refreshToken } = await this.loginUseCase.execute({
-      email: req.user.getProperties().email,
-      password: Password.from(_loginDto.password),
-    });
+    const { user, accessToken, refreshToken } = await this.loginUseCase.execute(
+      {
+        email: req.user.getProperties().email,
+        password: Password.from(_loginDto.password),
+      },
+    );
 
     return {
       accessToken,
