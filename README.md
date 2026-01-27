@@ -1,43 +1,151 @@
 # Y.TELLERIE
 
-## Description
+## Description Fonctionnelle
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript project
+Ce projet constitue le socle backend d'une application de gestion hôtelière moderne. L'objectif métier est de fournir une plateforme centralisée permettant de piloter l'activité complète de l'établissement, de la mise en ligne des chambres jusqu'à la finalisation du séjour.
 
-## Project setup
+### Cœur du système
+L'application orchestre l'ensemble du flux opérationnel de l'hôtel :
+* **Gestion du Catalogue & Inventaire** : Administration fine des chambres (catégories, équipements, statut de nettoyage) et gestion de la disponibilité en temps réel.
+* **Cycle de Réservation Complet** : Tunnel de réservation incluant la vérification de disponibilité, la gestion des dates et la confirmation ferme.
+* **Moteur de Tarification & Paiement** : Calcul dynamique des coûts de séjour et intégration sécurisée avec **Stripe** pour le traitement des transactions en ligne.
+* **Communication Transactionnelle** : Système de notifications automatiques via **Mailjet** pour l'envoi des confirmations de réservation et des factures.
 
-### Requirements
+### Profils & Parcours Utilisateurs
+Le système distingue deux types d'utilisateurs avec des droits et accès spécifiques :
+-   **Le personnel de l'hôtel** : Des employés disposant de droits étendus pour la gestion de l'inventaire, la supervision des réservations et l'administration des utilisateurs.
+-   **Les clients** : Des utilisateurs externes pouvant consulter le catalogue, effectuer des réservations sécurisées et accéder à leur historique de séjour.
 
-- Docker & Docker Compose
-- Node.js v18+ (LTS)
-- npm v9+
+---
+
+## Architecture
+
+L'application est conçue selon les principes de l'**Architecture Hexagonale** (ou Ports & Adapters), favorisant la séparation des préoccupations, la maintenabilité et la testabilité.
+
+### Domaine Métier & DDD
+
+Le cœur du système est découpé selon les principes du Domain-Driven Design (DDD) pour garantir une logique métier pure et isolée :
+
+-   **Bounded Contexts** : Identification claire des frontières entre la gestion des utilisateurs (Authentification/Profils) et la gestion hôtelière (Chambres/Réservations).
+-   **Entités & Agrégats** : Utilisation d'entités riches (ex: Chambre) et d'agrégats pour maintenir l'intégrité des données (ex: Réservation).
+-   **Value Objects** : Validation stricte des données immuables (ex: Tarif).
+-   **Services du Domaine** : Logique métier complexe ne pouvant pas être portée par une seule entité (ex : Paiement).
+-   **Application** : Orchestre les cas d'utilisation (Use Cases) en utilisant les objets du domaine. Il définit les "ports" (interfaces) nécessaires pour communiquer avec l'extérieur (ex: base de données, services externes).
+-   **Infrastructure** : Implémente les "adapters". C'est ici que se trouvent les technologies externes : contrôleurs API, connexion à la base de données (TypeORM), envoi d'emails, etc.
+
+![img.png](bounded_context.png)
+
+### Diagramme C4
+
+L'architecture technique est documentée via le modèle C4 pour offrir une vision claire des composants du système.
+
+![img.png](diagramme_C4_niveau1.png)
+![img.png](diagramme_C4_niveau2.png)
+![img.png](diagramme_C4_niveau3.png)
+> **Note :** Le diagramme de Niveau 3 détaille les interactions entre les Contrôleurs (Infrastructure), les Use Cases / services (Application) et les Entités (Domaine).
+
+---
+
+## Manuel Utilisateur
+
+L'API est accessible via l'URL de base `http://localhost:3000`. Une documentation interactive Swagger est également disponible pour explorer et tester les endpoints en direct.
+
+-   **Documentation API (Swagger)** : `http://localhost:3000/api-docs`
+
+---
+
+## Manuel Technique
+
+### Prérequis
+
+-   Docker & Docker Compose
+-   Node.js v18+ (LTS)
+-   npm v9+
 
 ### Installation
 
-```bash
-$ npm install
-```
+1.  Clonez le dépôt du projet.
+2.  Copiez le fichier d'environnement d'exemple et remplissez les variables nécessaires :
+    ```bash
+    $ cp .env.example .env
+    ```
+3.  Installez les dépendances du projet :
+    ```bash
+    $ npm install
+    ```
 
-### Compile and run the project
+### Lancement de l'application
+
+Pour lancer l'ensemble des services (API, base de données, pgAdmin) dans un environnement de développement :
 
 ```bash
 $ docker compose up -d --build
 ```
 
-### Access the application
+L'application sera alors accessible sur `http://localhost:3000`.
+
+### Accès aux services
+
+-   **API (Swagger)** : `http://localhost:3000/api-docs`
+-   **pgAdmin (GUI pour la BDD)** : `http://localhost:5050`
+-   **API (accès direct)**: `http://localhost:3000`
+
+### Tests
+
+Le projet est couvert à au moins 30% par des tests unitaires utilisant **Jest**. Pour exécuter les tests et vérifier la couverture de code, utilisez les commandes suivantes :
 
 ```bash
-# Swagger API documentation
-http://localhost:3000/api-docs  
+# Lancer les tests unitaires
+$ npm run test
+
+# Calculer la couverture de test
+$ npm run test:cov
 ```
+
+---
+
+## Intégration Continue (CI)
+
+Le projet intègre un pipeline de CI via **GitHub Actions** qui s'exécute à chaque push ou pull request sur la branche `main`. Ce pipeline garantit la qualité du code avant tout déploiement.
+
+**Étapes du pipeline :**
+1.  **Checkout** : Récupération du code source.
+2.  **Setup Node.js** : Installation de l'environnement (v20.x).
+3.  **Install** : Installation propre des dépendances via `npm ci`.
+4.  **Tests & Coverage** : Exécution des tests unitaires et vérification de la couverture de code (`npm run test:cov`).
+
+### Base de données et Migrations
+
+Le projet utilise TypeORM pour gérer le schéma de la base de données.
 
 ```bash
-# PgAdmin interface
-http://localhost:5050/
+# Appliquer les migrations en attente
+$ npm run migration:run
+
+# Revenir en arrière sur la dernière migration
+$ npm run migration:revert
+
+# Générer une nouvelle migration
+$ npm run migration:generate -- -n NomDeLaMigration
 ```
 
-```bash
-# API access
-http://localhost:3000/
-```
+---
 
+## Description Technique
+
+### Langages et Frameworks
+
+-   **Langage** : TypeScript 5.7
+-   **Framework principal** : NestJS 11
+
+### Dépendances Externes et Librairies
+
+-   **Base de Données** : PostgreSQL (lancé via Docker).
+-   **ORM** : TypeORM pour la modélisation et l'accès aux données.
+-   **Authentification** : Passport.js avec des stratégies `local` (email/mot de passe) et `jwt`.
+-   **Validation des données** : `class-validator` et `class-transformer` pour la validation et la transformation des DTOs.
+-   **API & Documentation** : Swagger (`@nestjs/swagger`) pour la génération automatique de la documentation d'API.
+-   **Tests** : Jest pour les tests unitaires.
+-   **Qualité de code** : ESLint (linting) et Prettier (formatage).
+-   **Gestion des mails** : Mailjet pour l'envoi d'emails transactionnels.
+-   **Gestion des paiements** : Stripe pour le traitement des paiements en ligne.
