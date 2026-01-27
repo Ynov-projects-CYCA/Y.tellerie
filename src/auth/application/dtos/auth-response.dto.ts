@@ -19,10 +19,7 @@ export class UserResponse {
   })
   email: string;
 
-  @ApiProperty({
-    description: 'The roles assigned to the user',
-    example: ['user', 'admin'],
-  })
+  @ApiProperty({ description: 'The roles assigned to the user', example: ['client'] })
   roles: string[];
 }
 

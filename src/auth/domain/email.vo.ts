@@ -5,6 +5,13 @@ import {
   ValidationError,
 } from 'class-validator';
 
+export class InvalidEmailError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidEmailError';
+  }
+}
+
 export class Email {
   @IsEmail()
   @IsNotEmpty()
@@ -14,7 +21,7 @@ export class Email {
     this.value = value;
     const errors = validateSync(this);
     if (errors.length > 0) {
-      throw new Error(this.formatErrors(errors));
+      throw new InvalidEmailError(this.formatErrors(errors));
     }
   }
 
@@ -24,6 +31,10 @@ export class Email {
 
   public toString(): string {
     return this.value;
+  }
+
+  public equals(other: Email): boolean {
+    return this.value === other.value;
   }
 
   private formatErrors(errors: ValidationError[]): string {

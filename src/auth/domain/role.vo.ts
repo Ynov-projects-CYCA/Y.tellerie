@@ -1,6 +1,6 @@
 export enum Role {
-  ADMIN = 'admin',
-  USER = 'user',
+  CLIENT = 'client',
+  PERSONNEL = 'personnel',
 }
 
 export class Roles {
@@ -9,7 +9,7 @@ export class Roles {
   public static from(roles: Role[]): Roles {
     if (!roles || roles.length === 0) {
       // Default role if none provided
-      return new Roles([Role.USER]);
+      return new Roles([Role.CLIENT]);
     }
     return new Roles(roles);
   }

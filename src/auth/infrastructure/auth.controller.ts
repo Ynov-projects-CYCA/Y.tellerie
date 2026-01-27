@@ -16,7 +16,8 @@ import {
   ApiBody,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { RegisterUserUseCase } from '../application/use-cases/register-user.use-case';
+import { RegisterClientUseCase } from '../application/use-cases/register-client.use-case';
+import { RegisterPersonnelUseCase } from '../application/use-cases/register-personnel.use-case';
 import { LoginUseCase } from '../application/use-cases/login.use-case';
 import { RefreshTokenUseCase } from '../application/use-cases/refresh-token.use-case';
 import { ChangePasswordUseCase } from '../application/use-cases/change-password.use-case';
@@ -34,27 +35,70 @@ import { RefreshTokenDto } from '../application/dtos/refresh-token.dto';
 @Controller('auth')
 export class AuthController {
   constructor(
-    private readonly registerUserUseCase: RegisterUserUseCase,
+    private readonly registerClientUseCase: RegisterClientUseCase,
+    private readonly registerPersonnelUseCase: RegisterPersonnelUseCase,
     private readonly loginUseCase: LoginUseCase,
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
     private readonly changePasswordUseCase: ChangePasswordUseCase,
     private readonly logoutUseCase: LogoutUseCase,
   ) {}
 
-  @Post('register')
+  @Post('register/client')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Register a new user and log them in' })
+  @ApiOperation({ summary: 'Register a new client and log them in' })
   @ApiResponse({
     status: HttpStatus.CREATED,
-    description: 'User successfully registered and logged in.',
+    description: 'Client successfully registered and logged in.',
     type: AuthResponseDto,
   })
   @ApiResponse({
     status: HttpStatus.CONFLICT,
     description: 'User with this email already exists.',
   })
-  async register(@Body() registerDto: RegisterDto): Promise<AuthResponseDto> {
-    const user = await this.registerUserUseCase.execute({
+  async registerClient(
+    @Body() registerDto: RegisterDto,
+  ): Promise<AuthResponseDto> {
+    const user = await this.registerClientUseCase.execute({
+      firstname: registerDto.firstname,
+      lastname: registerDto.lastname,
+      email: Email.from(registerDto.email),
+      rawPassword: registerDto.password,
+    });
+
+    const { accessToken, refreshToken } = await this.loginUseCase.execute({
+      email: user.getProperties().email,
+      password: await Password.from(registerDto.password),
+    });
+
+    return {
+      accessToken,
+      refreshToken: refreshToken.getProperties().id,
+      user: {
+        id: user.getProperties().id.toString(),
+        firstname: user.getProperties().firstname,
+        lastname: user.getProperties().lastname,
+        email: user.getProperties().email.toString(),
+        roles: user.getProperties().roles,
+      },
+    };
+  }
+
+  @Post('register/personnel')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Register a new personnel and log them in' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Personnel successfully registered and logged in.',
+    type: AuthResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'User with this email already exists.',
+  })
+  async registerPersonnel(
+    @Body() registerDto: RegisterDto,
+  ): Promise<AuthResponseDto> {
+    const user = await this.registerPersonnelUseCase.execute({
       firstname: registerDto.firstname,
       lastname: registerDto.lastname,
       email: Email.from(registerDto.email),

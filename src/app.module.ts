@@ -8,6 +8,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { StripeModule } from './stripe/stripe.module';
+import { RolesGuard } from './auth/infrastructure/guards/roles.guard';
 
 @Module({
   imports: [
@@ -33,6 +34,6 @@ import { StripeModule } from './stripe/stripe.module';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, RolesGuard],
 })
 export class AppModule {}
