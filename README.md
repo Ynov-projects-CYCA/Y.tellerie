@@ -39,9 +39,10 @@ Le cœur du système est découpé selon les principes du Domain-Driven Design (
 
 L'architecture technique est documentée via le modèle C4 pour offrir une vision claire des composants du système.
 
-![img.png](diagramme_C4_niveau1.png)
-![img.png](diagramme_C4_niveau2.png)
-![img.png](diagramme_C4_niveau3.png)
+![diagramme_C4_niveau1.png](diagramme_C4_niveau1.png)
+![diagramme_C4_niveau2.png](diagramme_C4_niveau2.png)
+![diagramme_C4_niveau3.png](diagramme_C4_niveau3.png)
+
 > **Note :** Le diagramme de Niveau 3 détaille les interactions entre les Contrôleurs (Infrastructure), les Use Cases / services (Application) et les Entités (Domaine).
 
 ---
@@ -73,6 +74,61 @@ L'API est accessible via l'URL de base `http://localhost:3000`. Une documentatio
     ```bash
     $ npm install
     ```
+
+### Configuration des Services
+
+Le projet repose sur deux services tiers pour assurer les fonctionnalités critiques de paiement et de communication. Renseignez les clés correspondantes dans votre fichier `.env`.
+
+#### Paiements (Stripe)
+L'intégration Stripe sécurise les transactions bancaires et permet la confirmation ferme des réservations.
+1. **Création de compte** : Créez un compte sur le [Tableau de bord Stripe](https://stripe.com).
+2. **Identifiants API** : Naviguez vers **Développeurs** > **Clés API**.
+3. **Clé secrète** : Récupérez la **Clé secrète** (commençant par `sk_test_`).
+4. **Webhook (optionnel)** : Configurez un webhook pour suivre les événements d'email si nécessaire. Pour la synchronisation locale, utilisez la CLI Stripe pour obtenir votre secret de signature (whsec_...).
+5. **Configuration** : Renseignez les variables suivantes dans le `.env` :
+   ```bash
+   STRIPE_SECRET_KEY=sk_test_votre_cle_secrete
+   STRIPE_WEBHOOK_SECRET=whsec_votre_cle_webhook
+   STRIPE_CURRENCY=eur
+    ```
+   
+#### Emails (Mailjet)
+Mailjet est utilisé pour l'envoi automatisé des confirmations de séjour et des alertes de gestion des chambres.
+1. **Création de compte** : Inscrivez-vous sur [Mailjet](https://www.mailjet.com).
+2. **Validation d'expéditeur** : Validez votre adresse email dans la section Adresses d'expéditeurs.
+3. **Identifiants API** : Accédez à **Mon compte** > **API Keys**.
+4. **Clé** : Récupérez la **Clé API publique** et la **Clé API secrète**.
+5. **Configuration** : Renseignez les variables suivantes dans le `.env` :
+   ```bash
+   MAILJET_API_KEY=your_mailjet_api_key
+   MAILJET_API_SECRET=your_mailjet_api_secret
+   MAILJET_SANDBOX= true # ou false en production
+   MAILJET_SENDER_EMAIL=your_verified_sender_email
+   MAILJET_SENDER_NAME=YourSenderName
+    ```
+#### Base de Données (PostgreSQL & pgAdmin)
+Le projet utilise PostgreSQL comme base de données relationnelle. Un service PostgreSQL est configuré via Docker Compose.
+1.  Assurez-vous que les variables de connexion à la base de données dans le fichier `.env` correspondent à celles définies dans le `docker-compose.yml` :
+    ```bash
+    POSTGRES_HOST=your_host
+    POSTGRES_PORT=your_port
+    POSTGRES_USER=your_user
+    POSTGRES_PASSWORD=your_password
+    POSTGRES_DB=your_database
+    ```
+2.  Un service pgAdmin est également configuré pour faciliter la gestion de la base de données via une interface graphique.
+3.  Accédez à pgAdmin via `http://localhost:5050` avec les identifiants définis dans le `.env` :
+    ```bash
+    PGADMIN_DEFAULT_EMAIL=your_email
+    PGADMIN_DEFAULT_PASSWORD=your_password
+    ```
+4.  Ajoutez un nouveau serveur dans pgAdmin avec les paramètres de connexion PostgreSQL du `.env` :
+    -   **Nom du serveur** : `PostgreSQL`
+    -   **Hôte** : `your_host`
+    -   **Port** : `your_port`
+    -   **Maintenance DB** : `your_database`
+    -   **Username** : `your_user`
+    -   **Password** : `your_password`
 
 ### Lancement de l'application
 

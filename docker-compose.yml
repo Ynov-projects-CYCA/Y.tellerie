@@ -10,7 +10,7 @@ services:
     ports:
       - '${APP_PORT}:${APP_PORT}'
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=${NODE_ENV}
       - DATABASE_HOST=${POSTGRES_HOST}
       - DATABASE_PORT=${POSTGRES_PORT}
       - DATABASE_USER=${POSTGRES_USER}
