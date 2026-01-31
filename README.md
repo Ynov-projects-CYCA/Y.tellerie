@@ -51,7 +51,7 @@ L'architecture technique est documentée via le modèle C4 pour offrir une visio
 
 L'API est accessible via l'URL de base `http://localhost:3000`. Une documentation interactive Swagger est également disponible pour explorer et tester les endpoints en direct.
 
--   **Documentation API (Swagger)** : `http://localhost:3000/api-docs`
+-   **Documentation API (Swagger)** : `http://localhost:3000/api/docs`
 
 ---
 
@@ -66,9 +66,10 @@ L'API est accessible via l'URL de base `http://localhost:3000`. Une documentatio
 ### Installation
 
 1.  Clonez le dépôt du projet.
-2.  Copiez le fichier d'environnement d'exemple et remplissez les variables nécessaires :
+2.  Copiez les fichiers d'environnement d'exemple et remplissez les variables nécessaires :
     ```bash
     $ cp .env.example .env
+    $ cp .env.test.example .env.test
     ```
 3.  Installez les dépendances du projet :
     ```bash
@@ -157,6 +158,19 @@ $ npm run test
 # Calculer la couverture de test
 $ npm run test:cov
 ```
+
+#### Configuration des Tests d'Intégration
+
+Les tests d'intégration nécessitent une base de données PostgreSQL dédiée. Assurez-vous que :
+
+1. Le service PostgreSQL est démarré : `docker compose up -d postgres`
+2. Le fichier `.env.test` est configuré avec les bonnes credentials
+3. La base de données de test est créée :
+   ```bash
+   $ docker exec hotel-postgres psql -U hotel_user -d hotel_db -c "CREATE DATABASE hotel_db_test;"
+   ```
+
+> **Note de Sécurité** : Les tests utilisent un fichier `.env.test` séparé pour éviter toute interaction avec les données de production. Ne committez jamais ce fichier dans le repository.
 
 ---
 
