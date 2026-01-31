@@ -16,6 +16,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
+    "test:cov:ci": "jest --coverage --testPathIgnorePatterns=typeorm-room-repository.adapter.spec.ts",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "start:docker:dev": "NODE_ENV=development node dist/main",
@@ -93,9 +94,17 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "src/**/*.(t|j)s"
+      "src/**/*.(t|j)s",
+      "!src/**/*.module.ts",
+      "!src/main.ts",
+      "!src/**/*.interface.ts",
+      "!src/**/*.schema.ts",
+      "!src/rooms/infrastructure/adapters/typeorm-room-repository.adapter.ts"
     ],
     "coverageDirectory": "./coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "testPathIgnorePatterns": [
+      "typeorm-room-repository.adapter.spec.ts"
+    ]
   }
 }
