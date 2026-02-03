@@ -6,6 +6,7 @@ import {
   Delete,
   Param,
   Body,
+  Query,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
@@ -13,6 +14,7 @@ import { CreateRoomDto } from '../application/dtos/create-room.dto';
 import { UpdateRoomDto } from '../application/dtos/update-room.dto';
 import { RoomResponseDto } from '../application/dtos/room-response.dto';
 import { CreateRoomUseCase } from '../application/use-cases/create-room.use-case';
+import { CheckAvailabilityUseCase } from '../../reservations/application/use-cases/check-availability.use-case';
 import { UpdateRoomUseCase } from '../application/use-cases/update-room.use-case';
 import { DeleteRoomUseCase } from '../application/use-cases/delete-room.use-case';
 import { GetRoomUseCase } from '../application/use-cases/get-room.use-case';
@@ -32,6 +34,7 @@ export class RoomsController {
     private readonly checkoutRoomUseCase: CheckoutRoomUseCase,
     private readonly cleanRoomUseCase: CleanRoomUseCase,
     private readonly checkinRoomUseCase: CheckinRoomUseCase,
+    private readonly checkAvailabilityUseCase: CheckAvailabilityUseCase,
   ) {}
 
   @Post()
@@ -53,6 +56,18 @@ export class RoomsController {
     return RoomResponseDto.fromDomain(room);
   }
 
+  @Get(':id/availability')
+  async availability(
+    @Param('id') id: string,
+    @Query('from') from: string,
+    @Query('to') to: string,
+  ): Promise<{ available: boolean; conflicts: any[] }> {
+    const start = new Date(from);
+    const end = new Date(to);
+    const result = await this.checkAvailabilityUseCase.execute(id, start, end);
+    return result;
+  }
+
   @Put(':id')
   async update(
     @Param('id') id: string,
@@ -67,8 +82,6 @@ export class RoomsController {
   async remove(@Param('id') id: string): Promise<void> {
     await this.deleteRoomUseCase.execute(id);
   }
-
-
 
   @Post(':id/checkout')
   async checkout(@Param('id') id: string): Promise<RoomResponseDto> {

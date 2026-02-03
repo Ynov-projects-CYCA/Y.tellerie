@@ -4,6 +4,8 @@ import { RoomEntity } from './infrastructure/persistence/room.entity';
 import { RoomsController } from './infrastructure/rooms.controller';
 import { RoomFactory } from './domain/room.factory';
 import { CreateRoomUseCase } from './application/use-cases/create-room.use-case';
+import { AvailabilityModule } from '../availability/availability.module';
+import { CheckAvailabilityUseCase } from '../reservations/application/use-cases/check-availability.use-case';
 import { UpdateRoomUseCase } from './application/use-cases/update-room.use-case';
 import { DeleteRoomUseCase } from './application/use-cases/delete-room.use-case';
 import { GetRoomUseCase } from './application/use-cases/get-room.use-case';
@@ -15,7 +17,7 @@ import { TypeOrmRoomRepositoryAdapter } from './infrastructure/adapters/typeorm-
 import { ROOM_REPOSITORY } from './application/ports/room-repository.port';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([RoomEntity])],
+  imports: [TypeOrmModule.forFeature([RoomEntity]), AvailabilityModule],
   controllers: [RoomsController],
   providers: [
     RoomFactory,
@@ -31,6 +33,7 @@ import { ROOM_REPOSITORY } from './application/ports/room-repository.port';
     CheckoutRoomUseCase,
     CleanRoomUseCase,
     CheckinRoomUseCase,
+    CheckAvailabilityUseCase,
   ],
   exports: [RoomFactory, ROOM_REPOSITORY],
 })
