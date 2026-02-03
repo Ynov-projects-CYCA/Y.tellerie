@@ -5,21 +5,21 @@ export class ReservationEntity {
   @PrimaryColumn('uuid')
   id: string;
 
-  @Column('uuid')
+  @Column('uuid', { name: 'room_id' })
   roomId: string;
 
-  @Column('timestamp with time zone')
+  @Column('timestamp with time zone', { name: 'start_date' })
   startDate: Date;
 
-  @Column('timestamp with time zone')
+  @Column('timestamp with time zone', { name: 'end_date' })
   endDate: Date;
 
   @Column({ default: 'confirmed' })
   status: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }
