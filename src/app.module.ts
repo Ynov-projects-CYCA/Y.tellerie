@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import { StripeModule } from './stripe/stripe.module';
 import { MailjetModule } from './mailjet/mailjet.module';
 import { RoomsModule } from './rooms/rooms.module';
+import { AvailabilityModule } from './availability/availability.module';
 import { RolesGuard } from './auth/infrastructure/guards/roles.guard';
 
 @Module({
@@ -19,6 +20,7 @@ import { RolesGuard } from './auth/infrastructure/guards/roles.guard';
     StripeModule,
     MailjetModule,
     RoomsModule,
+    AvailabilityModule,
     ConfigModule.forRoot({
       isGlobal: true,
       load: [appConfig, databaseConfig, stripeConfig, mailjetConfig],
