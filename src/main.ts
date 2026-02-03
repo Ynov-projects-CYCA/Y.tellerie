@@ -43,6 +43,7 @@ async function bootstrap() {
     .addTag('Auth')
     .addTag('Stripe')
     .addTag('Mailjet')
+    .addTag('Availability')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
