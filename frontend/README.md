@@ -15,7 +15,7 @@ Le serveur Angular écoute sur `http://localhost:4200`.
 - `src/environments/environment.development.ts`
   Base URL API: `/api`
 - `src/environments/environment.ts`
-  Base URL API: `http://localhost:3000`
+  Base URL API: `/api`
 
 En développement, `ng serve` utilise `proxy.conf.json` pour rediriger `/api/*` vers le backend local.
 
@@ -28,11 +28,19 @@ En développement, `ng serve` utilise `proxy.conf.json` pour rediriger `/api/*` 
 
 ## Point CORS
 
-Le backend Nest active actuellement CORS uniquement pour `http://localhost:3000`.
+Le backend Nest lit maintenant la liste d’origines autorisées depuis `CORS_ALLOWED_ORIGINS`.
 
 - En local, le proxy Angular évite ce problème pour les appels vers `/api`.
-- En intégration ou pour des appels directs depuis le navigateur, le backend devra autoriser l’origine réelle du frontend, par exemple `http://localhost:4200` ou le domaine d’intégration.
-- Alternative acceptable: placer frontend et backend derrière un reverse proxy en same-origin.
+- En intégration ou pour des appels directs depuis le navigateur, il faut renseigner l’origine réelle du frontend dans `CORS_ALLOWED_ORIGINS`.
+- En Docker, le frontend Nginx reverse-proxy `/api` vers le backend, ce qui garde les appels browser en same-origin.
+
+## Docker
+
+```bash
+cd ..
+cp .env.example .env
+docker compose up --build
+```
 
 ## Vérification
 
