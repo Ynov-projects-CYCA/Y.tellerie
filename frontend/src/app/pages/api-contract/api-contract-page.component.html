@@ -1,0 +1,37 @@
+<section class="page">
+  <article class="card card--primary">
+    <p class="eyebrow">Contrat d’intégration</p>
+    <h1>Couche HTTP mutualisée alignée sur le backend Nest.</h1>
+    <p>
+      Les services frontend consomment directement la donnée utile. L’enveloppe backend
+      <code>{{ '{ data, timestamp }' }}</code> et les erreurs sont traitées dans les intercepteurs.
+    </p>
+  </article>
+
+  <div class="grid">
+    <article class="card">
+      <h2>Comportement standardisé</h2>
+      <ul>
+        @for (item of contractItems; track item) {
+          <li>{{ item }}</li>
+        }
+      </ul>
+    </article>
+
+    <article class="card">
+      <h2>Test rapide backend</h2>
+      <p>Route appelée: <code>{{ environment.apiBaseUrl }}/</code></p>
+      <button type="button" (click)="checkBackend()" [disabled]="loading()">
+        {{ loading() ? 'Vérification en cours...' : 'Tester la connexion API' }}
+      </button>
+
+      @if (backendMessage(); as message) {
+        <p class="feedback feedback--success">{{ message }}</p>
+      }
+
+      @if (errorMessage(); as message) {
+        <p class="feedback feedback--error">{{ message }}</p>
+      }
+    </article>
+  </div>
+</section>

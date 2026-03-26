@@ -1,0 +1,28 @@
+:host {
+  display: block;
+}
+
+.card {
+  padding: 2rem;
+  border-radius: 28px;
+  border: 1px solid var(--color-border);
+  background: rgba(255, 251, 245, 0.86);
+  box-shadow: var(--shadow-soft);
+}
+
+.card h1 {
+  margin: 0.4rem 0 0.8rem;
+}
+
+.eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-accent);
+  font-size: 0.8rem;
+}
+
+.card a {
+  color: var(--color-accent);
+  font-weight: 600;
+}

@@ -1,0 +1,36 @@
+<section class="hero">
+  <div class="hero__copy">
+    <p class="eyebrow">Base technique Angular</p>
+    <h1>Socle frontend prêt pour brancher les features métier.</h1>
+    <p class="hero__lede">
+      Le shell principal, la configuration d’environnement et la couche d’intégration API
+      sont posés pour accélérer les prochains tickets.
+    </p>
+  </div>
+
+  <aside class="hero__panel">
+    <p>Configuration active</p>
+    <strong>{{ environment.production ? 'production' : 'development' }}</strong>
+    <span>{{ environment.apiBaseUrl }}</span>
+  </aside>
+</section>
+
+<section class="grid">
+  <article class="card">
+    <h2>Ce qui est en place</h2>
+    <ul>
+      @for (item of foundationItems; track item) {
+        <li>{{ item }}</li>
+      }
+    </ul>
+  </article>
+
+  <article class="card">
+    <h2>Point d’attention CORS</h2>
+    <p>
+      En développement, Angular appelle le backend via le proxy local <code>/api</code>.
+      En intégration ou sans proxy, le backend devra autoriser explicitement l’origine frontend.
+    </p>
+    <a routerLink="/integration">Voir le contrat d’intégration</a>
+  </article>
+</section>
