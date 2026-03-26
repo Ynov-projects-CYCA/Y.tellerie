@@ -46,23 +46,22 @@ function buildMessage(statusCode: number, payload: BackendErrorPayload | null): 
     return candidate;
   }
 
-  if (statusCode >= 500) {
-    return 'Le serveur a rencontré une erreur inattendue.';
-  }
-
-  if (statusCode === 401) {
+  switch (statusCode) {
+  case 0:
+    return "Impossible de joindre l'API.";
+  case 400:
+    return 'La requête est invalide.';
+  case 401:
     return 'Votre session est invalide ou a expiré.';
-  }
-
-  if (statusCode === 403) {
+  case 403:
     return "Vous n'avez pas les droits nécessaires pour cette action.";
-  }
-
-  if (statusCode === 404) {
+  case 404:
     return 'La ressource demandée est introuvable.';
+  default:
+    return statusCode >= 500
+      ? 'Le serveur a rencontré une erreur inattendue.'
+      : 'La requête a échoué.';
   }
-
-  return 'La requête a échoué.';
 }
 
 function extractMessage(payload: BackendErrorPayload | null): string | null {
