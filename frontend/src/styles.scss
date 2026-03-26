@@ -1,1 +1,69 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --color-background: #f3ede3;
+  --color-surface: rgba(255, 251, 245, 0.82);
+  --color-text: #1c2a2f;
+  --color-muted: #5d6c72;
+  --color-border: rgba(28, 42, 47, 0.12);
+  --color-accent: #175e7f;
+  --shadow-soft: 0 24px 60px rgba(43, 50, 46, 0.08);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--color-text);
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(185, 125, 60, 0.24), transparent 30%),
+    radial-gradient(circle at 85% 15%, rgba(23, 94, 127, 0.16), transparent 28%),
+    linear-gradient(180deg, #f6f1e8 0%, #f0e6d9 100%);
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.85rem 1.2rem;
+  background: var(--color-accent);
+  color: #f7fbfd;
+  cursor: pointer;
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+
+button:hover:not(:disabled),
+button:focus-visible:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+code {
+  padding: 0.15rem 0.4rem;
+  border-radius: 8px;
+  background: rgba(28, 42, 47, 0.08);
+  font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
+}
+
+a {
+  color: inherit;
+}

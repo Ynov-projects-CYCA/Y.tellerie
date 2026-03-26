@@ -1,7 +1,6 @@
 node_modules
 dist
 coverage
+.angular
 .git
-.env
-.env.*
 npm-debug.log

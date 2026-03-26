@@ -1,5 +1,6 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
@@ -9,9 +10,11 @@ import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
+  const allowedOrigins = configService.get<string[]>('app.corsOrigins') ?? [];
 
   app.enableCors({
-    origin: ['http://localhost:3000'],
+    origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
@@ -48,10 +51,11 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  const port = process.env.PORT ?? '3000';
+  const port = configService.get<number>('app.port') ?? 3000;
   await app.listen(port);
 
   console.log(`Application is running on http://localhost:${port}`);
+  console.log(`CORS allowed origins: ${allowedOrigins.join(', ')}`);
 
   console.log(`Swagger UI available at http://localhost:${port}/api/docs`);
 }

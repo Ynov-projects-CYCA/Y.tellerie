@@ -1,59 +1,50 @@
 # Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.1.
+Socle Angular du frontend Y.tellerie.
 
-## Development server
-
-To start a local development server, run:
+## Démarrage
 
 ```bash
-ng serve
+npm start
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Le serveur Angular écoute sur `http://localhost:4200`.
 
-## Code scaffolding
+## Environnements
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+- `src/environments/environment.development.ts`
+  Base URL API: `/api`
+- `src/environments/environment.ts`
+  Base URL API: `/api`
+
+En développement, `ng serve` utilise `proxy.conf.json` pour rediriger `/api/*` vers le backend local.
+
+## Contrat HTTP
+
+- Les réponses de succès du backend sont attendues au format `{ data, timestamp }`.
+- La couche HTTP frontend retire automatiquement l’enveloppe et expose directement `data`.
+- Les erreurs backend sont converties en `AppHttpError` avec un message prêt pour l’UI.
+- Le bearer token est injecté automatiquement si `ytellerie.access_token` est présent dans le stockage local.
+
+## Point CORS
+
+Le backend Nest lit maintenant la liste d’origines autorisées depuis `CORS_ALLOWED_ORIGINS`.
+
+- En local, le proxy Angular évite ce problème pour les appels vers `/api`.
+- En intégration ou pour des appels directs depuis le navigateur, il faut renseigner l’origine réelle du frontend dans `CORS_ALLOWED_ORIGINS`.
+- En Docker, le frontend Nginx reverse-proxy `/api` vers le backend, ce qui garde les appels browser en same-origin.
+
+## Docker
 
 ```bash
-ng generate component component-name
+cd ..
+cp .env.example .env
+docker compose up --build
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Vérification
 
 ```bash
-ng generate --help
+npm run build
+npm test -- --watch=false
 ```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

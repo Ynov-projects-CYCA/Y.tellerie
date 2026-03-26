@@ -9,3 +9,4 @@ frontend/.angular
 .vscode/*
 backend/.env
 backend/.env.test
+.env
