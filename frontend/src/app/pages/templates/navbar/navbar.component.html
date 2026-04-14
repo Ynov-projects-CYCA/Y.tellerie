@@ -1,0 +1,52 @@
+<nav class="navbar" [class.navbar--scrolled]="isScrolled">
+  <div class="navbar__inner">
+
+    <!-- Logo -->
+    <a routerLink="/" class="navbar__logo">
+      <div class="navbar__logo-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </div>
+      <span class="navbar__logo-text">Ytellerie</span>
+    </a>
+
+    <!-- Desktop Nav Links -->
+    <ul class="navbar__links">
+      <li *ngFor="let link of navLinks">
+        <button class="navbar__link" (click)="scrollTo(link.anchor)">
+          {{ link.label }}
+        </button>
+      </li>
+    </ul>
+
+    <!-- Desktop CTAs -->
+    <div class="navbar__actions">
+      <a routerLink="/login" class="btn btn--ghost">Connexion</a>
+      <a routerLink="/login" class="btn btn--primary">Commencer</a>
+    </div>
+
+    <!-- Mobile Hamburger -->
+    <button class="navbar__burger" (click)="toggleMobileMenu()" [class.is-open]="isMobileMenuOpen" aria-label="Menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+
+  <!-- Mobile Menu Drawer -->
+  <div class="navbar__mobile-menu" [class.is-open]="isMobileMenuOpen">
+    <ul class="navbar__mobile-links">
+      <li *ngFor="let link of navLinks">
+        <button class="navbar__mobile-link" (click)="scrollTo(link.anchor)">
+          {{ link.label }}
+        </button>
+      </li>
+    </ul>
+    <div class="navbar__mobile-actions">
+      <a routerLink="/login" class="btn btn--ghost btn--full" (click)="closeMobileMenu()">Connexion</a>
+      <a routerLink="/login" class="btn btn--primary btn--full" (click)="closeMobileMenu()">Commencer</a>
+    </div>
+  </div>
+</nav>

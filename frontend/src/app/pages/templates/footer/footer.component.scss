@@ -1,0 +1,95 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.footer {
+  background: $color-amber-100;
+  border-top: 2px solid $color-amber-300;
+  padding: $spacing-12 0;
+
+  &__inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 $spacing-6;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $spacing-6;
+    flex-wrap: wrap;
+
+    @include mobile {
+      flex-direction: column;
+      text-align: center;
+      padding: 0 $spacing-4;
+      gap: $spacing-5;
+    }
+  }
+
+  // ── Brand ─────────────────────────────────────
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: $spacing-2;
+    text-decoration: none;
+    transition: opacity 0.2s;
+
+    &:hover { opacity: 0.8; }
+  }
+
+  &__brand-icon {
+    width: 34px;
+    height: 34px;
+    background: $color-amber-200;
+    border: 1.5px solid $color-amber-400;
+    border-radius: $radius-sm;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $color-amber-800;
+  }
+
+  &__brand-name {
+    font-family: $font-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: $color-amber-950;
+  }
+
+  // ── Copyright ─────────────────────────────────
+  &__copy {
+    font-size: 0.875rem;
+    color: $color-amber-800;
+    margin: 0;
+  }
+
+  // ── Legal Nav ─────────────────────────────────
+  &__nav {
+    display: flex;
+    align-items: center;
+    gap: $spacing-6;
+  }
+
+  &__nav-link {
+    font-size: 0.875rem;
+    color: $color-amber-800;
+    text-decoration: none;
+    transition: color 0.2s;
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: $color-amber-950;
+      transition: width 0.25s ease;
+    }
+
+    &:hover {
+      color: $color-amber-950;
+
+      &::after { width: 100%; }
+    }
+  }
+}

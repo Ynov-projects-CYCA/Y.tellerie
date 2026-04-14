@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { AppShellComponent } from './layout/app-shell.component';
 import { ApiContractPageComponent } from './pages/api-contract/api-contract-page.component';
-import { HomePageComponent } from './pages/home/home-page.component';
+import { HomeComponent } from './pages/home/home.component';
 import { NotFoundPageComponent } from './pages/not-found/not-found-page.component';
 
 export const routes: Routes = [
@@ -13,7 +13,7 @@ export const routes: Routes = [
         path: '',
         pathMatch: 'full',
         title: 'Accueil',
-        component: HomePageComponent,
+        component: HomeComponent,
       },
       {
         path: 'integration',
