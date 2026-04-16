@@ -3,6 +3,7 @@ import { AppShellComponent } from './layout/app-shell.component';
 import { ApiContractPageComponent } from './pages/api-contract/api-contract-page.component';
 import { HomePageComponent } from './pages/home/home-page.component';
 import { NotFoundPageComponent } from './pages/not-found/not-found-page.component';
+import { StaffDashboardPageComponent } from './pages/dashboard-staff/staff-dashboard-page.component';
 
 export const routes: Routes = [
   {
@@ -19,6 +20,11 @@ export const routes: Routes = [
         path: 'integration',
         title: 'Contrat API',
         component: ApiContractPageComponent,
+      },
+      {
+        path: 'staff',
+        title: 'Tableau de bord',
+        component: StaffDashboardPageComponent,
       },
       {
         path: '**',
