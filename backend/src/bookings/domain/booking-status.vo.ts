@@ -1,5 +1,8 @@
 export enum BookingStatus {
+  PENDING_PAYMENT = 'PENDING_PAYMENT',
   CONFIRMED = 'CONFIRMED',
+  PAYMENT_FAILED = 'PAYMENT_FAILED',
+  CANCELED = 'CANCELED',
 }
 
 export class BookingStatusVO {
@@ -15,6 +18,18 @@ export class BookingStatusVO {
 
   static confirmed(): BookingStatusVO {
     return new BookingStatusVO(BookingStatus.CONFIRMED);
+  }
+
+  static pendingPayment(): BookingStatusVO {
+    return new BookingStatusVO(BookingStatus.PENDING_PAYMENT);
+  }
+
+  static paymentFailed(): BookingStatusVO {
+    return new BookingStatusVO(BookingStatus.PAYMENT_FAILED);
+  }
+
+  static canceled(): BookingStatusVO {
+    return new BookingStatusVO(BookingStatus.CANCELED);
   }
 
   getValue(): BookingStatus {

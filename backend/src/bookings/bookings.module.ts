@@ -25,5 +25,6 @@ import { GetBookingUseCase } from './application/use-cases/get-booking.use-case'
     ConfirmBookingUseCase,
     GetBookingUseCase,
   ],
+  exports: [BOOKING_REPOSITORY],
 })
 export class BookingsModule {}
