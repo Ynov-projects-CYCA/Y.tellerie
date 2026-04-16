@@ -11,7 +11,10 @@ import { AuthModule } from './auth/auth.module';
 import { StripeModule } from './stripe/stripe.module';
 import { MailjetModule } from './mailjet/mailjet.module';
 import { RoomsModule } from './rooms/rooms.module';
+import { BookingsModule } from './bookings/bookings.module';
 import { RolesGuard } from './auth/infrastructure/guards/roles.guard';
+
+const isTsRuntime = __filename.endsWith('.ts');
 
 @Module({
   imports: [
@@ -19,6 +22,7 @@ import { RolesGuard } from './auth/infrastructure/guards/roles.guard';
     StripeModule,
     MailjetModule,
     RoomsModule,
+    BookingsModule,
     ConfigModule.forRoot({
       isGlobal: true,
       load: [appConfig, databaseConfig, stripeConfig, mailjetConfig],
@@ -34,6 +38,10 @@ import { RolesGuard } from './auth/infrastructure/guards/roles.guard';
         password: configService.get<string>('database.password'),
         database: configService.get<string>('database.name'),
         autoLoadEntities: true,
+        migrations: isTsRuntime
+          ? ['src/migrations/*.ts']
+          : ['dist/migrations/*.js'],
+        migrationsRun: configService.get<boolean>('app.runMigrations') ?? false,
         synchronize: false, // Set to false for production
       }),
     }),
