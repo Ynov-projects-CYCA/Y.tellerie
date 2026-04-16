@@ -110,7 +110,9 @@ describe('AuthController', () => {
       expect(sendTransactionalEmailUseCase.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           to: expect.objectContaining({ email: 'john.doe@example.com' }),
-          subject: 'Verify your email address',
+          subject: 'Confirmez votre adresse email Ytellerie',
+          text: expect.stringContaining('Bienvenue sur Ytellerie.'),
+          html: expect.stringContaining('Confirmer mon adresse email'),
         }),
       );
       expect(loginUseCase.execute).not.toHaveBeenCalled();
@@ -152,7 +154,9 @@ describe('AuthController', () => {
       expect(sendTransactionalEmailUseCase.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           to: expect.objectContaining({ email: 'jane.doe@example.com' }),
-          subject: 'Verify your email address',
+          subject: 'Confirmez votre adresse email Ytellerie',
+          text: expect.stringContaining('Bienvenue sur Ytellerie.'),
+          html: expect.stringContaining('Confirmer mon adresse email'),
         }),
       );
       expect(loginUseCase.execute).not.toHaveBeenCalled();
