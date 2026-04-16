@@ -1,52 +1,48 @@
-<nav class="navbar" [class.navbar--scrolled]="isScrolled">
-  <div class="navbar__inner">
+<nav class="nav" [class.nav--scrolled]="isScrolled">
+  <div class="nav-container">
 
     <!-- Logo -->
-    <a routerLink="/" class="navbar__logo">
-      <div class="navbar__logo-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-          <polyline points="9 22 9 12 15 12 15 22"/>
-        </svg>
+    <a routerLink="/" class="nav-brand">
+      <div class="brand-icon-wrapper">
+        <svg lucideHotel class="brand-icon"></svg>
       </div>
-      <span class="navbar__logo-text">Ytellerie</span>
+      <span class="brand-name">Ytellerie</span>
     </a>
 
     <!-- Desktop Nav Links -->
-    <ul class="navbar__links">
+    <ul class="nav-menu">
       <li *ngFor="let link of navLinks">
-        <button class="navbar__link" (click)="scrollTo(link.anchor)">
+        <button class="nav-link" (click)="scrollTo(link.anchor)">
           {{ link.label }}
         </button>
       </li>
     </ul>
 
     <!-- Desktop CTAs -->
-    <div class="navbar__actions">
-      <a routerLink="/login" class="btn btn--ghost">Connexion</a>
-      <a routerLink="/login" class="btn btn--primary">Commencer</a>
+    <div class="nav-actions">
+      <a routerLink="/login" class="btn btn-ghost">Connexion</a>
+      <a routerLink="/login" class="btn btn-primary">Commencer</a>
     </div>
 
     <!-- Mobile Hamburger -->
-    <button class="navbar__burger" (click)="toggleMobileMenu()" [class.is-open]="isMobileMenuOpen" aria-label="Menu">
-      <span></span>
-      <span></span>
-      <span></span>
+    <button class="menu-toggle" (click)="toggleMobileMenu()" [class.is-open]="isMobileMenuOpen" aria-label="Menu">
+      <svg *ngIf="!isMobileMenuOpen" lucideMenu class="toggle-icon"></svg>
+      <svg *ngIf="isMobileMenuOpen" lucideX class="toggle-icon"></svg>
     </button>
   </div>
 
   <!-- Mobile Menu Drawer -->
-  <div class="navbar__mobile-menu" [class.is-open]="isMobileMenuOpen">
-    <ul class="navbar__mobile-links">
+  <div class="mobile-drawer" [class.is-open]="isMobileMenuOpen">
+    <ul class="mobile-nav-list">
       <li *ngFor="let link of navLinks">
-        <button class="navbar__mobile-link" (click)="scrollTo(link.anchor)">
+        <button class="mobile-nav-link" (click)="scrollTo(link.anchor)">
           {{ link.label }}
         </button>
       </li>
     </ul>
-    <div class="navbar__mobile-actions">
-      <a routerLink="/login" class="btn btn--ghost btn--full" (click)="closeMobileMenu()">Connexion</a>
-      <a routerLink="/login" class="btn btn--primary btn--full" (click)="closeMobileMenu()">Commencer</a>
+    <div class="mobile-actions">
+      <a routerLink="/login" class="btn btn-ghost btn-full" (click)="closeMobileMenu()">Connexion</a>
+      <a routerLink="/login" class="btn btn-primary btn-full" (click)="closeMobileMenu()">Commencer</a>
     </div>
   </div>
 </nav>

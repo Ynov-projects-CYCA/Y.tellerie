@@ -3,10 +3,10 @@
 
 .footer {
   background: $color-amber-100;
-  border-top: 2px solid $color-amber-300;
-  padding: $spacing-12 0;
+  border-top: 1.5px solid $color-amber-300;
+  padding: $spacing-6 0;
 
-  &__inner {
+  &-container {
     max-width: 1280px;
     margin: 0 auto;
     padding: 0 $spacing-6;
@@ -20,76 +20,73 @@
       flex-direction: column;
       text-align: center;
       padding: 0 $spacing-4;
-      gap: $spacing-5;
+      gap: $spacing-4;
     }
   }
 
-  // ── Brand ─────────────────────────────────────
-  &__brand {
+  &-brand {
     display: flex;
     align-items: center;
     gap: $spacing-2;
     text-decoration: none;
     transition: opacity 0.2s;
 
-    &:hover { opacity: 0.8; }
+    &:hover {
+      opacity: 0.8;
+    }
   }
 
-  &__brand-icon {
-    width: 34px;
-    height: 34px;
+  &-brand-icon {
+    width: 28px;
+    height: 28px;
     background: $color-amber-200;
-    border: 1.5px solid $color-amber-400;
+    border: 1px solid $color-amber-400;
     border-radius: $radius-sm;
     display: flex;
     align-items: center;
     justify-content: center;
     color: $color-amber-800;
+
+    .brand-icon {
+      width: 16px;
+      height: 16px;
+    }
   }
 
-  &__brand-name {
+  &-brand-name {
     font-family: $font-serif;
-    font-size: 1.05rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: $color-amber-950;
   }
 
-  // ── Copyright ─────────────────────────────────
-  &__copy {
-    font-size: 0.875rem;
-    color: $color-amber-800;
+
+  &-copyright {
+    font-size: 0.8rem;
+    color: $color-amber-700;
     margin: 0;
   }
 
-  // ── Legal Nav ─────────────────────────────────
-  &__nav {
+  &-nav {
     display: flex;
     align-items: center;
     gap: $spacing-6;
+
+    @include mobile {
+      gap: $spacing-4;
+    }
   }
 
-  &__nav-link {
-    font-size: 0.875rem;
+  &-nav-link {
+    font-size: 0.8rem;
     color: $color-amber-800;
     text-decoration: none;
     transition: color 0.2s;
     position: relative;
 
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: -2px;
-      left: 0;
-      width: 0;
-      height: 1px;
-      background: $color-amber-950;
-      transition: width 0.25s ease;
-    }
-
     &:hover {
       color: $color-amber-950;
-
-      &::after { width: 100%; }
+      text-decoration: underline;
     }
   }
 }

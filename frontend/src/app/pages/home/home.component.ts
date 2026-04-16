@@ -1,11 +1,17 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { NavbarComponent } from '../templates/navbar/navbar.component';
-import { FooterComponent } from '../templates/footer/footer.component';
+import {
+  LucideCalendar,
+  LucideHotel,
+  LucideUsers,
+  LucideChartBar,
+  LucideShieldCheck,
+  LucideClock,
+} from '@lucide/angular';
 
 interface Feature {
-  icon: string;
+  icon: any;
   title: string;
   description: string;
 }
@@ -19,44 +25,46 @@ interface Benefit {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule, NavbarComponent, FooterComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+  ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent {
   features: Feature[] = [
     {
-      icon: 'calendar',
+      icon: LucideCalendar,
       title: 'Réservations en ligne',
-      description:
-        'Système de réservation intuitif pour vos clients avec confirmation instantanée.',
+      description: 'Système de réservation intuitif pour vos clients avec confirmation instantanée.',
     },
     {
-      icon: 'hotel',
+      icon: LucideHotel,
       title: 'Gestion des chambres',
       description:
         "Gérez facilement la disponibilité, les tarifs et l'état de vos chambres.",
     },
     {
-      icon: 'users',
+      icon: LucideUsers,
       title: 'Gestion du personnel',
       description:
         'Organisez les équipes, horaires et tâches de votre personnel efficacement.',
     },
     {
-      icon: 'chart',
+      icon: LucideChartBar,
       title: 'Statistiques en temps réel',
       description:
         'Suivez vos performances avec des tableaux de bord détaillés.',
     },
     {
-      icon: 'shield',
+      icon: LucideShieldCheck,
       title: 'Sécurisé et fiable',
       description:
         'Vos données sont protégées avec les dernières technologies de sécurité.',
     },
     {
-      icon: 'clock',
+      icon: LucideClock,
       title: 'Support 24/7',
       description:
         'Une équipe dédiée disponible pour vous accompagner à tout moment.',

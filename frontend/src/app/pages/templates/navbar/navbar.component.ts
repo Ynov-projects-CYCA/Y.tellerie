@@ -1,11 +1,12 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { LucideHotel, LucideMenu, LucideX } from '@lucide/angular';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, LucideHotel, LucideMenu, LucideX],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss'],
 })
