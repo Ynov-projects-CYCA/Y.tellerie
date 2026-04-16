@@ -14,6 +14,7 @@ describe('UserFactory', () => {
       {
         firstname: 'John',
         lastname: 'Doe',
+        phoneNumber: '+33612345678',
         email: Email.from('john.doe@example.com'),
         rawPassword: 'password123',
       },
@@ -30,6 +31,7 @@ describe('UserFactory', () => {
       {
         firstname: 'Jane',
         lastname: 'Doe',
+        phoneNumber: '+33687654321',
         email: Email.from('jane.doe@example.com'),
         rawPassword: 'password456',
       },

@@ -29,6 +29,7 @@ export class RegisterClientUseCase {
   async execute(command: {
     firstname: string;
     lastname: string;
+    phoneNumber: string;
     email: Email;
     rawPassword: string;
   }): Promise<UserAggregate> {
@@ -41,6 +42,7 @@ export class RegisterClientUseCase {
       {
         firstname: command.firstname,
         lastname: command.lastname,
+        phoneNumber: command.phoneNumber,
         email: command.email,
         rawPassword: command.rawPassword,
       },

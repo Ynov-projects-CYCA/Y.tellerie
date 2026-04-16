@@ -5,6 +5,7 @@ export class UserOrmEntity {
   id: string;
   firstname: string;
   lastname: string;
+  phoneNumber: string;
   email: string;
   passwordHash: string;
   roles: Role[];
@@ -25,6 +26,10 @@ export const UserSchema = new EntitySchema<UserOrmEntity>({
     },
     lastname: {
       type: 'varchar',
+    },
+    phoneNumber: {
+      type: 'varchar',
+      name: 'phone_number',
     },
     email: {
       type: 'varchar',

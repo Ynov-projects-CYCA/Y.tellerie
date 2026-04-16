@@ -12,6 +12,7 @@ describe('UserAggregate', () => {
       id: UserId.generate(),
       firstname: 'John',
       lastname: 'Doe',
+      phoneNumber: '+33612345678',
       email: Email.from('john.doe@example.com'),
       passwordHash: 'hashed_password',
       roles: [Role.CLIENT],
