@@ -13,6 +13,7 @@ export class UserFactory {
     properties: {
       firstname: string;
       lastname: string;
+      phoneNumber: string;
       email: Email;
       rawPassword: string;
     },
@@ -23,6 +24,7 @@ export class UserFactory {
       id: UserId.generate(),
       firstname: properties.firstname,
       lastname: properties.lastname,
+      phoneNumber: properties.phoneNumber,
       email: properties.email,
       passwordHash: await passwordHasher.hash(properties.rawPassword),
       roles: [initialRole],

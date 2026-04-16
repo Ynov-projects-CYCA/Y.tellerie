@@ -19,10 +19,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const message =
-      exception instanceof HttpException
-        ? (exception.getResponse() as any)
-        : 'Internal server error';
+    const message = normalizeExceptionMessage(exception);
 
     if (status === HttpStatus.INTERNAL_SERVER_ERROR) {
       console.error(exception);
@@ -35,4 +32,58 @@ export class AllExceptionsFilter implements ExceptionFilter {
       error: message,
     });
   }
+}
+
+function normalizeExceptionMessage(exception: unknown): unknown {
+  if (!(exception instanceof HttpException)) {
+    return 'Internal server error';
+  }
+
+  const response = exception.getResponse() as
+    | string
+    | { message?: unknown; error?: unknown; statusCode?: number };
+
+  if (typeof response === 'string') {
+    return response;
+  }
+
+  const rawMessage = extractMessage(response.message) ?? extractMessage(response.error);
+
+  if (rawMessage && isMalformedJsonMessage(rawMessage)) {
+    return {
+      ...response,
+      message:
+        'Invalid JSON body. Check for unescaped line breaks, tabs, or quotes in string values.',
+      details: rawMessage,
+    };
+  }
+
+  return response;
+}
+
+function extractMessage(candidate: unknown): string | null {
+  if (typeof candidate === 'string' && candidate.trim().length > 0) {
+    return candidate.trim();
+  }
+
+  if (Array.isArray(candidate)) {
+    const firstMessage = candidate.find(
+      (value): value is string =>
+        typeof value === 'string' && value.trim().length > 0,
+    );
+
+    return firstMessage?.trim() ?? null;
+  }
+
+  return null;
+}
+
+function isMalformedJsonMessage(message: string): boolean {
+  const normalizedMessage = message.toLowerCase();
+
+  return (
+    normalizedMessage.includes('in json at position') ||
+    normalizedMessage.includes('unexpected token') ||
+    normalizedMessage.includes('bad control character')
+  );
 }

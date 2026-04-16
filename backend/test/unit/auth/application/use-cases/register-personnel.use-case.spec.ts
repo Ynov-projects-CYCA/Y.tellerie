@@ -33,6 +33,7 @@ describe('RegisterPersonnelUseCase', () => {
     const command = {
       firstname: 'New',
       lastname: 'Personnel',
+      phoneNumber: '+33612345678',
       email: email,
       rawPassword: 'password123',
     };
@@ -52,6 +53,7 @@ describe('RegisterPersonnelUseCase', () => {
       id: UserId.generate(),
       firstname: 'Existing',
       lastname: 'Personnel',
+      phoneNumber: '+33612345678',
       email: email,
       passwordHash: 'hashed_password',
       roles: [Role.PERSONNEL],
@@ -64,6 +66,7 @@ describe('RegisterPersonnelUseCase', () => {
     const command = {
       firstname: 'Existing',
       lastname: 'Personnel',
+      phoneNumber: '+33612345678',
       email: email,
       rawPassword: 'password123',
     };
