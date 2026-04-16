@@ -12,10 +12,10 @@ export class Booking {
     private readonly nights: number,
     private readonly totalPrice: number,
     private readonly currency: string,
-    private readonly status: BookingStatusVO,
+    private status: BookingStatusVO,
     private readonly specialRequests?: string,
     private readonly createdAt: Date = new Date(),
-    private readonly updatedAt: Date = new Date(),
+    private updatedAt: Date = new Date(),
   ) {
     this.validate();
   }
@@ -95,6 +95,21 @@ export class Booking {
 
   getUpdatedAt(): Date {
     return this.updatedAt;
+  }
+
+  markConfirmed(): void {
+    this.status = BookingStatusVO.confirmed();
+    this.updatedAt = new Date();
+  }
+
+  markPaymentFailed(): void {
+    this.status = BookingStatusVO.paymentFailed();
+    this.updatedAt = new Date();
+  }
+
+  markCanceled(): void {
+    this.status = BookingStatusVO.canceled();
+    this.updatedAt = new Date();
   }
 
   overlaps(checkInDate: Date, checkOutDate: Date): boolean {

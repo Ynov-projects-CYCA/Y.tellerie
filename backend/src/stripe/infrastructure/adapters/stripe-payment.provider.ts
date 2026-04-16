@@ -28,6 +28,15 @@ export class StripePaymentProvider implements IPaymentProvider {
       this.configService.get<string>('stripe.currency') ??
       'usd';
 
+    const successUrl = this.addBookingIdToUrl(
+      this.configService.get<string>('stripe.successUrl')!,
+      props.bookingId,
+    );
+    const cancelUrl = this.addBookingIdToUrl(
+      this.configService.get<string>('stripe.cancelUrl')!,
+      props.bookingId,
+    );
+
     const session = await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
@@ -45,10 +54,11 @@ export class StripePaymentProvider implements IPaymentProvider {
         },
       ],
       customer_email: props.customerEmail,
-      success_url: this.configService.get<string>('stripe.successUrl')!,
-      cancel_url: this.configService.get<string>('stripe.cancelUrl')!,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
       metadata: {
         paymentId: props.id,
+        bookingId: props.bookingId,
       },
     });
 
@@ -57,6 +67,12 @@ export class StripePaymentProvider implements IPaymentProvider {
     );
 
     return { sessionId: session.id, url: session.url ?? '' };
+  }
+
+  private addBookingIdToUrl(url: string, bookingId: string): string {
+    const parsed = new URL(url);
+    parsed.searchParams.set('booking_id', bookingId);
+    return parsed.toString();
   }
 
   retrieveEvent(signature: string, payload: Buffer) {
