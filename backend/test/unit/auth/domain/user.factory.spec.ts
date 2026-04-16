@@ -15,6 +15,7 @@ describe('UserFactory', () => {
         firstname: 'John',
         lastname: 'Doe',
         email: Email.from('john.doe@example.com'),
+        phone: '+33123456789',
         rawPassword: 'password123',
       },
       mockPasswordHasher,
@@ -22,6 +23,7 @@ describe('UserFactory', () => {
 
     const userProperties = user.getProperties();
     expect(userProperties.roles).toEqual([Role.CLIENT]);
+    expect(userProperties.phone).toBe('+33123456789');
     expect(mockPasswordHasher.hash).toHaveBeenCalledWith('password123');
   });
 
@@ -31,6 +33,7 @@ describe('UserFactory', () => {
         firstname: 'Jane',
         lastname: 'Doe',
         email: Email.from('jane.doe@example.com'),
+        phone: '+33987654321',
         rawPassword: 'password456',
       },
       mockPasswordHasher,
