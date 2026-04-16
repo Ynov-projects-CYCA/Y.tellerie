@@ -36,6 +36,7 @@ describe('RegisterPersonnelUseCase', () => {
       lastname: 'Personnel',
       phoneNumber: '+33612345678',
       email: email,
+      phone: '+33111111111',
       rawPassword: 'password123',
     };
 
@@ -59,6 +60,7 @@ describe('RegisterPersonnelUseCase', () => {
       verifyEmailToken: null,
       resetPasswordToken: null,
       email: email,
+      phone: '+33222222222',
       passwordHash: 'hashed_password',
       roles: [Role.PERSONNEL],
       createdAt: new Date(),
@@ -72,6 +74,7 @@ describe('RegisterPersonnelUseCase', () => {
       lastname: 'Personnel',
       phoneNumber: '+33612345678',
       email: email,
+      phone: '+33111111111',
       rawPassword: 'password123',
     };
 

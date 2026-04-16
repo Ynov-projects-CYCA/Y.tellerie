@@ -1,0 +1,20 @@
+<section class="space-panel">
+  <p class="eyebrow">Espace authentifie</p>
+  <h1>Bienvenue dans votre espace client</h1>
+
+  @if (user(); as user) {
+    <p>
+      Vous etes connecte en tant que <strong>{{ user.firstname }} {{ user.lastname }}</strong>.
+    </p>
+
+    <ul>
+      <li>Email: {{ user.email }}</li>
+      <li>Telephone: {{ user.phone }}</li>
+      <li>Roles: {{ user.roles.join(', ') }}</li>
+    </ul>
+  }
+
+  <button type="button" (click)="logout()" [disabled]="isLoggingOut()">
+    {{ isLoggingOut() ? 'Deconnexion...' : 'Se deconnecter' }}
+  </button>
+</section>

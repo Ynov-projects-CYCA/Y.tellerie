@@ -17,6 +17,7 @@ describe('UserAggregate', () => {
       verifyEmailToken: null,
       resetPasswordToken: null,
       email: Email.from('john.doe@example.com'),
+      phone: '+33123456789',
       passwordHash: 'hashed_password',
       roles: [Role.CLIENT],
       createdAt: new Date(),

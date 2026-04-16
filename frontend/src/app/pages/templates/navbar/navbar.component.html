@@ -4,7 +4,7 @@
     <!-- Logo -->
     <a routerLink="/" class="nav-brand">
       <div class="brand-icon-wrapper">
-        <svg lucideHotel class="brand-icon"></svg>
+        <span class="brand-icon" aria-hidden="true">⌂</span>
       </div>
       <span class="brand-name">Ytellerie</span>
     </a>
@@ -20,14 +20,20 @@
 
     <!-- Desktop CTAs -->
     <div class="nav-actions">
-      <a routerLink="/login" class="btn btn-ghost">Connexion</a>
-      <a routerLink="/login" class="btn btn-primary">Commencer</a>
+      @if (authSessionService.getAccessToken()) {
+        <button class="btn btn-ghost" type="button" (click)="logout()">
+          {{ isLoggingOut() ? 'Deconnexion...' : 'Deconnexion' }}
+        </button>
+      } @else {
+        <a routerLink="/connexion" class="btn btn-ghost">Connexion</a>
+        <a routerLink="/connexion" class="btn btn-primary">Commencer</a>
+      }
     </div>
 
     <!-- Mobile Hamburger -->
     <button class="menu-toggle" (click)="toggleMobileMenu()" [class.is-open]="isMobileMenuOpen" aria-label="Menu">
-      <svg *ngIf="!isMobileMenuOpen" lucideMenu class="toggle-icon"></svg>
-      <svg *ngIf="isMobileMenuOpen" lucideX class="toggle-icon"></svg>
+      <span *ngIf="!isMobileMenuOpen" class="toggle-icon" aria-hidden="true">☰</span>
+      <span *ngIf="isMobileMenuOpen" class="toggle-icon" aria-hidden="true">✕</span>
     </button>
   </div>
 
@@ -41,8 +47,14 @@
       </li>
     </ul>
     <div class="mobile-actions">
-      <a routerLink="/login" class="btn btn-ghost btn-full" (click)="closeMobileMenu()">Connexion</a>
-      <a routerLink="/login" class="btn btn-primary btn-full" (click)="closeMobileMenu()">Commencer</a>
+      @if (authSessionService.getAccessToken()) {
+        <button class="btn btn-ghost btn-full" type="button" (click)="logout()">
+          {{ isLoggingOut() ? 'Deconnexion...' : 'Deconnexion' }}
+        </button>
+      } @else {
+        <a routerLink="/connexion" class="btn btn-ghost btn-full" (click)="closeMobileMenu()">Connexion</a>
+        <a routerLink="/connexion" class="btn btn-primary btn-full" (click)="closeMobileMenu()">Commencer</a>
+      }
     </div>
   </div>
 </nav>

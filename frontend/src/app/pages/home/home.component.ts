@@ -1,17 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import {
-  LucideCalendar,
-  LucideHotel,
-  LucideUsers,
-  LucideChartBar,
-  LucideShieldCheck,
-  LucideClock,
-} from '@lucide/angular';
 
 interface Feature {
-  icon: any;
+  icon: string;
   title: string;
   description: string;
 }
@@ -35,36 +27,36 @@ interface Benefit {
 export class HomeComponent {
   features: Feature[] = [
     {
-      icon: LucideCalendar,
+      icon: '📅',
       title: 'Réservations en ligne',
       description: 'Système de réservation intuitif pour vos clients avec confirmation instantanée.',
     },
     {
-      icon: LucideHotel,
+      icon: '🏨',
       title: 'Gestion des chambres',
       description:
         "Gérez facilement la disponibilité, les tarifs et l'état de vos chambres.",
     },
     {
-      icon: LucideUsers,
+      icon: '👥',
       title: 'Gestion du personnel',
       description:
         'Organisez les équipes, horaires et tâches de votre personnel efficacement.',
     },
     {
-      icon: LucideChartBar,
+      icon: '📊',
       title: 'Statistiques en temps réel',
       description:
         'Suivez vos performances avec des tableaux de bord détaillés.',
     },
     {
-      icon: LucideShieldCheck,
+      icon: '🛡️',
       title: 'Sécurisé et fiable',
       description:
         'Vos données sont protégées avec les dernières technologies de sécurité.',
     },
     {
-      icon: LucideClock,
+      icon: '⏰',
       title: 'Support 24/7',
       description:
         'Une équipe dédiée disponible pour vous accompagner à tout moment.',

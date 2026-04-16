@@ -10,6 +10,7 @@ export class UserOrmEntity {
   verifyEmailToken: string | null;
   resetPasswordToken: string | null;
   email: string;
+  phone: string;
   passwordHash: string;
   roles: Role[];
   createdAt: Date;
@@ -52,6 +53,9 @@ export const UserSchema = new EntitySchema<UserOrmEntity>({
     email: {
       type: 'varchar',
       unique: true,
+    },
+    phone: {
+      type: 'varchar',
     },
     passwordHash: {
       type: 'varchar',

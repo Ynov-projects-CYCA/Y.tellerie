@@ -27,6 +27,7 @@ export class RegisterPersonnelUseCase {
     lastname: string;
     phoneNumber: string;
     email: Email;
+    phone: string;
     rawPassword: string;
   }): Promise<UserAggregate> {
     const existingUser = await this.userRepository.findByEmail(command.email);
@@ -40,6 +41,7 @@ export class RegisterPersonnelUseCase {
         lastname: command.lastname,
         phoneNumber: command.phoneNumber,
         email: command.email,
+        phone: command.phone,
         rawPassword: command.rawPassword,
       },
       this.passwordHasher,

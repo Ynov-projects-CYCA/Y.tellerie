@@ -16,6 +16,7 @@ export class UserFactory {
       lastname: string;
       phoneNumber: string;
       email: Email;
+      phone: string;
       rawPassword: string;
     },
     passwordHasher: IPasswordHasher,
@@ -30,6 +31,7 @@ export class UserFactory {
       verifyEmailToken: randomUUID(),
       resetPasswordToken: null,
       email: properties.email,
+      phone: properties.phone,
       passwordHash: await passwordHasher.hash(properties.rawPassword),
       roles: [initialRole],
       createdAt: new Date(),

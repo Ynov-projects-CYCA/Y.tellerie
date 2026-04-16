@@ -1,0 +1,25 @@
+<app-auth-shell
+  [title]="'Validation de votre email'"
+  [subtitle]="'Nous confirmons votre compte Ytellerie'"
+  [compact]="true"
+  [badgeText]="'OK'"
+>
+  @if (isLoading()) {
+    <p class="auth-feedback">Verification en cours...</p>
+  } @else if (isSuccess()) {
+    <p class="auth-feedback is-success">
+      Votre adresse email a bien ete validee. Vous allez etre redirige vers la
+      page de connexion.
+    </p>
+    <p class="auth-footer">
+      <a class="auth-link" routerLink="/connexion">Aller a la connexion</a>
+    </p>
+  } @else {
+    <p class="auth-feedback is-error">
+      {{ submitError() }}
+    </p>
+    <p class="auth-footer">
+      <a class="auth-link" routerLink="/connexion">Retour a la connexion</a>
+    </p>
+  }
+</app-auth-shell>

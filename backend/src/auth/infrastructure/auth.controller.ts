@@ -1,43 +1,61 @@
 import {
-  Get,
-  Controller,
-  Post,
   Body,
-  UseGuards,
-  Request,
+  ConflictException,
+  Controller,
+  ForbiddenException,
+  Get,
   HttpCode,
   HttpStatus,
-  Patch,
   Logger,
+  Patch,
+  Post,
+  Request,
+  UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import {
-  ApiTags,
+  ApiBearerAuth,
+  ApiBody,
   ApiOperation,
   ApiResponse,
-  ApiBody,
-  ApiBearerAuth,
+  ApiTags,
 } from '@nestjs/swagger';
-import { RegisterClientUseCase } from '../application/use-cases/register-client.use-case';
-import { RegisterPersonnelUseCase } from '../application/use-cases/register-personnel.use-case';
-import { LoginUseCase } from '../application/use-cases/login.use-case';
-import { ChangePasswordUseCase } from '../application/use-cases/change-password.use-case';
-import { VerifyEmailUseCase } from '../application/use-cases/verify-email.use-case';
-import { RegisterDto } from '../application/dtos/register.dto';
-import { LoginDto } from '../application/dtos/login.dto';
-import { ChangePasswordDto } from '../application/dtos/change-password.dto';
-import { VerifyEmailDto } from '../application/dtos/verify-email.dto';
-import { Email } from '../domain/email.vo';
-import { Password } from '../domain/password.vo';
+import { SendTransactionalEmailUseCase } from '../../mailjet/application/use-cases/send-transactional-email.use-case';
+import {
+  buildActionEmailHtml,
+  buildActionEmailText,
+} from '../../mailjet/application/templates/action-email.template';
 import {
   AuthResponseDto,
   RegisterResponseDto,
   UserResponse,
 } from '../application/dtos/auth-response.dto';
-import { UserAggregate } from '../domain/user.aggregate';
+import { ChangePasswordDto } from '../application/dtos/change-password.dto';
+import { ForgotPasswordDto } from '../application/dtos/forgot-password.dto';
+import { LoginDto } from '../application/dtos/login.dto';
+import { RegisterDto } from '../application/dtos/register.dto';
+import { ResetPasswordDto } from '../application/dtos/reset-password.dto';
+import { VerifyEmailDto } from '../application/dtos/verify-email.dto';
+import { ChangePasswordUseCase } from '../application/use-cases/change-password.use-case';
+import { ForgotPasswordUseCase } from '../application/use-cases/forgot-password.use-case';
+import {
+  InvalidCredentialsError,
+  LoginUseCase,
+  UserCannotLoginError,
+} from '../application/use-cases/login.use-case';
+import { RegisterUseCase, UserAlreadyExistsError } from '../application/use-cases/register.use-case';
+import {
+  InvalidPasswordResetTokenError,
+  ResetPasswordUseCase,
+} from '../application/use-cases/reset-password.use-case';
+import { VerifyEmailUseCase } from '../application/use-cases/verify-email.use-case';
+import { Email } from '../domain/email.vo';
+import { Password } from '../domain/password.vo';
 import { Role } from '../domain/role.vo';
-import { SendTransactionalEmailUseCase } from '../../mailjet/application/use-cases/send-transactional-email.use-case';
-import { ConfigService } from '@nestjs/config';
+import { UserAggregate } from '../domain/user.aggregate';
+import { InvalidOldPasswordError } from '../application/use-cases/change-password.use-case';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -45,11 +63,12 @@ export class AuthController {
   private readonly logger = new Logger(AuthController.name);
 
   constructor(
-    private readonly registerClientUseCase: RegisterClientUseCase,
-    private readonly registerPersonnelUseCase: RegisterPersonnelUseCase,
+    private readonly registerUseCase: RegisterUseCase,
     private readonly loginUseCase: LoginUseCase,
     private readonly changePasswordUseCase: ChangePasswordUseCase,
     private readonly verifyEmailUseCase: VerifyEmailUseCase,
+    private readonly forgotPasswordUseCase: ForgotPasswordUseCase,
+    private readonly resetPasswordUseCase: ResetPasswordUseCase,
     private readonly sendTransactionalEmailUseCase: SendTransactionalEmailUseCase,
     private readonly configService: ConfigService,
   ) {}
@@ -67,29 +86,9 @@ export class AuthController {
     return this.mapUserResponse(req.user);
   }
 
-  @Post('verify-email')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Verify a user email address' })
-  @ApiBody({ type: VerifyEmailDto })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Email successfully verified.',
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'Verification token is invalid or missing.',
-  })
-  async verifyEmail(
-    @Body() verifyEmailDto: VerifyEmailDto,
-  ): Promise<{ message: string }> {
-    await this.verifyEmailUseCase.execute(verifyEmailDto.token);
-
-    return { message: 'Email verified successfully.' };
-  }
-
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Register a new user and log them in' })
+  @ApiOperation({ summary: 'Register a new user' })
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: 'User successfully registered. Email verification required.',
@@ -102,29 +101,30 @@ export class AuthController {
   async register(
     @Body() registerDto: RegisterDto,
   ): Promise<RegisterResponseDto> {
-    const user =
-      registerDto.role === Role.PERSONNEL
-        ? await this.registerPersonnelUseCase.execute({
-            firstname: registerDto.firstname,
-            lastname: registerDto.lastname,
-            phoneNumber: registerDto.phoneNumber,
-            email: Email.from(registerDto.email),
-            rawPassword: registerDto.password,
-          })
-        : await this.registerClientUseCase.execute({
-            firstname: registerDto.firstname,
-            lastname: registerDto.lastname,
-            phoneNumber: registerDto.phoneNumber,
-            email: Email.from(registerDto.email),
-            rawPassword: registerDto.password,
-          });
+    try {
+      const user = await this.registerUseCase.execute({
+        firstname: registerDto.firstname,
+        lastname: registerDto.lastname,
+        phoneNumber: registerDto.phoneNumber,
+        email: Email.from(registerDto.email),
+        phone: registerDto.phone,
+        rawPassword: registerDto.password,
+        role: registerDto.role ?? Role.CLIENT,
+      });
 
-    await this.sendVerificationEmail(user);
+      await this.sendVerificationEmail(user);
 
-    return {
-      message: 'Account created. Verify your email before logging in.',
-      user: this.mapUserResponse(user),
-    };
+      return {
+        message: 'Account created. Verify your email before logging in.',
+        user: this.mapUserResponse(user),
+      };
+    } catch (error) {
+      if (error instanceof UserAlreadyExistsError) {
+        throw new ConflictException('User with this email already exists.');
+      }
+
+      throw error;
+    }
   }
 
   @Post('login')
@@ -147,25 +147,98 @@ export class AuthController {
   })
   async login(
     @Request() req: { user: UserAggregate },
-    @Body() _loginDto: LoginDto,
+    @Body() loginDto: LoginDto,
   ): Promise<AuthResponseDto> {
-    const { user, accessToken } = await this.loginUseCase.execute(
-      {
+    try {
+      const { user, accessToken } = await this.loginUseCase.execute({
         email: req.user.getProperties().email,
-        password: Password.from(_loginDto.password),
-      },
-    );
+        password: Password.from(loginDto.password),
+      });
 
-    return {
-      accessToken,
-      user: this.mapUserResponse(user),
-    };
+      return {
+        accessToken,
+        user: this.mapUserResponse(user),
+      };
+    } catch (error) {
+      if (error instanceof InvalidCredentialsError) {
+        throw new UnauthorizedException('Invalid email or password.');
+      }
+
+      if (error instanceof UserCannotLoginError) {
+        throw new ForbiddenException(
+          'Account is not active. Verify your email before logging in.',
+        );
+      }
+
+      throw error;
+    }
   }
 
-  @Patch('change-password')
+  @Post('verify-email')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Verify a user email address' })
+  @ApiBody({ type: VerifyEmailDto })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Email successfully verified.',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Verification token is invalid or missing.',
+  })
+  async verifyEmail(
+    @Body() verifyEmailDto: VerifyEmailDto,
+  ): Promise<{ message: string }> {
+    await this.verifyEmailUseCase.execute(verifyEmailDto.token);
+
+    return { message: 'Email verified successfully.' };
+  }
+
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Request a password reset link' })
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'Password reset request accepted.',
+  })
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto): Promise<void> {
+    await this.forgotPasswordUseCase.execute({
+      email: Email.from(forgotPasswordDto.email),
+    });
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Reset a password using a token received by email' })
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'Password successfully reset.',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired password reset token.',
+  })
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<void> {
+    try {
+      await this.resetPasswordUseCase.execute({
+        token: resetPasswordDto.token,
+        password: Password.from(resetPasswordDto.password),
+      });
+    } catch (error) {
+      if (error instanceof InvalidPasswordResetTokenError) {
+        throw new UnauthorizedException(
+          'Invalid or expired password reset token.',
+        );
+      }
+
+      throw error;
+    }
+  }
+
+  @Patch('modify-password')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AuthGuard('jwt'))
-  @ApiOperation({ summary: 'Change the current user password' })
+  @ApiOperation({ summary: 'Modify the current user password' })
   @ApiBearerAuth()
   @ApiResponse({
     status: HttpStatus.NO_CONTENT,
@@ -175,15 +248,46 @@ export class AuthController {
     status: HttpStatus.UNAUTHORIZED,
     description: 'User not authenticated.',
   })
+  async modifyPassword(
+    @Request() req: { user: UserAggregate },
+    @Body() changePasswordDto: ChangePasswordDto,
+  ): Promise<void> {
+    try {
+      await this.changePasswordUseCase.execute({
+        userId: req.user.getProperties().id,
+        oldPassword: Password.from(changePasswordDto.oldPassword),
+        newPassword: Password.from(changePasswordDto.newPassword),
+      });
+    } catch (error) {
+      if (error instanceof InvalidOldPasswordError) {
+        throw new UnauthorizedException('The old password does not match.');
+      }
+
+      throw error;
+    }
+  }
+
+  @Patch('change-password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({ summary: 'Deprecated alias for modify-password' })
+  @ApiBearerAuth()
   async changePassword(
     @Request() req: { user: UserAggregate },
     @Body() changePasswordDto: ChangePasswordDto,
   ): Promise<void> {
-    await this.changePasswordUseCase.execute({
-      userId: req.user.getProperties().id,
-      oldPassword: Password.from(changePasswordDto.oldPassword),
-      newPassword: Password.from(changePasswordDto.newPassword),
-    });
+    return this.modifyPassword(req, changePasswordDto);
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Log out the current user' })
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'User successfully logged out.',
+  })
+  async logout(): Promise<void> {
+    return;
   }
 
   private mapUserResponse(user: UserAggregate): UserResponse {
@@ -196,6 +300,7 @@ export class AuthController {
       phoneNumber: properties.phoneNumber,
       isActive: properties.isActive,
       email: properties.email.toString(),
+      phone: properties.phone,
       roles: properties.roles,
     };
   }
@@ -210,6 +315,17 @@ export class AuthController {
 
     const verificationUrl = this.buildVerificationUrl(token);
     const recipientName = `${properties.firstname} ${properties.lastname}`.trim();
+    const templateParams = {
+      recipientName,
+      preheader: 'Confirmation de compte',
+      title: 'Activez votre compte avec elegance',
+      intro: 'Bienvenue sur Ytellerie.',
+      body: 'Confirmez votre adresse email pour finaliser votre inscription et acceder a votre espace.',
+      ctaLabel: 'Confirmer mon adresse email',
+      actionUrl: verificationUrl,
+      footerNote:
+        "Si vous n'etes pas a l'origine de cette inscription, vous pouvez ignorer cet email.",
+    };
 
     try {
       await this.sendTransactionalEmailUseCase.execute({
@@ -218,8 +334,8 @@ export class AuthController {
           name: recipientName,
         },
         subject: 'Confirmez votre adresse email Ytellerie',
-        text: this.buildVerificationEmailText(recipientName, verificationUrl),
-        html: this.buildVerificationEmailHtml(recipientName, verificationUrl),
+        text: buildActionEmailText(templateParams),
+        html: buildActionEmailHtml(templateParams),
       });
     } catch (error) {
       this.logger.warn(
@@ -233,117 +349,17 @@ export class AuthController {
   private buildVerificationUrl(token: string): string {
     const configuredFrontendUrl =
       this.configService.get<string>('app.frontendUrl')?.trim();
+    const frontendBaseUrl =
+      this.configService.get<string>('app.frontendBaseUrl')?.trim();
     const corsOrigins = this.configService.get<string[]>('app.corsOrigins') ?? [];
     const baseUrl =
       configuredFrontendUrl ||
+      frontendBaseUrl ||
       corsOrigins[0] ||
       'http://localhost:4200';
 
     return `${baseUrl.replace(/\/$/, '')}/verify-email?token=${encodeURIComponent(
       token,
     )}`;
-  }
-
-  private buildVerificationEmailText(
-    recipientName: string,
-    verificationUrl: string,
-  ): string {
-    const greeting = recipientName ? `Bonjour ${recipientName},` : 'Bonjour,';
-
-    return [
-      greeting,
-      '',
-      'Bienvenue sur Ytellerie.',
-      "Confirmez votre adresse email pour activer votre compte et commencer a gerer votre hotel avec elegance.",
-      '',
-      `Confirmer mon adresse email : ${verificationUrl}`,
-      '',
-      "Si vous n'etes pas a l'origine de cette inscription, vous pouvez ignorer cet email.",
-      '',
-      'Ytellerie',
-    ].join('\n');
-  }
-
-  private buildVerificationEmailHtml(
-    recipientName: string,
-    verificationUrl: string,
-  ): string {
-    const greeting = recipientName ? `Bonjour ${recipientName},` : 'Bonjour,';
-
-    return `
-      <!DOCTYPE html>
-      <html lang="fr">
-        <head>
-          <meta charset="UTF-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <title>Verification email Ytellerie</title>
-        </head>
-        <body style="margin:0;padding:0;background-color:#f7f0dd;font-family:Arial,sans-serif;color:#7b3400;">
-          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f7f0dd;margin:0;padding:32px 16px;">
-            <tr>
-              <td align="center">
-                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:680px;background-color:#fffaf0;border:1px solid #e8cf9d;border-radius:24px;overflow:hidden;">
-                  <tr>
-                    <td style="padding:28px 32px;border-bottom:1px solid #edd9b2;">
-                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-                        <tr>
-                          <td style="font-size:16px;font-weight:700;letter-spacing:0.2px;color:#8d3f03;">
-                            Ytellerie
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="padding:44px 32px 24px 32px;text-align:center;">
-                      <div style="display:inline-block;padding:10px 18px;border:1px solid #f1c24b;border-radius:12px;background-color:#fff4cc;color:#a14c08;font-size:14px;line-height:20px;">
-                        Confirmation de compte
-                      </div>
-                      <h1 style="margin:28px 0 20px 0;font-family:Georgia,'Times New Roman',serif;font-size:54px;line-height:1.05;font-weight:500;color:#6d2a00;">
-                        Activez votre compte avec elegance
-                      </h1>
-                      <p style="margin:0 0 12px 0;font-size:18px;line-height:30px;color:#9a4708;">
-                        ${greeting}
-                      </p>
-                      <p style="margin:0 0 12px 0;font-size:18px;line-height:30px;color:#9a4708;">
-                        Bienvenue sur Ytellerie. Confirmez votre adresse email pour finaliser votre inscription et acceder a votre espace.
-                      </p>
-                      <p style="margin:0 0 36px 0;font-size:18px;line-height:30px;color:#9a4708;">
-                        Une fois votre email valide, vous pourrez demarrer votre experience dans un environnement sobre, clair et professionnel.
-                      </p>
-                      <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 auto 18px auto;">
-                        <tr>
-                          <td align="center" bgcolor="#ae4f00" style="border-radius:16px;">
-                            <a href="${verificationUrl}" style="display:inline-block;padding:18px 32px;font-size:18px;font-weight:700;line-height:22px;color:#fffaf0;text-decoration:none;border:1px solid #ae4f00;border-radius:16px;">
-                              Confirmer mon adresse email
-                            </a>
-                          </td>
-                        </tr>
-                      </table>
-                      <p style="margin:0;font-size:14px;line-height:24px;color:#a4693a;">
-                        Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :
-                      </p>
-                      <p style="margin:10px 0 0 0;font-size:14px;line-height:24px;word-break:break-all;">
-                        <a href="${verificationUrl}" style="color:#8d3f03;text-decoration:underline;">${verificationUrl}</a>
-                      </p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="padding:24px 32px 32px 32px;background-color:#fcf5e7;border-top:1px solid #edd9b2;text-align:center;">
-                      <p style="margin:0 0 8px 0;font-size:13px;line-height:22px;color:#a4693a;">
-                        Si vous n'etes pas a l'origine de cette inscription, vous pouvez ignorer cet email.
-                      </p>
-                      <p style="margin:0;font-size:13px;line-height:22px;color:#a4693a;">
-                        Ytellerie
-                      </p>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </table>
-        </body>
-      </html>
-    `.trim();
   }
 }

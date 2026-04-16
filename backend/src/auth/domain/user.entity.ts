@@ -11,6 +11,7 @@ export interface UserProperties {
   verifyEmailToken: string | null;
   resetPasswordToken: string | null;
   email: Email;
+  phone: string;
   passwordHash: string;
   roles: Role[];
   createdAt: Date;
@@ -26,6 +27,7 @@ export class User {
   private verifyEmailToken: string | null;
   private resetPasswordToken: string | null;
   private email: Email;
+  private phone: string;
   private passwordHash: string;
   private roles: Role[];
   private readonly createdAt: Date;
@@ -45,6 +47,7 @@ export class User {
       verifyEmailToken: this.verifyEmailToken,
       resetPasswordToken: this.resetPasswordToken,
       email: this.email,
+      phone: this.phone,
       passwordHash: this.passwordHash,
       roles: this.roles,
       createdAt: this.createdAt,
