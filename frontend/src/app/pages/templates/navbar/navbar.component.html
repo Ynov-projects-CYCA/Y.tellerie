@@ -1,0 +1,48 @@
+<nav class="nav" [class.nav--scrolled]="isScrolled">
+  <div class="nav-container">
+
+    <!-- Logo -->
+    <a routerLink="/" class="nav-brand">
+      <div class="brand-icon-wrapper">
+        <svg lucideHotel class="brand-icon"></svg>
+      </div>
+      <span class="brand-name">Ytellerie</span>
+    </a>
+
+    <!-- Desktop Nav Links -->
+    <ul class="nav-menu">
+      <li *ngFor="let link of navLinks">
+        <button class="nav-link" (click)="scrollTo(link.anchor)">
+          {{ link.label }}
+        </button>
+      </li>
+    </ul>
+
+    <!-- Desktop CTAs -->
+    <div class="nav-actions">
+      <a routerLink="/login" class="btn btn-ghost">Connexion</a>
+      <a routerLink="/login" class="btn btn-primary">Commencer</a>
+    </div>
+
+    <!-- Mobile Hamburger -->
+    <button class="menu-toggle" (click)="toggleMobileMenu()" [class.is-open]="isMobileMenuOpen" aria-label="Menu">
+      <svg *ngIf="!isMobileMenuOpen" lucideMenu class="toggle-icon"></svg>
+      <svg *ngIf="isMobileMenuOpen" lucideX class="toggle-icon"></svg>
+    </button>
+  </div>
+
+  <!-- Mobile Menu Drawer -->
+  <div class="mobile-drawer" [class.is-open]="isMobileMenuOpen">
+    <ul class="mobile-nav-list">
+      <li *ngFor="let link of navLinks">
+        <button class="mobile-nav-link" (click)="scrollTo(link.anchor)">
+          {{ link.label }}
+        </button>
+      </li>
+    </ul>
+    <div class="mobile-actions">
+      <a routerLink="/login" class="btn btn-ghost btn-full" (click)="closeMobileMenu()">Connexion</a>
+      <a routerLink="/login" class="btn btn-primary btn-full" (click)="closeMobileMenu()">Commencer</a>
+    </div>
+  </div>
+</nav>

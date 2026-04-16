@@ -1,0 +1,26 @@
+<footer class="footer">
+  <div class="footer-container">
+
+    <a routerLink="/" class="footer-brand">
+      <div class="footer-brand-icon">
+        <svg lucideHotel class="brand-icon"></svg>
+      </div>
+      <span class="footer-brand-name">Ytellerie</span>
+    </a>
+
+    <p class="footer-copyright">
+      &copy; {{ currentYear }} Ytellerie.
+    </p>
+
+    <nav class="footer-nav">
+      <a
+        *ngFor="let link of legalLinks"
+        [href]="link.href"
+        class="footer-nav-link"
+      >
+        {{ link.label }}
+      </a>
+    </nav>
+
+  </div>
+</footer>
