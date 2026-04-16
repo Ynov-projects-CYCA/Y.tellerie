@@ -20,6 +20,7 @@ describe('RegisterUseCase', () => {
       findByEmail: jest.fn(),
       save: jest.fn(),
       findById: jest.fn(),
+      findByVerifyEmailToken: jest.fn(),
     };
     mockPasswordHasher = {
       hash: jest.fn().mockResolvedValue('hashed_password'),
@@ -38,6 +39,7 @@ describe('RegisterUseCase', () => {
     const result = await registerUseCase.execute({
       firstname: 'New',
       lastname: 'User',
+      phoneNumber: '+33612345678',
       email,
       phone: '+33123456789',
       rawPassword: 'password123',
@@ -56,6 +58,10 @@ describe('RegisterUseCase', () => {
       id: UserId.generate(),
       firstname: 'Existing',
       lastname: 'User',
+      phoneNumber: '+33612345678',
+      isActive: true,
+      verifyEmailToken: null,
+      resetPasswordToken: null,
       email,
       phone: '+33123456789',
       passwordHash: 'hashed_password',
@@ -72,6 +78,7 @@ describe('RegisterUseCase', () => {
       registerUseCase.execute({
         firstname: 'Existing',
         lastname: 'User',
+        phoneNumber: '+33612345678',
         email,
         phone: '+33123456789',
         rawPassword: 'password123',
