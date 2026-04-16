@@ -13,6 +13,14 @@ export class RegisterDto {
   lastname: string;
 
   @ApiProperty({
+    description: 'The phone number of the user',
+    example: '+33612345678',
+  })
+  @IsString()
+  @IsNotEmpty()
+  phoneNumber: string;
+
+  @ApiProperty({
     description: 'The email address of the user',
     example: 'john.doe@example.com',
   })

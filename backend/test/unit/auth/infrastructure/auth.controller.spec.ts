@@ -24,6 +24,7 @@ describe('AuthController', () => {
     id: UserId.generate(),
     firstname: 'John',
     lastname: 'Doe',
+    phoneNumber: '+33612345678',
     email: Email.from('john.doe@example.com'),
     passwordHash: 'hashed_password',
     roles: [Role.CLIENT],
@@ -79,6 +80,7 @@ describe('AuthController', () => {
       const registerDto: RegisterDto = {
         firstname: 'John',
         lastname: 'Doe',
+        phoneNumber: '+33612345678',
         email: 'john.doe@example.com',
         password: 'password123',
       };
@@ -100,11 +102,27 @@ describe('AuthController', () => {
     });
   });
 
+  describe('me', () => {
+    it('should return the authenticated user', () => {
+      const result = authController.getCurrentUser({ user: mockUserAggregate });
+
+      expect(result).toEqual({
+        id: mockUserAggregate.getProperties().id.toString(),
+        firstname: 'John',
+        lastname: 'Doe',
+        phoneNumber: '+33612345678',
+        email: 'john.doe@example.com',
+        roles: [Role.CLIENT],
+      });
+    });
+  });
+
   describe('registerPersonnel', () => {
     it('should register a personnel and return auth response', async () => {
       const registerDto: RegisterDto = {
         firstname: 'Jane',
         lastname: 'Doe',
+        phoneNumber: '+33687654321',
         email: 'jane.doe@example.com',
         password: 'password123',
       };

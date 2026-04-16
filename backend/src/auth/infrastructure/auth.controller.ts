@@ -1,4 +1,5 @@
 import {
+  Get,
   Controller,
   Post,
   Body,
@@ -27,7 +28,10 @@ import { LoginDto } from '../application/dtos/login.dto';
 import { ChangePasswordDto } from '../application/dtos/change-password.dto';
 import { Email } from '../domain/email.vo';
 import { Password } from '../domain/password.vo';
-import { AuthResponseDto } from '../application/dtos/auth-response.dto';
+import {
+  AuthResponseDto,
+  UserResponse,
+} from '../application/dtos/auth-response.dto';
 import { UserAggregate } from '../domain/user.aggregate';
 import { RefreshTokenDto } from '../application/dtos/refresh-token.dto';
 
@@ -42,6 +46,19 @@ export class AuthController {
     private readonly changePasswordUseCase: ChangePasswordUseCase,
     private readonly logoutUseCase: LogoutUseCase,
   ) {}
+
+  @Get('me')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({ summary: 'Get current authenticated user' })
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Current authenticated user.',
+    type: UserResponse,
+  })
+  getCurrentUser(@Request() req: { user: UserAggregate }): UserResponse {
+    return this.mapUserResponse(req.user);
+  }
 
   @Post('register/client')
   @HttpCode(HttpStatus.CREATED)
@@ -61,6 +78,7 @@ export class AuthController {
     const user = await this.registerClientUseCase.execute({
       firstname: registerDto.firstname,
       lastname: registerDto.lastname,
+      phoneNumber: registerDto.phoneNumber,
       email: Email.from(registerDto.email),
       rawPassword: registerDto.password,
     });
@@ -73,13 +91,7 @@ export class AuthController {
     return {
       accessToken,
       refreshToken: refreshToken.getProperties().id,
-      user: {
-        id: user.getProperties().id.toString(),
-        firstname: user.getProperties().firstname,
-        lastname: user.getProperties().lastname,
-        email: user.getProperties().email.toString(),
-        roles: user.getProperties().roles,
-      },
+      user: this.mapUserResponse(user),
     };
   }
 
@@ -101,6 +113,7 @@ export class AuthController {
     const user = await this.registerPersonnelUseCase.execute({
       firstname: registerDto.firstname,
       lastname: registerDto.lastname,
+      phoneNumber: registerDto.phoneNumber,
       email: Email.from(registerDto.email),
       rawPassword: registerDto.password,
     });
@@ -113,13 +126,7 @@ export class AuthController {
     return {
       accessToken,
       refreshToken: refreshToken.getProperties().id,
-      user: {
-        id: user.getProperties().id.toString(),
-        firstname: user.getProperties().firstname,
-        lastname: user.getProperties().lastname,
-        email: user.getProperties().email.toString(),
-        roles: user.getProperties().roles,
-      },
+      user: this.mapUserResponse(user),
     };
   }
 
@@ -151,13 +158,7 @@ export class AuthController {
     return {
       accessToken,
       refreshToken: refreshToken.getProperties().id,
-      user: {
-        id: user.getProperties().id.toString(),
-        firstname: user.getProperties().firstname,
-        lastname: user.getProperties().lastname,
-        email: user.getProperties().email.toString(),
-        roles: user.getProperties().roles,
-      },
+      user: this.mapUserResponse(user),
     };
   }
 
@@ -197,13 +198,7 @@ export class AuthController {
     return {
       accessToken,
       refreshToken: refreshToken.getProperties().id,
-      user: {
-        id: user.getProperties().id.toString(),
-        firstname: user.getProperties().firstname,
-        lastname: user.getProperties().lastname,
-        email: user.getProperties().email.toString(),
-        roles: user.getProperties().roles,
-      },
+      user: this.mapUserResponse(user),
     };
   }
 
@@ -229,5 +224,18 @@ export class AuthController {
       oldPassword: Password.from(changePasswordDto.oldPassword),
       newPassword: Password.from(changePasswordDto.newPassword),
     });
+  }
+
+  private mapUserResponse(user: UserAggregate): UserResponse {
+    const properties = user.getProperties();
+
+    return {
+      id: properties.id.toString(),
+      firstname: properties.firstname,
+      lastname: properties.lastname,
+      phoneNumber: properties.phoneNumber,
+      email: properties.email.toString(),
+      roles: properties.roles,
+    };
   }
 }
