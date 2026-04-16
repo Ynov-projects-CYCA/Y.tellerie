@@ -2,15 +2,15 @@ import { RoomType } from '../../domain/room-type.vo';
 import { RoomStatus } from '../../domain/room-status.vo';
 
 export class RoomResponseDto {
-  id: string;
-  roomNumber: string;
-  type: RoomType;
-  capacity: number;
-  price: number;
-  currency: string;
-  status: RoomStatus;
-  createdAt: Date;
-  updatedAt: Date;
+  id!: string;
+  roomNumber!: string;
+  type!: RoomType;
+  capacity!: number;
+  price!: number;
+  currency!: string;
+  status!: RoomStatus;
+  createdAt!: Date;
+  updatedAt!: Date;
 
   static fromDomain(room: any): RoomResponseDto {
     const dto = new RoomResponseDto();
