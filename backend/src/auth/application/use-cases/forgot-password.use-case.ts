@@ -2,6 +2,10 @@ import { createHash, randomBytes } from 'crypto';
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SendTransactionalEmailUseCase } from '../../../mailjet/application/use-cases/send-transactional-email.use-case';
+import {
+  buildActionEmailHtml,
+  buildActionEmailText,
+} from '../../../mailjet/application/templates/action-email.template';
 import { Email } from '../../domain/email.vo';
 import {
   IUserRepository,
@@ -45,15 +49,27 @@ export class ForgotPasswordUseCase {
       'http://localhost:4200';
     const resetUrl = `${frontendBaseUrl}/reinitialiser-mot-de-passe?token=${encodeURIComponent(rawToken)}`;
     const userProps = user.getProperties();
+    const recipientName = `${userProps.firstname} ${userProps.lastname}`.trim();
+    const templateParams = {
+      recipientName,
+      preheader: 'Reinitialisation du mot de passe',
+      title: 'Choisissez un nouveau mot de passe',
+      intro: 'Une demande de reinitialisation de mot de passe a ete recue pour votre compte Ytellerie.',
+      body: 'Utilisez le lien ci-dessous pour definir un nouveau mot de passe. Ce lien expire dans 1 heure.',
+      ctaLabel: 'Reinitialiser mon mot de passe',
+      actionUrl: resetUrl,
+      footerNote:
+        "Si vous n'etes pas a l'origine de cette demande, vous pouvez ignorer cet email.",
+    };
 
     await this.sendTransactionalEmailUseCase.execute({
       to: {
         email: userProps.email.toString(),
-        name: `${userProps.firstname} ${userProps.lastname}`.trim(),
+        name: recipientName,
       },
       subject: 'Reinitialisation de votre mot de passe',
-      text: `Bonjour ${userProps.firstname},\n\nUtilisez ce lien pour reinitialiser votre mot de passe : ${resetUrl}\n\nCe lien expire dans 1 heure.`,
-      html: `<p>Bonjour ${userProps.firstname},</p><p>Utilisez ce lien pour reinitialiser votre mot de passe :</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>Ce lien expire dans 1 heure.</p>`,
+      text: buildActionEmailText(templateParams),
+      html: buildActionEmailHtml(templateParams),
     });
   }
 }

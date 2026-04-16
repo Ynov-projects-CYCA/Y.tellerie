@@ -4,8 +4,6 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthApiService } from '../../../core/auth/auth-api.service';
-import { AuthRedirectService } from '../../../core/auth/auth-redirect.service';
-import { AuthSessionService } from '../../../core/auth/auth-session.service';
 import { AppHttpError } from '../../../core/http/models/app-http-error.model';
 import { AuthShellComponent } from '../shared/auth-shell.component';
 
@@ -17,8 +15,6 @@ import { AuthShellComponent } from '../shared/auth-shell.component';
 export class RegisterPageComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authApiService = inject(AuthApiService);
-  private readonly authSessionService = inject(AuthSessionService);
-  private readonly authRedirectService = inject(AuthRedirectService);
   private readonly router = inject(Router);
 
   protected readonly isSubmitting = signal(false);
@@ -60,15 +56,13 @@ export class RegisterPageComponent {
     this.authApiService
       .register({
         ...payload,
+        phoneNumber: payload.phone,
         role: 'client',
       })
       .pipe(finalize(() => this.isSubmitting.set(false)))
       .subscribe({
-        next: (response) => {
-          this.authSessionService.startSession(response, 'local');
-          void this.router.navigateByUrl(
-            this.authRedirectService.getPostAuthUrl(response.user),
-          );
+        next: () => {
+          void this.router.navigateByUrl('/connexion');
         },
         error: (error: unknown) => {
           if (error instanceof AppHttpError && error.statusCode === 409) {

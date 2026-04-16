@@ -4,6 +4,7 @@ import {
   MinLength,
   IsNotEmpty,
   IsEnum,
+  IsOptional,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '../../domain/role.vo';
@@ -18,6 +19,25 @@ export class RegisterDto {
   @IsString()
   @IsNotEmpty()
   lastname: string;
+
+  @ApiProperty({
+    description: 'The phone number of the user',
+    example: '+33612345678',
+  })
+  @IsString()
+  @IsNotEmpty()
+  phoneNumber: string;
+
+  @ApiProperty({
+    description: 'The role assigned at registration',
+    example: Role.CLIENT,
+    enum: Role,
+    required: false,
+    default: Role.CLIENT,
+  })
+  @IsOptional()
+  @IsEnum(Role)
+  role?: Role;
 
   @ApiProperty({
     description: 'The email address of the user',
@@ -44,11 +64,4 @@ export class RegisterDto {
   @MinLength(8, { message: 'Password must be at least 8 characters long' })
   password: string;
 
-  @ApiProperty({
-    description: 'The initial role assigned to the user',
-    enum: Role,
-    example: Role.CLIENT,
-  })
-  @IsEnum(Role)
-  role: Role;
 }

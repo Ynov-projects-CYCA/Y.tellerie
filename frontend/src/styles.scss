@@ -1,3 +1,5 @@
+@use './styles/variables' as *;
+
 :root {
   --color-background: #f3ede3;
   --color-surface: rgba(255, 251, 245, 0.82);
@@ -18,56 +20,26 @@
 *::before,
 *::after {
   box-sizing: border-box;
-}
-
-html,
-body {
-  min-height: 100%;
-}
-
-body {
   margin: 0;
-  color: var(--color-text);
-  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
-  background:
-    radial-gradient(circle at top left, rgba(185, 125, 60, 0.24), transparent 30%),
-    radial-gradient(circle at 85% 15%, rgba(23, 94, 127, 0.16), transparent 28%),
-    linear-gradient(180deg, #f6f1e8 0%, #f0e6d9 100%);
+  padding: 0;
 }
 
-button,
-a,
-input,
-textarea,
-select {
-  font: inherit;
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
 }
 
-button {
-  border: 0;
-  border-radius: 999px;
-  padding: 0.85rem 1.2rem;
-  background: var(--color-accent);
-  color: #f7fbfd;
-  cursor: pointer;
-  transition: transform 160ms ease, opacity 160ms ease;
+body {
+  font-family: $font-sans;
+  color: $color-amber-950;
+  background: $color-amber-50;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-button:hover:not(:disabled),
-button:focus-visible:not(:disabled) {
-  transform: translateY(-1px);
-}
-
-button:disabled {
-  opacity: 0.7;
-  cursor: progress;
-}
-
-code {
-  padding: 0.15rem 0.4rem;
-  border-radius: 8px;
-  background: rgba(28, 42, 47, 0.08);
-  font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
+img {
+  max-width: 100%;
+  display: block;
 }
 
 a {
@@ -189,10 +161,28 @@ a {
 }
 
 .auth-tab {
+  border: 1px solid transparent;
   border-radius: 999px;
   background: transparent;
   color: var(--hotel-brown);
   padding: 0.8rem 1rem;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.auth-tab:hover {
+  border-color: rgba(179, 84, 0, 0.18);
+  background: rgba(255, 248, 233, 0.88);
+}
+
+.auth-tab:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(179, 84, 0, 0.14);
 }
 
 .auth-tab.is-active {
@@ -265,11 +255,20 @@ a {
   align-items: center;
   gap: 0.7rem;
   color: var(--hotel-copper);
+  line-height: 1.5;
 }
 
 .auth-checkbox input {
   width: 1rem;
   height: 1rem;
+  margin: 0;
+  accent-color: var(--hotel-copper);
+  border-radius: 0.25rem;
+}
+
+.auth-checkbox input:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(179, 84, 0, 0.14);
 }
 
 .auth-link {
@@ -278,17 +277,58 @@ a {
 }
 
 .auth-link.is-inline {
+  border: 0;
   background: transparent;
   padding: 0;
   color: var(--hotel-copper);
+  font: inherit;
+  cursor: pointer;
+}
+
+.auth-link:hover {
+  color: #8f4305;
+}
+
+.auth-link:focus-visible {
+  outline: none;
+  text-decoration: underline;
+  text-underline-offset: 0.18rem;
 }
 
 .auth-submit {
   width: 100%;
   margin-top: 0.5rem;
+  padding: 0.95rem 1.1rem;
+  border: 1px solid #9e4700;
   border-radius: 0.75rem;
   background: var(--hotel-copper);
   color: #fffaf3;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+
+.auth-submit:hover:not(:disabled) {
+  background: #9e4700;
+  box-shadow: 0 16px 32px rgba(111, 49, 16, 0.18);
+  transform: translateY(-1px);
+}
+
+.auth-submit:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(179, 84, 0, 0.16);
+}
+
+.auth-submit:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .auth-footer {
@@ -323,8 +363,40 @@ a {
   margin-top: 1.5rem;
 }
 
+.auth-modal__actions button {
+  padding: 0.8rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(179, 84, 0, 0.28);
+  background: rgba(255, 248, 233, 0.9);
+  color: var(--hotel-brown);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.auth-modal__actions button:hover {
+  background: rgba(255, 242, 210, 0.96);
+  border-color: rgba(179, 84, 0, 0.42);
+}
+
+.auth-modal__actions button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(179, 84, 0, 0.14);
+}
+
 .auth-modal__actions button + button {
   background: var(--hotel-copper);
+  border-color: #9e4700;
+  color: #fffaf3;
+}
+
+.auth-modal__actions button + button:hover {
+  background: #9e4700;
 }
 
 .space-panel {

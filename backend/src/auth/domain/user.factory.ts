@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { UserAggregate } from './user.aggregate';
 import { UserId } from './user-id.vo';
 import { Email } from './email.vo';
@@ -13,6 +14,7 @@ export class UserFactory {
     properties: {
       firstname: string;
       lastname: string;
+      phoneNumber: string;
       email: Email;
       phone: string;
       rawPassword: string;
@@ -24,6 +26,10 @@ export class UserFactory {
       id: UserId.generate(),
       firstname: properties.firstname,
       lastname: properties.lastname,
+      phoneNumber: properties.phoneNumber,
+      isActive: false,
+      verifyEmailToken: randomUUID(),
+      resetPasswordToken: null,
       email: properties.email,
       phone: properties.phone,
       passwordHash: await passwordHasher.hash(properties.rawPassword),

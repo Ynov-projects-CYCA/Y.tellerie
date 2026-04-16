@@ -29,6 +29,7 @@ export class RegisterClientUseCase {
   async execute(command: {
     firstname: string;
     lastname: string;
+    phoneNumber: string;
     email: Email;
     phone: string;
     rawPassword: string;
@@ -42,6 +43,7 @@ export class RegisterClientUseCase {
       {
         firstname: command.firstname,
         lastname: command.lastname,
+        phoneNumber: command.phoneNumber,
         email: command.email,
         phone: command.phone,
         rawPassword: command.rawPassword,

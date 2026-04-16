@@ -21,6 +21,7 @@ describe('ResetPasswordUseCase', () => {
       save: jest.fn(),
       findById: jest.fn(),
       findByEmail: jest.fn(),
+      findByVerifyEmailToken: jest.fn(),
     };
     tokenRepository = {
       save: jest.fn(),
@@ -47,6 +48,10 @@ describe('ResetPasswordUseCase', () => {
       id: userId,
       firstname: 'John',
       lastname: 'Doe',
+      phoneNumber: '+33612345678',
+      isActive: true,
+      verifyEmailToken: null,
+      resetPasswordToken: null,
       email: Email.from('john.doe@example.com'),
       phone: '+33123456789',
       passwordHash: 'old-hash',

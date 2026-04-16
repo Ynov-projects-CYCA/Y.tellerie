@@ -8,7 +8,7 @@ export const IAuthenticationStrategy = Symbol('IAuthenticationStrategy');
  */
 export interface IAuthenticationStrategy {
   /**
-   * The name of the strategy (e.g., 'local', 'jwt', 'refresh-token').
+   * The name of the strategy (e.g., 'local', 'jwt').
    */
   readonly name: string;
 

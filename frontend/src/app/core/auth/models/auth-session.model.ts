@@ -5,6 +5,7 @@ export interface AuthenticatedUser {
   firstname: string;
   lastname: string;
   email: string;
+  phoneNumber?: string;
   phone: string;
   roles: AuthRole[];
 }
@@ -24,9 +25,15 @@ export interface RegisterPayload {
   firstname: string;
   lastname: string;
   email: string;
+  phoneNumber: string;
   phone: string;
   password: string;
   role: AuthRole;
+}
+
+export interface RegisterResponse {
+  message: string;
+  user: AuthenticatedUser;
 }
 
 export interface ForgotPasswordPayload {

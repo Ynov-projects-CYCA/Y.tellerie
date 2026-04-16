@@ -6,6 +6,7 @@ import {
   ForgotPasswordPayload,
   LoginPayload,
   RegisterPayload,
+  RegisterResponse,
   ResetPasswordPayload,
 } from './models/auth-session.model';
 
@@ -17,8 +18,8 @@ export class AuthApiService {
     return this.apiClient.post<AuthResponse, LoginPayload>('/auth/login', payload);
   }
 
-  register(payload: RegisterPayload): Observable<AuthResponse> {
-    return this.apiClient.post<AuthResponse, RegisterPayload>(
+  register(payload: RegisterPayload): Observable<RegisterResponse> {
+    return this.apiClient.post<RegisterResponse, RegisterPayload>(
       '/auth/register',
       payload,
     );
@@ -28,6 +29,13 @@ export class AuthApiService {
     return this.apiClient.post<void, ForgotPasswordPayload>(
       '/auth/forgot-password',
       payload,
+    );
+  }
+
+  verifyEmail(token: string): Observable<{ message: string }> {
+    return this.apiClient.post<{ message: string }, { token: string }>(
+      '/auth/verify-email',
+      { token },
     );
   }
 

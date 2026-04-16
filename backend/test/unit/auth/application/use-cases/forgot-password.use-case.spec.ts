@@ -20,6 +20,7 @@ describe('ForgotPasswordUseCase', () => {
       save: jest.fn(),
       findById: jest.fn(),
       findByEmail: jest.fn(),
+      findByVerifyEmailToken: jest.fn(),
     };
     tokenRepository = {
       save: jest.fn(),
@@ -55,6 +56,10 @@ describe('ForgotPasswordUseCase', () => {
         id: UserId.generate(),
         firstname: 'John',
         lastname: 'Doe',
+        phoneNumber: '+33612345678',
+        isActive: true,
+        verifyEmailToken: null,
+        resetPasswordToken: null,
         email: Email.from('john.doe@example.com'),
         phone: '+33123456789',
         passwordHash: 'hashed_password',
@@ -70,6 +75,9 @@ describe('ForgotPasswordUseCase', () => {
     expect(emailUseCase.execute).toHaveBeenCalledTimes(1);
     expect((emailUseCase.execute as jest.Mock).mock.calls[0][0].html).toContain(
       'reinitialiser-mot-de-passe?token=',
+    );
+    expect((emailUseCase.execute as jest.Mock).mock.calls[0][0].html).toContain(
+      'Reinitialiser mon mot de passe',
     );
   });
 });

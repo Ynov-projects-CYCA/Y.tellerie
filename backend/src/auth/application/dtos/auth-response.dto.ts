@@ -14,6 +14,18 @@ export class UserResponse {
   lastname: string;
 
   @ApiProperty({
+    description: 'The phone number of the user',
+    example: '+33612345678',
+  })
+  phoneNumber: string;
+
+  @ApiProperty({
+    description: 'Whether the account is active',
+    example: false,
+  })
+  isActive: boolean;
+
+  @ApiProperty({
     description: 'The email address of the user',
     example: 'john.doe@example.com',
   })
@@ -36,11 +48,16 @@ export class AuthResponseDto {
   })
   accessToken: string;
 
+  @ApiProperty({ type: UserResponse })
+  user: UserResponse;
+}
+
+export class RegisterResponseDto {
   @ApiProperty({
-    description: 'The refresh token for renewing access tokens',
-    example: 'a1b2c3d4-e5f6-7890-1234-567890abcdef',
+    description: 'A message describing the registration outcome',
+    example: 'Account created. Verify your email before logging in.',
   })
-  refreshToken: string;
+  message: string;
 
   @ApiProperty({ type: UserResponse })
   user: UserResponse;

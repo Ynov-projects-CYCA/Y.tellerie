@@ -21,6 +21,10 @@ export class TypeOrmUserRepository implements IUserRepository {
       id: userProps.id.toString(),
       firstname: userProps.firstname,
       lastname: userProps.lastname,
+      phoneNumber: userProps.phoneNumber,
+      isActive: userProps.isActive,
+      verifyEmailToken: userProps.verifyEmailToken,
+      resetPasswordToken: userProps.resetPasswordToken,
       email: userProps.email.toString(),
       phone: userProps.phone,
       passwordHash: userProps.passwordHash,
@@ -42,6 +46,10 @@ export class TypeOrmUserRepository implements IUserRepository {
       id: UserId.from(userOrmEntity.id),
       firstname: userOrmEntity.firstname,
       lastname: userOrmEntity.lastname,
+      phoneNumber: userOrmEntity.phoneNumber,
+      isActive: userOrmEntity.isActive,
+      verifyEmailToken: userOrmEntity.verifyEmailToken,
+      resetPasswordToken: userOrmEntity.resetPasswordToken,
       email: Email.from(userOrmEntity.email),
       phone: userOrmEntity.phone,
       passwordHash: userOrmEntity.passwordHash,
@@ -62,6 +70,34 @@ export class TypeOrmUserRepository implements IUserRepository {
       id: UserId.from(userOrmEntity.id),
       firstname: userOrmEntity.firstname,
       lastname: userOrmEntity.lastname,
+      phoneNumber: userOrmEntity.phoneNumber,
+      isActive: userOrmEntity.isActive,
+      verifyEmailToken: userOrmEntity.verifyEmailToken,
+      resetPasswordToken: userOrmEntity.resetPasswordToken,
+      email: Email.from(userOrmEntity.email),
+      phone: userOrmEntity.phone,
+      passwordHash: userOrmEntity.passwordHash,
+      roles: userOrmEntity.roles,
+      createdAt: userOrmEntity.createdAt,
+      updatedAt: userOrmEntity.updatedAt,
+    });
+  }
+
+  async findByVerifyEmailToken(token: string): Promise<UserAggregate | null> {
+    const userOrmEntity = await this.userRepository.findOne({
+      where: { verifyEmailToken: token },
+    });
+    if (!userOrmEntity) {
+      return null;
+    }
+    return UserFactory.reconstitute({
+      id: UserId.from(userOrmEntity.id),
+      firstname: userOrmEntity.firstname,
+      lastname: userOrmEntity.lastname,
+      phoneNumber: userOrmEntity.phoneNumber,
+      isActive: userOrmEntity.isActive,
+      verifyEmailToken: userOrmEntity.verifyEmailToken,
+      resetPasswordToken: userOrmEntity.resetPasswordToken,
       email: Email.from(userOrmEntity.email),
       phone: userOrmEntity.phone,
       passwordHash: userOrmEntity.passwordHash,

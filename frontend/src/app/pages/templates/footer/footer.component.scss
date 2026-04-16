@@ -1,0 +1,97 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.footer {
+  background: $color-amber-100;
+  border-top: 1.5px solid $color-amber-300;
+  padding: $spacing-6 0;
+
+  &-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 $spacing-6;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $spacing-6;
+    flex-wrap: wrap;
+
+    @include mobile {
+      flex-direction: column;
+      text-align: center;
+      padding: 0 $spacing-4;
+      gap: $spacing-4;
+    }
+  }
+
+  &-brand {
+    display: flex;
+    align-items: center;
+    gap: $spacing-2;
+    text-decoration: none;
+    transition: opacity 0.2s;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+
+  &-brand-icon {
+    width: 28px;
+    height: 28px;
+    background: $color-amber-200;
+    border: 1px solid $color-amber-400;
+    border-radius: $radius-sm;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $color-amber-800;
+
+    .brand-icon {
+      width: 16px;
+      height: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      line-height: 1;
+    }
+  }
+
+  &-brand-name {
+    font-family: $font-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: $color-amber-950;
+  }
+
+
+  &-copyright {
+    font-size: 0.8rem;
+    color: $color-amber-700;
+    margin: 0;
+  }
+
+  &-nav {
+    display: flex;
+    align-items: center;
+    gap: $spacing-6;
+
+    @include mobile {
+      gap: $spacing-4;
+    }
+  }
+
+  &-nav-link {
+    font-size: 0.8rem;
+    color: $color-amber-800;
+    text-decoration: none;
+    transition: color 0.2s;
+    position: relative;
+
+    &:hover {
+      color: $color-amber-950;
+      text-decoration: underline;
+    }
+  }
+}
