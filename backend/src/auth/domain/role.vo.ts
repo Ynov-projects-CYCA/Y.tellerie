@@ -1,7 +1,4 @@
-export enum Role {
-  CLIENT = 'client',
-  PERSONNEL = 'personnel',
-}
+import { Role } from '@/shared/model';
 
 export class Roles {
   private constructor(private readonly values: Role[]) {}

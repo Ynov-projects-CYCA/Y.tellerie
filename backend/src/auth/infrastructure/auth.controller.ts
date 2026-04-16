@@ -22,40 +22,37 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { SendTransactionalEmailUseCase } from '../../mailjet/application/use-cases/send-transactional-email.use-case';
+import { SendTransactionalEmailUseCase } from '@/mailjet/application/use-cases/send-transactional-email.use-case';
 import {
   buildActionEmailHtml,
   buildActionEmailText,
-} from '../../mailjet/application/templates/action-email.template';
+} from '@/mailjet/application/templates/action-email.template';
 import {
   AuthResponseDto,
+  ChangePasswordDto,
+  ForgotPasswordDto,
+  LoginDto,
+  RegisterDto,
   RegisterResponseDto,
+  ResetPasswordDto,
   UserResponse,
-} from '../application/dtos/auth-response.dto';
-import { ChangePasswordDto } from '../application/dtos/change-password.dto';
-import { ForgotPasswordDto } from '../application/dtos/forgot-password.dto';
-import { LoginDto } from '../application/dtos/login.dto';
-import { RegisterDto } from '../application/dtos/register.dto';
-import { ResetPasswordDto } from '../application/dtos/reset-password.dto';
-import { VerifyEmailDto } from '../application/dtos/verify-email.dto';
-import { ChangePasswordUseCase } from '../application/use-cases/change-password.use-case';
-import { ForgotPasswordUseCase } from '../application/use-cases/forgot-password.use-case';
+  VerifyEmailDto,
+} from '../application/dtos';
 import {
+  ChangePasswordUseCase,
+  ForgotPasswordUseCase,
   InvalidCredentialsError,
   LoginUseCase,
+  RegisterUseCase,
+  UserAlreadyExistsError,
   UserCannotLoginError,
-} from '../application/use-cases/login.use-case';
-import { RegisterUseCase, UserAlreadyExistsError } from '../application/use-cases/register.use-case';
-import {
   InvalidPasswordResetTokenError,
   ResetPasswordUseCase,
-} from '../application/use-cases/reset-password.use-case';
-import { VerifyEmailUseCase } from '../application/use-cases/verify-email.use-case';
-import { Email } from '../domain/email.vo';
-import { Password } from '../domain/password.vo';
-import { Role } from '../domain/role.vo';
-import { UserAggregate } from '../domain/user.aggregate';
-import { InvalidOldPasswordError } from '../application/use-cases/change-password.use-case';
+  VerifyEmailUseCase,
+  InvalidOldPasswordError,
+} from '../application/use-cases';
+import { Email, Password, UserAggregate } from '@/auth/domain';
+import { Role } from '@/shared/model';
 
 @ApiTags('Auth')
 @Controller('auth')

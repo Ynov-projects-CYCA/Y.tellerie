@@ -2,13 +2,10 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   IPasswordHasher,
   IPasswordHasher as IPasswordHasherSymbol,
-} from '../ports/password-hasher.port';
-import {
   IUserRepository,
   IUserRepository as IUserRepositorySymbol,
-} from '../ports/user-repository.port';
-import { UserId } from '../../domain/user-id.vo';
-import { Password } from '../../domain/password.vo';
+} from '@/auth/application/ports';
+import { UserId, Password } from '@/auth/domain';
 
 export class UserNotFoundError extends Error {
   constructor(userId: string) {

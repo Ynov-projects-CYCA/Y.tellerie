@@ -7,7 +7,7 @@ import {
   IsOptional,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Role } from '../../domain/role.vo';
+import { Role } from '@/shared/model';
 
 export class RegisterDto {
   @ApiProperty({ description: 'The first name of the user', example: 'John' })
@@ -63,5 +63,4 @@ export class RegisterDto {
   @IsNotEmpty()
   @MinLength(8, { message: 'Password must be at least 8 characters long' })
   password: string;
-
 }

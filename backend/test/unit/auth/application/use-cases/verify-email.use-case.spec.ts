@@ -1,10 +1,12 @@
 import { BadRequestException } from '@nestjs/common';
-import { IUserRepository } from '../../../../../src/auth/application/ports/user-repository.port';
-import { VerifyEmailUseCase } from '../../../../../src/auth/application/use-cases/verify-email.use-case';
-import { Email } from '../../../../../src/auth/domain/email.vo';
-import { Role } from '../../../../../src/auth/domain/role.vo';
-import { UserAggregate } from '../../../../../src/auth/domain/user.aggregate';
-import { UserId } from '../../../../../src/auth/domain/user-id.vo';
+import {
+  Email,
+  IUserRepository,
+  Role,
+  UserAggregate,
+  UserId,
+  VerifyEmailUseCase,
+} from '../../../../../src/auth';
 
 describe('VerifyEmailUseCase', () => {
   let useCase: VerifyEmailUseCase;

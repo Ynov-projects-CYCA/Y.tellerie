@@ -1,14 +1,16 @@
 import { ForbiddenException } from '@nestjs/common';
-import { LoginUseCase } from '../../../../../src/auth/application/use-cases/login.use-case';
-import { IPasswordHasher } from '../../../../../src/auth/application/ports/password-hasher.port';
-import { ITokenGenerator } from '../../../../../src/auth/application/ports/token-generator.port';
-import { IUserRepository } from '../../../../../src/auth/application/ports/user-repository.port';
-import { AuthenticationDomainService } from '../../../../../src/auth/domain/authentication.domain-service';
-import { Email } from '../../../../../src/auth/domain/email.vo';
-import { Password } from '../../../../../src/auth/domain/password.vo';
-import { Role } from '../../../../../src/auth/domain/role.vo';
-import { UserAggregate } from '../../../../../src/auth/domain/user.aggregate';
-import { UserId } from '../../../../../src/auth/domain/user-id.vo';
+import {
+  AuthenticationDomainService,
+  Email,
+  IPasswordHasher,
+  ITokenGenerator,
+  IUserRepository,
+  LoginUseCase,
+  Password,
+  Role,
+  UserAggregate,
+  UserId,
+} from '../../../../../src/auth';
 
 describe('LoginUseCase', () => {
   let useCase: LoginUseCase;

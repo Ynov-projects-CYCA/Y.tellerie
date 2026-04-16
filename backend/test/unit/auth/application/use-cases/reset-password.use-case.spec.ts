@@ -1,13 +1,16 @@
-import { PasswordResetToken } from '../../../../../src/auth/domain/password-reset-token.entity';
-import { ResetPasswordUseCase, InvalidPasswordResetTokenError } from '../../../../../src/auth/application/use-cases/reset-password.use-case';
-import { IUserRepository } from '../../../../../src/auth/application/ports/user-repository.port';
-import { IPasswordResetTokenRepository } from '../../../../../src/auth/application/ports/password-reset-token-repository.port';
-import { IPasswordHasher } from '../../../../../src/auth/application/ports/password-hasher.port';
-import { UserAggregate } from '../../../../../src/auth/domain/user.aggregate';
-import { UserId } from '../../../../../src/auth/domain/user-id.vo';
-import { Role } from '../../../../../src/auth/domain/role.vo';
-import { Email } from '../../../../../src/auth/domain/email.vo';
-import { Password } from '../../../../../src/auth/domain/password.vo';
+import {
+  Email,
+  InvalidPasswordResetTokenError,
+  IPasswordHasher,
+  IPasswordResetTokenRepository,
+  IUserRepository,
+  Password,
+  PasswordResetToken,
+  ResetPasswordUseCase,
+  Role,
+  UserAggregate,
+  UserId,
+} from '../../../../../src/auth';
 import { createHash } from 'crypto';
 
 describe('ResetPasswordUseCase', () => {

@@ -1,5 +1,5 @@
 import { EntitySchema } from 'typeorm';
-import { Role } from '../../../domain/role.vo';
+import { Role } from '@/shared/model';
 
 export class UserOrmEntity {
   id: string;

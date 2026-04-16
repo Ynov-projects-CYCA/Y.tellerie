@@ -2,7 +2,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import {
   IUserRepository,
   IUserRepository as IUserRepositorySymbol,
-} from '../ports/user-repository.port';
+} from '@/auth/application/ports';
 
 @Injectable()
 export class VerifyEmailUseCase {

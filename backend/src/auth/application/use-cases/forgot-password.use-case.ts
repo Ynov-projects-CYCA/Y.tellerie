@@ -1,21 +1,18 @@
 import { createHash, randomBytes } from 'crypto';
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { SendTransactionalEmailUseCase } from '../../../mailjet/application/use-cases/send-transactional-email.use-case';
+import { Email, PasswordResetToken } from '@/auth/domain';
+import { SendTransactionalEmailUseCase } from '@/mailjet/application/use-cases/send-transactional-email.use-case';
 import {
   buildActionEmailHtml,
   buildActionEmailText,
-} from '../../../mailjet/application/templates/action-email.template';
-import { Email } from '../../domain/email.vo';
-import {
-  IUserRepository,
-  IUserRepository as IUserRepositorySymbol,
-} from '../ports/user-repository.port';
-import { PasswordResetToken } from '../../domain/password-reset-token.entity';
+} from '@/mailjet/application/templates/action-email.template';
 import {
   IPasswordResetTokenRepository,
   IPasswordResetTokenRepository as IPasswordResetTokenRepositorySymbol,
-} from '../ports/password-reset-token-repository.port';
+  IUserRepository,
+  IUserRepository as IUserRepositorySymbol,
+} from '@/auth/application/ports';
 
 @Injectable()
 export class ForgotPasswordUseCase {

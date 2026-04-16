@@ -1,16 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { UserFactory } from '../../domain/user.factory';
-import { Email } from '../../domain/email.vo';
 import {
   IPasswordHasher,
   IPasswordHasher as IPasswordHasherSymbol,
-} from '../ports/password-hasher.port';
-import {
   IUserRepository,
   IUserRepository as IUserRepositorySymbol,
-} from '../ports/user-repository.port';
-import { UserAggregate } from '../../domain/user.aggregate';
-import { Role } from '../../domain/role.vo';
+} from '@/auth/application/ports';
+import { Email, UserAggregate, UserFactory } from '@/auth/domain';
+import { Role } from '@/shared/model';
 
 export class UserAlreadyExistsError extends Error {
   constructor(email: string) {

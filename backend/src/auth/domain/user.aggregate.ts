@@ -1,5 +1,5 @@
+import { Role } from '@/shared/model';
 import { User } from './user.entity';
-import { Role } from './role.vo';
 
 /**
  * In this domain, the User is the aggregate root.

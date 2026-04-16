@@ -1,22 +1,6 @@
 import { Email } from './email.vo';
-import { Role } from './role.vo';
 import { UserId } from './user-id.vo';
-
-export interface UserProperties {
-  id: UserId;
-  firstname: string;
-  lastname: string;
-  phoneNumber: string;
-  isActive: boolean;
-  verifyEmailToken: string | null;
-  resetPasswordToken: string | null;
-  email: Email;
-  phone: string;
-  passwordHash: string;
-  roles: Role[];
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { Role, UserProperties } from '@/shared/model';
 
 export class User {
   private readonly id: UserId;

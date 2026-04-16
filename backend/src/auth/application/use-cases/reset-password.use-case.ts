@@ -3,16 +3,12 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   IPasswordHasher,
   IPasswordHasher as IPasswordHasherSymbol,
-} from '../ports/password-hasher.port';
-import {
   IUserRepository,
   IUserRepository as IUserRepositorySymbol,
-} from '../ports/user-repository.port';
-import {
   IPasswordResetTokenRepository,
   IPasswordResetTokenRepository as IPasswordResetTokenRepositorySymbol,
-} from '../ports/password-reset-token-repository.port';
-import { Password } from '../../domain/password.vo';
+} from '@/auth/application/ports';
+import { Password } from '@/auth/domain';
 
 export class InvalidPasswordResetTokenError extends Error {
   constructor() {

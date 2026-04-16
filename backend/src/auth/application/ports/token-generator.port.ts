@@ -1,4 +1,4 @@
-import { UserAggregate } from '../../domain/user.aggregate';
+import { UserAggregate } from '@/auth/domain';
 
 export const ITokenGenerator = Symbol('ITokenGenerator');
 
