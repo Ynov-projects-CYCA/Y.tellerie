@@ -7,6 +7,9 @@ export interface UserProperties {
   firstname: string;
   lastname: string;
   phoneNumber: string;
+  isActive: boolean;
+  verifyEmailToken: string | null;
+  resetPasswordToken: string | null;
   email: Email;
   passwordHash: string;
   roles: Role[];
@@ -19,6 +22,9 @@ export class User {
   private firstname: string;
   private lastname: string;
   private phoneNumber: string;
+  private isActive: boolean;
+  private verifyEmailToken: string | null;
+  private resetPasswordToken: string | null;
   private email: Email;
   private passwordHash: string;
   private roles: Role[];
@@ -35,6 +41,9 @@ export class User {
       firstname: this.firstname,
       lastname: this.lastname,
       phoneNumber: this.phoneNumber,
+      isActive: this.isActive,
+      verifyEmailToken: this.verifyEmailToken,
+      resetPasswordToken: this.resetPasswordToken,
       email: this.email,
       passwordHash: this.passwordHash,
       roles: this.roles,
@@ -45,6 +54,12 @@ export class User {
 
   changePassword(newPasswordHash: string) {
     this.passwordHash = newPasswordHash;
+    this.updatedAt = new Date();
+  }
+
+  verifyEmail() {
+    this.isActive = true;
+    this.verifyEmailToken = null;
     this.updatedAt = new Date();
   }
 }

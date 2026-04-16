@@ -1,5 +1,13 @@
-import { IsString, IsEmail, MinLength, IsNotEmpty } from 'class-validator';
+import {
+  IsString,
+  IsEmail,
+  MinLength,
+  IsNotEmpty,
+  IsEnum,
+  IsOptional,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Role } from '../../domain/role.vo';
 
 export class RegisterDto {
   @ApiProperty({ description: 'The first name of the user', example: 'John' })
@@ -19,6 +27,17 @@ export class RegisterDto {
   @IsString()
   @IsNotEmpty()
   phoneNumber: string;
+
+  @ApiProperty({
+    description: 'The role assigned at registration',
+    example: Role.CLIENT,
+    enum: Role,
+    required: false,
+    default: Role.CLIENT,
+  })
+  @IsOptional()
+  @IsEnum(Role)
+  role?: Role;
 
   @ApiProperty({
     description: 'The email address of the user',

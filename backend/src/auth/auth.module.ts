@@ -3,40 +3,32 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MailjetModule } from '../mailjet/mailjet.module';
 import { IPasswordHasher } from './application/ports/password-hasher.port';
-import { BcryptPasswordHasher } from './infrastructure/adapters/bcrypt-password-hasher.adapter';
 import {
-  IRefreshTokenRepository,
-  IRefreshTokenRepository as IRefreshTokenRepositorySymbol,
-} from './application/ports/refresh-token-repository.port';
-import { TypeOrmRefreshTokenRepository } from './infrastructure/adapters/typeorm-refresh-token-repository.adapter';
-import {
-  ITokenGenerator,
-  ITokenGenerator as ITokenGeneratorSymbol,
+  ITokenGenerator as ITokenGeneratorSymbol
 } from './application/ports/token-generator.port';
-import { JwtTokenGenerator } from './infrastructure/adapters/jwt-token-generator.adapter';
 import {
-  IUserRepository,
-  IUserRepository as IUserRepositorySymbol,
+  IUserRepository as IUserRepositorySymbol
 } from './application/ports/user-repository.port';
-import { TypeOrmUserRepository } from './infrastructure/adapters/typeorm-user-repository.adapter';
+import { JwtStrategy } from './application/strategies/jwt.strategy';
+import { LocalStrategy } from './application/strategies/local.strategy';
+import { ChangePasswordUseCase } from './application/use-cases/change-password.use-case';
+import { LoginUseCase } from './application/use-cases/login.use-case';
 import { RegisterClientUseCase } from './application/use-cases/register-client.use-case';
 import { RegisterPersonnelUseCase } from './application/use-cases/register-personnel.use-case';
-import { LoginUseCase } from './application/use-cases/login.use-case';
-import { RefreshTokenUseCase } from './application/use-cases/refresh-token.use-case';
-import { ChangePasswordUseCase } from './application/use-cases/change-password.use-case';
-import { LogoutUseCase } from './application/use-cases/logout.use-case';
+import { VerifyEmailUseCase } from './application/use-cases/verify-email.use-case';
 import { AuthenticationDomainService } from './domain/authentication.domain-service';
-import { LocalStrategy } from './application/strategies/local.strategy';
-import { JwtStrategy } from './application/strategies/jwt.strategy';
-import { RefreshTokenStrategy } from './application/strategies/refresh-token.strategy';
+import { BcryptPasswordHasher } from './infrastructure/adapters/bcrypt-password-hasher.adapter';
+import { JwtTokenGenerator } from './infrastructure/adapters/jwt-token-generator.adapter';
+import { TypeOrmUserRepository } from './infrastructure/adapters/typeorm-user-repository.adapter';
 import { AuthController } from './infrastructure/auth.controller';
 import { UserSchema } from './infrastructure/persistence/typeorm/user.schema';
-import { RefreshTokenSchema } from './infrastructure/persistence/typeorm/refresh-token.schema';
 
 @Module({
   imports: [
     ConfigModule,
+    MailjetModule,
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -46,30 +38,24 @@ import { RefreshTokenSchema } from './infrastructure/persistence/typeorm/refresh
         signOptions: { expiresIn: '15m' },
       }),
     }),
-    TypeOrmModule.forFeature([UserSchema, RefreshTokenSchema]),
+    TypeOrmModule.forFeature([UserSchema]),
   ],
   providers: [
     // Use Cases
     RegisterClientUseCase,
     RegisterPersonnelUseCase,
     LoginUseCase,
-    RefreshTokenUseCase,
     ChangePasswordUseCase,
-    LogoutUseCase,
+    VerifyEmailUseCase,
     // Domain Services
     AuthenticationDomainService,
     // Strategies
     LocalStrategy,
     JwtStrategy,
-    RefreshTokenStrategy,
     // Adapters (mapping ports to implementations)
     {
       provide: IPasswordHasher,
       useClass: BcryptPasswordHasher,
-    },
-    {
-      provide: IRefreshTokenRepositorySymbol,
-      useClass: TypeOrmRefreshTokenRepository,
     },
     {
       provide: ITokenGeneratorSymbol,

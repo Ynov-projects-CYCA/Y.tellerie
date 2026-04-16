@@ -8,6 +8,7 @@ import {
   HttpCode,
   HttpStatus,
   Patch,
+  Logger,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
@@ -20,31 +21,37 @@ import {
 import { RegisterClientUseCase } from '../application/use-cases/register-client.use-case';
 import { RegisterPersonnelUseCase } from '../application/use-cases/register-personnel.use-case';
 import { LoginUseCase } from '../application/use-cases/login.use-case';
-import { RefreshTokenUseCase } from '../application/use-cases/refresh-token.use-case';
 import { ChangePasswordUseCase } from '../application/use-cases/change-password.use-case';
-import { LogoutUseCase } from '../application/use-cases/logout.use-case';
+import { VerifyEmailUseCase } from '../application/use-cases/verify-email.use-case';
 import { RegisterDto } from '../application/dtos/register.dto';
 import { LoginDto } from '../application/dtos/login.dto';
 import { ChangePasswordDto } from '../application/dtos/change-password.dto';
+import { VerifyEmailDto } from '../application/dtos/verify-email.dto';
 import { Email } from '../domain/email.vo';
 import { Password } from '../domain/password.vo';
 import {
   AuthResponseDto,
+  RegisterResponseDto,
   UserResponse,
 } from '../application/dtos/auth-response.dto';
 import { UserAggregate } from '../domain/user.aggregate';
-import { RefreshTokenDto } from '../application/dtos/refresh-token.dto';
+import { Role } from '../domain/role.vo';
+import { SendTransactionalEmailUseCase } from '../../mailjet/application/use-cases/send-transactional-email.use-case';
+import { ConfigService } from '@nestjs/config';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
+
   constructor(
     private readonly registerClientUseCase: RegisterClientUseCase,
     private readonly registerPersonnelUseCase: RegisterPersonnelUseCase,
     private readonly loginUseCase: LoginUseCase,
-    private readonly refreshTokenUseCase: RefreshTokenUseCase,
     private readonly changePasswordUseCase: ChangePasswordUseCase,
-    private readonly logoutUseCase: LogoutUseCase,
+    private readonly verifyEmailUseCase: VerifyEmailUseCase,
+    private readonly sendTransactionalEmailUseCase: SendTransactionalEmailUseCase,
+    private readonly configService: ConfigService,
   ) {}
 
   @Get('me')
@@ -60,72 +67,62 @@ export class AuthController {
     return this.mapUserResponse(req.user);
   }
 
-  @Post('register/client')
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Register a new client and log them in' })
+  @Post('verify-email')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Verify a user email address' })
+  @ApiBody({ type: VerifyEmailDto })
   @ApiResponse({
-    status: HttpStatus.CREATED,
-    description: 'Client successfully registered and logged in.',
-    type: AuthResponseDto,
+    status: HttpStatus.OK,
+    description: 'Email successfully verified.',
   })
   @ApiResponse({
-    status: HttpStatus.CONFLICT,
-    description: 'User with this email already exists.',
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Verification token is invalid or missing.',
   })
-  async registerClient(
-    @Body() registerDto: RegisterDto,
-  ): Promise<AuthResponseDto> {
-    const user = await this.registerClientUseCase.execute({
-      firstname: registerDto.firstname,
-      lastname: registerDto.lastname,
-      phoneNumber: registerDto.phoneNumber,
-      email: Email.from(registerDto.email),
-      rawPassword: registerDto.password,
-    });
+  async verifyEmail(
+    @Body() verifyEmailDto: VerifyEmailDto,
+  ): Promise<{ message: string }> {
+    await this.verifyEmailUseCase.execute(verifyEmailDto.token);
 
-    const { accessToken, refreshToken } = await this.loginUseCase.execute({
-      email: user.getProperties().email,
-      password: await Password.from(registerDto.password),
-    });
-
-    return {
-      accessToken,
-      refreshToken: refreshToken.getProperties().id,
-      user: this.mapUserResponse(user),
-    };
+    return { message: 'Email verified successfully.' };
   }
 
-  @Post('register/personnel')
+  @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Register a new personnel and log them in' })
+  @ApiOperation({ summary: 'Register a new user and log them in' })
   @ApiResponse({
     status: HttpStatus.CREATED,
-    description: 'Personnel successfully registered and logged in.',
-    type: AuthResponseDto,
+    description: 'User successfully registered. Email verification required.',
+    type: RegisterResponseDto,
   })
   @ApiResponse({
     status: HttpStatus.CONFLICT,
     description: 'User with this email already exists.',
   })
-  async registerPersonnel(
+  async register(
     @Body() registerDto: RegisterDto,
-  ): Promise<AuthResponseDto> {
-    const user = await this.registerPersonnelUseCase.execute({
-      firstname: registerDto.firstname,
-      lastname: registerDto.lastname,
-      phoneNumber: registerDto.phoneNumber,
-      email: Email.from(registerDto.email),
-      rawPassword: registerDto.password,
-    });
+  ): Promise<RegisterResponseDto> {
+    const user =
+      registerDto.role === Role.PERSONNEL
+        ? await this.registerPersonnelUseCase.execute({
+            firstname: registerDto.firstname,
+            lastname: registerDto.lastname,
+            phoneNumber: registerDto.phoneNumber,
+            email: Email.from(registerDto.email),
+            rawPassword: registerDto.password,
+          })
+        : await this.registerClientUseCase.execute({
+            firstname: registerDto.firstname,
+            lastname: registerDto.lastname,
+            phoneNumber: registerDto.phoneNumber,
+            email: Email.from(registerDto.email),
+            rawPassword: registerDto.password,
+          });
 
-    const { accessToken, refreshToken } = await this.loginUseCase.execute({
-      email: user.getProperties().email,
-      password: await Password.from(registerDto.password),
-    });
+    await this.sendVerificationEmail(user);
 
     return {
-      accessToken,
-      refreshToken: refreshToken.getProperties().id,
+      message: 'Account created. Verify your email before logging in.',
       user: this.mapUserResponse(user),
     };
   }
@@ -144,11 +141,15 @@ export class AuthController {
     status: HttpStatus.UNAUTHORIZED,
     description: 'Invalid credentials.',
   })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Account is not active.',
+  })
   async login(
     @Request() req: { user: UserAggregate },
     @Body() _loginDto: LoginDto,
   ): Promise<AuthResponseDto> {
-    const { user, accessToken, refreshToken } = await this.loginUseCase.execute(
+    const { user, accessToken } = await this.loginUseCase.execute(
       {
         email: req.user.getProperties().email,
         password: Password.from(_loginDto.password),
@@ -157,47 +158,6 @@ export class AuthController {
 
     return {
       accessToken,
-      refreshToken: refreshToken.getProperties().id,
-      user: this.mapUserResponse(user),
-    };
-  }
-
-  @Post('logout')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Log out a user by revoking their refresh token' })
-  @ApiResponse({
-    status: HttpStatus.NO_CONTENT,
-    description: 'User successfully logged out.',
-  })
-  async logout(@Body() refreshTokenDto: RefreshTokenDto): Promise<void> {
-    await this.logoutUseCase.execute({
-      refreshTokenId: refreshTokenDto.refreshToken,
-    });
-  }
-
-  @Post('refresh')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Refresh access token' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Tokens successfully refreshed.',
-    type: AuthResponseDto,
-  })
-  @ApiResponse({
-    status: HttpStatus.UNAUTHORIZED,
-    description: 'Invalid refresh token.',
-  })
-  async refresh(
-    @Body() refreshTokenDto: RefreshTokenDto,
-  ): Promise<AuthResponseDto> {
-    const { user, accessToken, refreshToken } =
-      await this.refreshTokenUseCase.execute({
-        refreshTokenId: refreshTokenDto.refreshToken,
-      });
-
-    return {
-      accessToken,
-      refreshToken: refreshToken.getProperties().id,
       user: this.mapUserResponse(user),
     };
   }
@@ -234,8 +194,52 @@ export class AuthController {
       firstname: properties.firstname,
       lastname: properties.lastname,
       phoneNumber: properties.phoneNumber,
+      isActive: properties.isActive,
       email: properties.email.toString(),
       roles: properties.roles,
     };
+  }
+
+  private async sendVerificationEmail(user: UserAggregate): Promise<void> {
+    const properties = user.getProperties();
+    const token = properties.verifyEmailToken;
+
+    if (!token) {
+      return;
+    }
+
+    const verificationUrl = this.buildVerificationUrl(token);
+
+    try {
+      await this.sendTransactionalEmailUseCase.execute({
+        to: {
+          email: properties.email.toString(),
+          name: `${properties.firstname} ${properties.lastname}`.trim(),
+        },
+        subject: 'Verify your email address',
+        text: `Welcome to Archi Hotel. Verify your account: ${verificationUrl}`,
+        html: `<p>Welcome to Archi Hotel.</p><p><a href="${verificationUrl}">Verify your account</a></p>`,
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Verification email failed for ${properties.email.toString()}: ${
+          (error as Error).message
+        }`,
+      );
+    }
+  }
+
+  private buildVerificationUrl(token: string): string {
+    const configuredFrontendUrl =
+      this.configService.get<string>('app.frontendUrl')?.trim();
+    const corsOrigins = this.configService.get<string[]>('app.corsOrigins') ?? [];
+    const baseUrl =
+      configuredFrontendUrl ||
+      corsOrigins[0] ||
+      'http://localhost:4200';
+
+    return `${baseUrl.replace(/\/$/, '')}/verify-email?token=${encodeURIComponent(
+      token,
+    )}`;
   }
 }

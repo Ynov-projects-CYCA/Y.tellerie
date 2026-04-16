@@ -15,7 +15,6 @@ import { MailjetController } from './infrastructure/mailjet.controller';
       useClass: MailjetProvider,
     },
   ],
-  exports: [IMailProviderSymbol],
+  exports: [IMailProviderSymbol, SendTransactionalEmailUseCase],
 })
 export class MailjetModule {}
-

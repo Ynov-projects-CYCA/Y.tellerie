@@ -6,6 +6,9 @@ export class UserOrmEntity {
   firstname: string;
   lastname: string;
   phoneNumber: string;
+  isActive: boolean;
+  verifyEmailToken: string | null;
+  resetPasswordToken: string | null;
   email: string;
   passwordHash: string;
   roles: Role[];
@@ -30,6 +33,21 @@ export const UserSchema = new EntitySchema<UserOrmEntity>({
     phoneNumber: {
       type: 'varchar',
       name: 'phone_number',
+    },
+    isActive: {
+      type: 'boolean',
+      name: 'is_active',
+      default: false,
+    },
+    verifyEmailToken: {
+      type: 'varchar',
+      name: 'verify_email_token',
+      nullable: true,
+    },
+    resetPasswordToken: {
+      type: 'varchar',
+      name: 'reset_password_token',
+      nullable: true,
     },
     email: {
       type: 'varchar',

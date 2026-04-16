@@ -3,28 +3,31 @@ import { AuthController } from '../../../../src/auth/infrastructure/auth.control
 import { RegisterClientUseCase } from '../../../../src/auth/application/use-cases/register-client.use-case';
 import { RegisterPersonnelUseCase } from '../../../../src/auth/application/use-cases/register-personnel.use-case';
 import { LoginUseCase } from '../../../../src/auth/application/use-cases/login.use-case';
-import { RefreshTokenUseCase } from '../../../../src/auth/application/use-cases/refresh-token.use-case';
 import { ChangePasswordUseCase } from '../../../../src/auth/application/use-cases/change-password.use-case';
-import { LogoutUseCase } from '../../../../src/auth/application/use-cases/logout.use-case';
+import { VerifyEmailUseCase } from '../../../../src/auth/application/use-cases/verify-email.use-case';
 import { RegisterDto } from '../../../../src/auth/application/dtos/register.dto';
 import { UserAggregate } from '../../../../src/auth/domain/user.aggregate';
 import { Role } from '../../../../src/auth/domain/role.vo';
 import { Email } from '../../../../src/auth/domain/email.vo';
 import { UserId } from '../../../../src/auth/domain/user-id.vo';
-import { RefreshToken } from '../../../../src/auth/domain/refresh-token.entity';
-import { HttpStatus } from '@nestjs/common';
-import { Password } from '../../../../src/auth/domain/password.vo';
+import { SendTransactionalEmailUseCase } from '../../../../src/mailjet/application/use-cases/send-transactional-email.use-case';
+import { ConfigService } from '@nestjs/config';
 
 describe('AuthController', () => {
   let authController: AuthController;
   let registerClientUseCase: RegisterClientUseCase;
   let loginUseCase: LoginUseCase;
+  let sendTransactionalEmailUseCase: SendTransactionalEmailUseCase;
+  let verifyEmailUseCase: VerifyEmailUseCase;
 
   const mockUserAggregate = new UserAggregate({
     id: UserId.generate(),
     firstname: 'John',
     lastname: 'Doe',
     phoneNumber: '+33612345678',
+    isActive: false,
+    verifyEmailToken: 'verify-token',
+    resetPasswordToken: null,
     email: Email.from('john.doe@example.com'),
     passwordHash: 'hashed_password',
     roles: [Role.CLIENT],
@@ -32,14 +35,9 @@ describe('AuthController', () => {
     updatedAt: new Date(),
   });
 
-  const mockRefreshToken = new RefreshToken({
-    id: 'refresh_token_id',
-    userId: mockUserAggregate.getProperties().id,
-    expiresAt: new Date(),
-    isRevoked: false,
-  });
-
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
       providers: [
@@ -56,16 +54,26 @@ describe('AuthController', () => {
           useValue: { execute: jest.fn() },
         },
         {
-          provide: RefreshTokenUseCase,
-          useValue: { execute: jest.fn() },
-        },
-        {
           provide: ChangePasswordUseCase,
           useValue: { execute: jest.fn() },
         },
         {
-          provide: LogoutUseCase,
+          provide: VerifyEmailUseCase,
           useValue: { execute: jest.fn() },
+        },
+        {
+          provide: SendTransactionalEmailUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => {
+              if (key === 'app.frontendUrl') return 'http://localhost:4200';
+              if (key === 'app.corsOrigins') return ['http://localhost:4200'];
+              return undefined;
+            }),
+          },
         },
       ],
     }).compile();
@@ -73,10 +81,14 @@ describe('AuthController', () => {
     authController = module.get<AuthController>(AuthController);
     registerClientUseCase = module.get<RegisterClientUseCase>(RegisterClientUseCase);
     loginUseCase = module.get<LoginUseCase>(LoginUseCase);
+    sendTransactionalEmailUseCase = module.get<SendTransactionalEmailUseCase>(
+      SendTransactionalEmailUseCase,
+    );
+    verifyEmailUseCase = module.get<VerifyEmailUseCase>(VerifyEmailUseCase);
   });
 
-  describe('registerClient', () => {
-    it('should register a client and return auth response', async () => {
+  describe('register', () => {
+    it('should register a client and return auth response by default', async () => {
       const registerDto: RegisterDto = {
         firstname: 'John',
         lastname: 'Doe',
@@ -89,16 +101,67 @@ describe('AuthController', () => {
       jest.spyOn(loginUseCase, 'execute').mockResolvedValue({
         user: mockUserAggregate,
         accessToken: 'access_token',
-        refreshToken: mockRefreshToken,
       });
       
-      const result = await authController.registerClient(registerDto);
+      const result = await authController.register(registerDto);
 
       expect(registerClientUseCase.execute).toHaveBeenCalled();
-      expect(loginUseCase.execute).toHaveBeenCalled();
-      expect(result).toHaveProperty('accessToken');
-      expect(result).toHaveProperty('refreshToken');
+      expect(authController['registerPersonnelUseCase'].execute).not.toHaveBeenCalled();
+      expect(sendTransactionalEmailUseCase.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: expect.objectContaining({ email: 'john.doe@example.com' }),
+          subject: 'Verify your email address',
+        }),
+      );
+      expect(loginUseCase.execute).not.toHaveBeenCalled();
+      expect(result).toEqual(
+        expect.objectContaining({
+          message: 'Account created. Verify your email before logging in.',
+        }),
+      );
       expect(result.user.email).toBe(registerDto.email);
+    });
+
+    it('should register a personnel and return auth response when role is personnel', async () => {
+      const registerDto: RegisterDto = {
+        firstname: 'Jane',
+        lastname: 'Doe',
+        phoneNumber: '+33687654321',
+        role: Role.PERSONNEL,
+        email: 'jane.doe@example.com',
+        password: 'password123',
+      };
+      const personnelUserAggregate = new UserAggregate({
+        ...mockUserAggregate.getProperties(),
+        firstname: 'Jane',
+        phoneNumber: '+33687654321',
+        email: Email.from('jane.doe@example.com'),
+        roles: [Role.PERSONNEL]
+      });
+
+      jest.spyOn(authController['registerPersonnelUseCase'], 'execute').mockResolvedValue(personnelUserAggregate);
+      jest.spyOn(loginUseCase, 'execute').mockResolvedValue({
+        user: personnelUserAggregate,
+        accessToken: 'access_token',
+      });
+
+      const result = await authController.register(registerDto);
+
+      expect(authController['registerPersonnelUseCase'].execute).toHaveBeenCalled();
+      expect(registerClientUseCase.execute).not.toHaveBeenCalled();
+      expect(sendTransactionalEmailUseCase.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: expect.objectContaining({ email: 'jane.doe@example.com' }),
+          subject: 'Verify your email address',
+        }),
+      );
+      expect(loginUseCase.execute).not.toHaveBeenCalled();
+      expect(result).toEqual(
+        expect.objectContaining({
+          message: 'Account created. Verify your email before logging in.',
+        }),
+      );
+      expect(result.user.roles).toContain(Role.PERSONNEL);
     });
   });
 
@@ -111,40 +174,21 @@ describe('AuthController', () => {
         firstname: 'John',
         lastname: 'Doe',
         phoneNumber: '+33612345678',
+        isActive: false,
         email: 'john.doe@example.com',
         roles: [Role.CLIENT],
       });
     });
   });
 
-  describe('registerPersonnel', () => {
-    it('should register a personnel and return auth response', async () => {
-      const registerDto: RegisterDto = {
-        firstname: 'Jane',
-        lastname: 'Doe',
-        phoneNumber: '+33687654321',
-        email: 'jane.doe@example.com',
-        password: 'password123',
-      };
-      const personnelUserAggregate = new UserAggregate({
-        ...mockUserAggregate.getProperties(),
-        roles: [Role.PERSONNEL]
-      });
+  describe('verifyEmail', () => {
+    it('should verify a user email token', async () => {
+      jest.spyOn(verifyEmailUseCase, 'execute').mockResolvedValue(undefined);
 
-      jest.spyOn(authController['registerPersonnelUseCase'], 'execute').mockResolvedValue(personnelUserAggregate);
-      jest.spyOn(loginUseCase, 'execute').mockResolvedValue({
-        user: personnelUserAggregate,
-        accessToken: 'access_token',
-        refreshToken: mockRefreshToken,
-      });
+      const result = await authController.verifyEmail({ token: 'verify-token' });
 
-      const result = await authController.registerPersonnel(registerDto);
-
-      expect(authController['registerPersonnelUseCase'].execute).toHaveBeenCalled();
-      expect(loginUseCase.execute).toHaveBeenCalled();
-      expect(result).toHaveProperty('accessToken');
-      expect(result).toHaveProperty('refreshToken');
-      expect(result.user.roles).toContain(Role.PERSONNEL);
+      expect(verifyEmailUseCase.execute).toHaveBeenCalledWith('verify-token');
+      expect(result).toEqual({ message: 'Email verified successfully.' });
     });
   });
 
@@ -156,43 +200,12 @@ describe('AuthController', () => {
       jest.spyOn(loginUseCase, 'execute').mockResolvedValue({
         user: mockUserAggregate,
         accessToken: 'access_token',
-        refreshToken: mockRefreshToken,
       });
 
       const result = await authController.login(req, loginDto);
 
       expect(loginUseCase.execute).toHaveBeenCalled();
       expect(result).toHaveProperty('accessToken');
-      expect(result).toHaveProperty('refreshToken');
-    });
-  });
-
-  describe('logout', () => {
-    it('should logout a user', async () => {
-      const logoutUseCase = authController['logoutUseCase'];
-      jest.spyOn(logoutUseCase, 'execute').mockResolvedValue(undefined);
-      const refreshTokenDto = { refreshToken: 'refresh_token_id' };
-      
-      await authController.logout(refreshTokenDto);
-
-      expect(logoutUseCase.execute).toHaveBeenCalledWith({ refreshTokenId: 'refresh_token_id' });
-    });
-  });
-
-  describe('refresh', () => {
-    it('should refresh the token and return auth response', async () => {
-      const refreshTokenUseCase = authController['refreshTokenUseCase'];
-      jest.spyOn(refreshTokenUseCase, 'execute').mockResolvedValue({
-        user: mockUserAggregate,
-        accessToken: 'new_access_token',
-        refreshToken: mockRefreshToken,
-      });
-      const refreshTokenDto = { refreshToken: 'refresh_token_id' };
-
-      const result = await authController.refresh(refreshTokenDto);
-      
-      expect(refreshTokenUseCase.execute).toHaveBeenCalledWith({ refreshTokenId: 'refresh_token_id' });
-      expect(result.accessToken).toBe('new_access_token');
     });
   });
 

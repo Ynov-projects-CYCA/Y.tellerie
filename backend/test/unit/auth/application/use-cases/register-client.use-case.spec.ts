@@ -17,6 +17,7 @@ describe('RegisterClientUseCase', () => {
       findByEmail: jest.fn(),
       save: jest.fn(),
       findById: jest.fn(),
+      findByVerifyEmailToken: jest.fn(),
     };
     mockPasswordHasher = {
       hash: jest.fn().mockResolvedValue('hashed_password'),
@@ -53,6 +54,9 @@ describe('RegisterClientUseCase', () => {
       firstname: 'Existing',
       lastname: 'Client',
       phoneNumber: '+33612345678',
+      isActive: false,
+      verifyEmailToken: null,
+      resetPasswordToken: null,
       email: email,
       passwordHash: 'hashed_password',
       roles: [Role.CLIENT],

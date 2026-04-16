@@ -23,6 +23,10 @@ describe('UserFactory', () => {
 
     const userProperties = user.getProperties();
     expect(userProperties.roles).toEqual([Role.CLIENT]);
+    expect(userProperties.isActive).toBe(false);
+    expect(userProperties.verifyEmailToken).toEqual(expect.any(String));
+    expect(userProperties.verifyEmailToken).not.toHaveLength(0);
+    expect(userProperties.resetPasswordToken).toBeNull();
     expect(mockPasswordHasher.hash).toHaveBeenCalledWith('password123');
   });
 
@@ -41,6 +45,10 @@ describe('UserFactory', () => {
 
     const userProperties = user.getProperties();
     expect(userProperties.roles).toEqual([Role.PERSONNEL]);
+    expect(userProperties.isActive).toBe(false);
+    expect(userProperties.verifyEmailToken).toEqual(expect.any(String));
+    expect(userProperties.verifyEmailToken).not.toHaveLength(0);
+    expect(userProperties.resetPasswordToken).toBeNull();
     expect(mockPasswordHasher.hash).toHaveBeenCalledWith('password456');
   });
 });

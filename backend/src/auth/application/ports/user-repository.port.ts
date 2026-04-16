@@ -8,4 +8,5 @@ export interface IUserRepository {
   save(user: UserAggregate): Promise<void>;
   findById(id: UserId): Promise<UserAggregate | null>;
   findByEmail(email: Email): Promise<UserAggregate | null>;
+  findByVerifyEmailToken(token: string): Promise<UserAggregate | null>;
 }
