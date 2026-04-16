@@ -7,6 +7,7 @@ export interface UserProperties {
   firstname: string;
   lastname: string;
   email: Email;
+  phone: string;
   passwordHash: string;
   roles: Role[];
   createdAt: Date;
@@ -18,6 +19,7 @@ export class User {
   private firstname: string;
   private lastname: string;
   private email: Email;
+  private phone: string;
   private passwordHash: string;
   private roles: Role[];
   private readonly createdAt: Date;
@@ -33,6 +35,7 @@ export class User {
       firstname: this.firstname,
       lastname: this.lastname,
       email: this.email,
+      phone: this.phone,
       passwordHash: this.passwordHash,
       roles: this.roles,
       createdAt: this.createdAt,

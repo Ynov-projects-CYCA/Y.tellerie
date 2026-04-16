@@ -12,6 +12,21 @@
       <a routerLink="/integration" routerLinkActive="is-active">
         Contrat API
       </a>
+      @if (!authSessionService.isAuthenticated()) {
+        <a routerLink="/connexion" routerLinkActive="is-active">
+          Connexion
+        </a>
+      }
+      @if (authSessionService.hasRole('client')) {
+        <a routerLink="/client" routerLinkActive="is-active">
+          Espace client
+        </a>
+      }
+      @if (authSessionService.hasRole('personnel')) {
+        <a routerLink="/staff" routerLinkActive="is-active">
+          Espace personnel
+        </a>
+      }
     </nav>
   </header>
 
@@ -21,6 +36,12 @@
 
   <footer class="shell__footer">
     <span>API cible: {{ environment.apiBaseUrl }}</span>
-    <span>Token bearer prêt via intercepteur HTTP.</span>
+    <span>
+      @if (authSessionService.currentUser(); as user) {
+        Session active: {{ user.firstname }} {{ user.lastname }}
+      } @else {
+        Session auth prete via intercepteur HTTP.
+      }
+    </span>
   </footer>
 </div>

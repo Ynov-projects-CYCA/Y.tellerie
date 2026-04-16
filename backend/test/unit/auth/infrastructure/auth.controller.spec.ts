@@ -1,30 +1,36 @@
+import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from '../../../../src/auth/infrastructure/auth.controller';
-import { RegisterClientUseCase } from '../../../../src/auth/application/use-cases/register-client.use-case';
-import { RegisterPersonnelUseCase } from '../../../../src/auth/application/use-cases/register-personnel.use-case';
+import { RegisterUseCase, UserAlreadyExistsError } from '../../../../src/auth/application/use-cases/register.use-case';
 import { LoginUseCase } from '../../../../src/auth/application/use-cases/login.use-case';
 import { RefreshTokenUseCase } from '../../../../src/auth/application/use-cases/refresh-token.use-case';
 import { ChangePasswordUseCase } from '../../../../src/auth/application/use-cases/change-password.use-case';
 import { LogoutUseCase } from '../../../../src/auth/application/use-cases/logout.use-case';
+import { ForgotPasswordUseCase } from '../../../../src/auth/application/use-cases/forgot-password.use-case';
+import {
+  InvalidPasswordResetTokenError,
+  ResetPasswordUseCase,
+} from '../../../../src/auth/application/use-cases/reset-password.use-case';
 import { RegisterDto } from '../../../../src/auth/application/dtos/register.dto';
 import { UserAggregate } from '../../../../src/auth/domain/user.aggregate';
 import { Role } from '../../../../src/auth/domain/role.vo';
 import { Email } from '../../../../src/auth/domain/email.vo';
 import { UserId } from '../../../../src/auth/domain/user-id.vo';
 import { RefreshToken } from '../../../../src/auth/domain/refresh-token.entity';
-import { HttpStatus } from '@nestjs/common';
-import { Password } from '../../../../src/auth/domain/password.vo';
 
 describe('AuthController', () => {
   let authController: AuthController;
-  let registerClientUseCase: RegisterClientUseCase;
+  let registerUseCase: RegisterUseCase;
   let loginUseCase: LoginUseCase;
+  let forgotPasswordUseCase: ForgotPasswordUseCase;
+  let resetPasswordUseCase: ResetPasswordUseCase;
 
   const mockUserAggregate = new UserAggregate({
     id: UserId.generate(),
     firstname: 'John',
     lastname: 'Doe',
     email: Email.from('john.doe@example.com'),
+    phone: '+33123456789',
     passwordHash: 'hashed_password',
     roles: [Role.CLIENT],
     createdAt: new Date(),
@@ -43,11 +49,7 @@ describe('AuthController', () => {
       controllers: [AuthController],
       providers: [
         {
-          provide: RegisterClientUseCase,
-          useValue: { execute: jest.fn() },
-        },
-        {
-          provide: RegisterPersonnelUseCase,
+          provide: RegisterUseCase,
           useValue: { execute: jest.fn() },
         },
         {
@@ -66,67 +68,65 @@ describe('AuthController', () => {
           provide: LogoutUseCase,
           useValue: { execute: jest.fn() },
         },
+        {
+          provide: ForgotPasswordUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: ResetPasswordUseCase,
+          useValue: { execute: jest.fn() },
+        },
       ],
     }).compile();
 
     authController = module.get<AuthController>(AuthController);
-    registerClientUseCase = module.get<RegisterClientUseCase>(RegisterClientUseCase);
+    registerUseCase = module.get<RegisterUseCase>(RegisterUseCase);
     loginUseCase = module.get<LoginUseCase>(LoginUseCase);
+    forgotPasswordUseCase = module.get<ForgotPasswordUseCase>(ForgotPasswordUseCase);
+    resetPasswordUseCase = module.get<ResetPasswordUseCase>(ResetPasswordUseCase);
   });
 
-  describe('registerClient', () => {
-    it('should register a client and return auth response', async () => {
+  describe('register', () => {
+    it('should register a user and return auth response', async () => {
       const registerDto: RegisterDto = {
         firstname: 'John',
         lastname: 'Doe',
         email: 'john.doe@example.com',
+        phone: '+33123456789',
         password: 'password123',
+        role: Role.CLIENT,
       };
 
-      jest.spyOn(registerClientUseCase, 'execute').mockResolvedValue(mockUserAggregate);
+      jest.spyOn(registerUseCase, 'execute').mockResolvedValue(mockUserAggregate);
       jest.spyOn(loginUseCase, 'execute').mockResolvedValue({
         user: mockUserAggregate,
         accessToken: 'access_token',
         refreshToken: mockRefreshToken,
       });
-      
-      const result = await authController.registerClient(registerDto);
 
-      expect(registerClientUseCase.execute).toHaveBeenCalled();
+      const result = await authController.register(registerDto);
+
+      expect(registerUseCase.execute).toHaveBeenCalled();
       expect(loginUseCase.execute).toHaveBeenCalled();
-      expect(result).toHaveProperty('accessToken');
-      expect(result).toHaveProperty('refreshToken');
-      expect(result.user.email).toBe(registerDto.email);
+      expect(result.user.phone).toBe(registerDto.phone);
+      expect(result.user.roles).toContain(Role.CLIENT);
     });
-  });
 
-  describe('registerPersonnel', () => {
-    it('should register a personnel and return auth response', async () => {
-      const registerDto: RegisterDto = {
-        firstname: 'Jane',
-        lastname: 'Doe',
-        email: 'jane.doe@example.com',
-        password: 'password123',
-      };
-      const personnelUserAggregate = new UserAggregate({
-        ...mockUserAggregate.getProperties(),
-        roles: [Role.PERSONNEL]
-      });
+    it('should translate duplicate emails to ConflictException', async () => {
+      jest
+        .spyOn(registerUseCase, 'execute')
+        .mockRejectedValue(new UserAlreadyExistsError('john.doe@example.com'));
 
-      jest.spyOn(authController['registerPersonnelUseCase'], 'execute').mockResolvedValue(personnelUserAggregate);
-      jest.spyOn(loginUseCase, 'execute').mockResolvedValue({
-        user: personnelUserAggregate,
-        accessToken: 'access_token',
-        refreshToken: mockRefreshToken,
-      });
-
-      const result = await authController.registerPersonnel(registerDto);
-
-      expect(authController['registerPersonnelUseCase'].execute).toHaveBeenCalled();
-      expect(loginUseCase.execute).toHaveBeenCalled();
-      expect(result).toHaveProperty('accessToken');
-      expect(result).toHaveProperty('refreshToken');
-      expect(result.user.roles).toContain(Role.PERSONNEL);
+      await expect(
+        authController.register({
+          firstname: 'John',
+          lastname: 'Doe',
+          email: 'john.doe@example.com',
+          phone: '+33123456789',
+          password: 'password123',
+          role: Role.CLIENT,
+        }),
+      ).rejects.toBeInstanceOf(ConflictException);
     });
   });
 
@@ -144,50 +144,43 @@ describe('AuthController', () => {
       const result = await authController.login(req, loginDto);
 
       expect(loginUseCase.execute).toHaveBeenCalled();
-      expect(result).toHaveProperty('accessToken');
-      expect(result).toHaveProperty('refreshToken');
+      expect(result.user.phone).toBe(mockUserAggregate.getProperties().phone);
     });
   });
 
-  describe('logout', () => {
-    it('should logout a user', async () => {
-      const logoutUseCase = authController['logoutUseCase'];
-      jest.spyOn(logoutUseCase, 'execute').mockResolvedValue(undefined);
-      const refreshTokenDto = { refreshToken: 'refresh_token_id' };
-      
-      await authController.logout(refreshTokenDto);
+  describe('forgotPassword', () => {
+    it('should delegate the request even when the user may not exist', async () => {
+      jest.spyOn(forgotPasswordUseCase, 'execute').mockResolvedValue(undefined);
 
-      expect(logoutUseCase.execute).toHaveBeenCalledWith({ refreshTokenId: 'refresh_token_id' });
+      await authController.forgotPassword({ email: 'john.doe@example.com' });
+
+      expect(forgotPasswordUseCase.execute).toHaveBeenCalled();
     });
   });
 
-  describe('refresh', () => {
-    it('should refresh the token and return auth response', async () => {
-      const refreshTokenUseCase = authController['refreshTokenUseCase'];
-      jest.spyOn(refreshTokenUseCase, 'execute').mockResolvedValue({
-        user: mockUserAggregate,
-        accessToken: 'new_access_token',
-        refreshToken: mockRefreshToken,
+  describe('resetPassword', () => {
+    it('should reset a password with a valid token', async () => {
+      jest.spyOn(resetPasswordUseCase, 'execute').mockResolvedValue(undefined);
+
+      await authController.resetPassword({
+        token: 'valid-token',
+        password: 'newPassword123',
       });
-      const refreshTokenDto = { refreshToken: 'refresh_token_id' };
 
-      const result = await authController.refresh(refreshTokenDto);
-      
-      expect(refreshTokenUseCase.execute).toHaveBeenCalledWith({ refreshTokenId: 'refresh_token_id' });
-      expect(result.accessToken).toBe('new_access_token');
+      expect(resetPasswordUseCase.execute).toHaveBeenCalled();
     });
-  });
 
-  describe('changePassword', () => {
-    it('should change the password', async () => {
-      const changePasswordUseCase = authController['changePasswordUseCase'];
-      jest.spyOn(changePasswordUseCase, 'execute').mockResolvedValue(undefined);
-      const req = { user: mockUserAggregate };
-      const changePasswordDto = { oldPassword: 'oldPassword123', newPassword: 'newPassword123' };
+    it('should translate invalid reset tokens to UnauthorizedException', async () => {
+      jest
+        .spyOn(resetPasswordUseCase, 'execute')
+        .mockRejectedValue(new InvalidPasswordResetTokenError());
 
-      await authController.changePassword(req, changePasswordDto);
-
-      expect(changePasswordUseCase.execute).toHaveBeenCalled();
+      await expect(
+        authController.resetPassword({
+          token: 'expired-token',
+          password: 'newPassword123',
+        }),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
     });
   });
 });

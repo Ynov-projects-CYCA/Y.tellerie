@@ -19,6 +19,12 @@ export class UserResponse {
   })
   email: string;
 
+  @ApiProperty({
+    description: 'The phone number of the user',
+    example: '+33123456789',
+  })
+  phone: string;
+
   @ApiProperty({ description: 'The roles assigned to the user', example: ['client'] })
   roles: string[];
 }
