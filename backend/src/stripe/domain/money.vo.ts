@@ -6,10 +6,10 @@ export class Money {
 
   public static create(amount: number, currency: string): Money {
     if (amount <= 0) {
-      throw new Error('Amount must be greater than 0');
+      throw new Error('Le montant doit etre superieur a 0');
     }
     if (!currency) {
-      throw new Error('Currency is required');
+      throw new Error('La devise est requise');
     }
     return new Money(amount, currency.toLowerCase());
   }

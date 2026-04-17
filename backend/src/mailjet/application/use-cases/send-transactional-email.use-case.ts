@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { EmailMessage } from '../../domain/email-message.entity';
+import { EmailMessage } from '@/mailjet/domain/email-message.entity';
 import {
   IMailProvider,
   IMailProvider as IMailProviderSymbol,
-} from '../ports/mail-provider.port';
+} from '@/mailjet/application/ports/mail-provider.port';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()

@@ -152,7 +152,7 @@ describe('UpdateRoomUseCase', () => {
       const dto: UpdateRoomDto = { capacity: 15 }; // Invalid capacity
 
       await expect(useCase.execute(room.getId(), dto)).rejects.toThrow(
-        'Capacity must be between 1 and 10',
+        'La capacite doit etre comprise entre 1 et 10',
       );
       expect(mockRepository.save).not.toHaveBeenCalled();
     });

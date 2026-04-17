@@ -2,17 +2,17 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import {
   ROOM_REPOSITORY,
   RoomRepositoryPort,
-} from '../../../rooms/application/ports/room-repository.port';
-import { Room } from '../../../rooms/domain/room.entity';
+} from '@/rooms/application/ports/room-repository.port';
+import { Room } from '@/rooms/domain/room.entity';
 import {
   BOOKING_REPOSITORY,
   BookingRepositoryPort,
-} from '../ports/booking-repository.port';
-import { SearchAvailabilityQueryDto } from '../dtos/search-availability-query.dto';
+} from '@/bookings/application/ports/booking-repository.port';
+import { SearchAvailabilityQueryDto } from '@/bookings/application/dtos/search-availability-query.dto';
 import {
   calculateNights,
   parseBookingDate,
-} from '../../domain/booking-date.utils';
+} from '@/bookings/domain/booking-date.utils';
 
 export interface AvailableRoomResult {
   room: Room;
@@ -43,7 +43,7 @@ export class SearchAvailabilityUseCase {
       checkOutDate = parseBookingDate(query.checkOutDate);
     } catch (error) {
       throw new BadRequestException(
-        error instanceof Error ? error.message : 'Invalid booking dates',
+        error instanceof Error ? error.message : 'Dates de reservation invalides',
       );
     }
 
@@ -52,7 +52,7 @@ export class SearchAvailabilityUseCase {
       nights = calculateNights(checkInDate, checkOutDate);
     } catch (error) {
       throw new BadRequestException(
-        error instanceof Error ? error.message : 'Invalid booking dates',
+        error instanceof Error ? error.message : 'Dates de reservation invalides',
       );
     }
 

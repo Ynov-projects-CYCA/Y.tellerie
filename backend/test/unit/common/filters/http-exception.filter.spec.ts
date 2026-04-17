@@ -32,7 +32,7 @@ describe('AllExceptionsFilter', () => {
         path: '/auth/register/personnel',
         error: expect.objectContaining({
           message:
-            'Invalid JSON body. Check for unescaped line breaks, tabs, or quotes in string values.',
+            'Corps JSON invalide. Verifiez les retours a la ligne, tabulations ou guillemets non echappes dans les chaines.',
           details:
             'Bad control character in string literal in JSON at position 80',
         }),

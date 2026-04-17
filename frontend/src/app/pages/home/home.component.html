@@ -20,7 +20,7 @@
       </p>
 
       <div class="hero-actions">
-        <a routerLink="/login" appButton variant="primary" size="lg">
+        <a routerLink="/connexion" appButton variant="primary" size="lg">
           Essayer gratuitement
         </a>
         <button appButton variant="outline" size="lg" (click)="scrollTo('#features')">
@@ -29,7 +29,6 @@
       </div>
     </div>
   </section>
-
 
   <!-- Features Section -->
   <section class="features-section" id="features">
@@ -44,7 +43,7 @@
       <div class="features-grid">
         <app-card class="feature-card" *ngFor="let feature of features; let i = index" [style.--delay]="i * 80 + 'ms'">
           <div class="feature-icon-wrapper">
-             <ng-container *ngComponentOutlet="feature.icon"></ng-container>
+            <span class="feature-icon" aria-hidden="true">{{ feature.icon }}</span>
           </div>
           <h3 class="feature-title">{{ feature.title }}</h3>
           <p class="feature-description">{{ feature.description }}</p>
@@ -52,7 +51,6 @@
       </div>
     </div>
   </section>
-
 
   <!-- Benefits Section -->
   <section class="benefits-section" id="benefits">
@@ -100,7 +98,7 @@
         Rejoignez des centaines d'hôtels qui nous font confiance
       </p>
       <div class="cta-actions">
-        <a routerLink="/login" appButton variant="white" size="lg">Commencer gratuitement</a>
+        <a routerLink="/connexion" appButton variant="white" size="lg">Commencer gratuitement</a>
         <a href="mailto:contact@ytellerie.com" appButton variant="white-outline" size="lg">Contactez-nous</a>
       </div>
     </div>

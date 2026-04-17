@@ -1,5 +1,5 @@
 import { RegisterPersonnelUseCase } from '../../../../../src/auth/application/use-cases/register-personnel.use-case';
-import { UserAlreadyExistsError } from '../../../../../src/auth/application/use-cases/register-client.use-case';
+import { UserAlreadyExistsError } from '../../../../../src/auth/application/use-cases/register.use-case';
 import { IUserRepository } from '../../../../../src/auth/application/ports/user-repository.port';
 import { IPasswordHasher } from '../../../../../src/auth/application/ports/password-hasher.port';
 import { Email } from '../../../../../src/auth/domain/email.vo';
@@ -18,6 +18,7 @@ describe('RegisterPersonnelUseCase', () => {
       findByEmail: jest.fn(),
       save: jest.fn(),
       findById: jest.fn(),
+      findByVerifyEmailToken: jest.fn(),
     };
     mockPasswordHasher = {
       hash: jest.fn().mockResolvedValue('hashed_password'),
@@ -35,6 +36,7 @@ describe('RegisterPersonnelUseCase', () => {
       lastname: 'Personnel',
       phoneNumber: '+33612345678',
       email: email,
+      phone: '+33111111111',
       rawPassword: 'password123',
     };
 
@@ -54,7 +56,11 @@ describe('RegisterPersonnelUseCase', () => {
       firstname: 'Existing',
       lastname: 'Personnel',
       phoneNumber: '+33612345678',
+      isActive: false,
+      verifyEmailToken: null,
+      resetPasswordToken: null,
       email: email,
+      phone: '+33222222222',
       passwordHash: 'hashed_password',
       roles: [Role.PERSONNEL],
       createdAt: new Date(),
@@ -68,6 +74,7 @@ describe('RegisterPersonnelUseCase', () => {
       lastname: 'Personnel',
       phoneNumber: '+33612345678',
       email: email,
+      phone: '+33111111111',
       rawPassword: 'password123',
     };
 

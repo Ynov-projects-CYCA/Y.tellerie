@@ -2,6 +2,10 @@ import { Component, HostListener, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { finalize } from 'rxjs';
+import { AuthApiService } from '../../../core/auth/auth-api.service';
+import { AuthSessionService } from '../../../core/auth/auth-session.service';
+import { ButtonComponent } from '../../../shared/components/button.component';
 import {
   LucideHotel,
   LucideMenu,
@@ -15,7 +19,6 @@ import {
   LucideShield,
   LucideHome,
 } from '@lucide/angular';
-import { ButtonComponent } from '../../../shared/components/button.component';
 
 @Component({
   selector: 'app-navbar',
@@ -40,7 +43,10 @@ import { ButtonComponent } from '../../../shared/components/button.component';
   styleUrls: ['./navbar.component.scss'],
 })
 export class NavbarComponent implements OnInit {
-  private router = inject(Router);
+  private readonly authApiService = inject(AuthApiService);
+  protected readonly authSessionService = inject(AuthSessionService);
+  private readonly router = inject(Router);
+  protected readonly isLoggingOut = signal(false);
 
   isScrolled = false;
   isMobileMenuOpen = false;
@@ -109,17 +115,43 @@ export class NavbarComponent implements OnInit {
     this.isProfileMenuOpen = !this.isProfileMenuOpen;
   }
 
+  closeMobileMenu(): void {
+    this.isMobileMenuOpen = false;
+  }
+
   scrollTo(anchor: string): void {
     if (this.currentMode() !== 'public') {
       this.router.navigate(['/'], { fragment: anchor.replace('#', '') });
       return;
     }
+    this.closeMobileMenu();
     const el = document.querySelector(anchor);
     el?.scrollIntoView({ behavior: 'smooth' });
-    this.isMobileMenuOpen = false;
   }
 
-  logout() {
-    this.router.navigate(['/']);
+  protected logout(): void {
+    this.closeMobileMenu();
+
+    const session = this.authSessionService.currentSession();
+    if (!session) {
+      this.authSessionService.clearSession();
+      void this.router.navigateByUrl('/connexion');
+      return;
+    }
+
+    this.isLoggingOut.set(true);
+
+    this.authApiService
+      .logout(session.refreshToken)
+      .pipe(
+        finalize(() => {
+          this.isLoggingOut.set(false);
+          this.authSessionService.clearSession();
+          void this.router.navigateByUrl('/connexion');
+        }),
+      )
+      .subscribe({
+        error: () => undefined,
+      });
   }
 }

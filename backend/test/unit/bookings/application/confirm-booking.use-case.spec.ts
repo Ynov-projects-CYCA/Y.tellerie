@@ -71,7 +71,7 @@ describe('ConfirmBookingUseCase', () => {
 
     expect(bookingRepository.save).toHaveBeenCalledTimes(1);
     expect(result.booking.getRoomId()).toBe(room.getId());
-    expect(result.booking.getStatus().getValue()).toBe('CONFIRMED');
+    expect(result.booking.getStatus().getValue()).toBe('PENDING_PAYMENT');
     expect(result.booking.getTotalPrice()).toBe(500);
   });
 });

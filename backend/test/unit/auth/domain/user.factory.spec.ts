@@ -16,6 +16,7 @@ describe('UserFactory', () => {
         lastname: 'Doe',
         phoneNumber: '+33612345678',
         email: Email.from('john.doe@example.com'),
+        phone: '+33123456789',
         rawPassword: 'password123',
       },
       mockPasswordHasher,
@@ -23,6 +24,11 @@ describe('UserFactory', () => {
 
     const userProperties = user.getProperties();
     expect(userProperties.roles).toEqual([Role.CLIENT]);
+    expect(userProperties.isActive).toBe(false);
+    expect(userProperties.verifyEmailToken).toEqual(expect.any(String));
+    expect(userProperties.verifyEmailToken).not.toHaveLength(0);
+    expect(userProperties.resetPasswordToken).toBeNull();
+    expect(userProperties.phone).toBe('+33123456789');
     expect(mockPasswordHasher.hash).toHaveBeenCalledWith('password123');
   });
 
@@ -33,6 +39,7 @@ describe('UserFactory', () => {
         lastname: 'Doe',
         phoneNumber: '+33687654321',
         email: Email.from('jane.doe@example.com'),
+        phone: '+33987654321',
         rawPassword: 'password456',
       },
       mockPasswordHasher,
@@ -41,6 +48,10 @@ describe('UserFactory', () => {
 
     const userProperties = user.getProperties();
     expect(userProperties.roles).toEqual([Role.PERSONNEL]);
+    expect(userProperties.isActive).toBe(false);
+    expect(userProperties.verifyEmailToken).toEqual(expect.any(String));
+    expect(userProperties.verifyEmailToken).not.toHaveLength(0);
+    expect(userProperties.resetPasswordToken).toBeNull();
     expect(mockPasswordHasher.hash).toHaveBeenCalledWith('password456');
   });
 });

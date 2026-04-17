@@ -8,17 +8,17 @@ import {
 import {
   ROOM_REPOSITORY,
   RoomRepositoryPort,
-} from '../../../rooms/application/ports/room-repository.port';
-import { Room } from '../../../rooms/domain/room.entity';
-import { BookingSummaryDto } from '../dtos/booking-summary.dto';
+} from '@/rooms/application/ports/room-repository.port';
+import { Room } from '@/rooms/domain/room.entity';
+import { BookingSummaryDto } from '@/bookings/application/dtos/booking-summary.dto';
 import {
   BOOKING_REPOSITORY,
   BookingRepositoryPort,
-} from '../ports/booking-repository.port';
+} from '@/bookings/application/ports/booking-repository.port';
 import {
   calculateNights,
   parseBookingDate,
-} from '../../domain/booking-date.utils';
+} from '@/bookings/domain/booking-date.utils';
 
 export interface BookingSummaryResult {
   room: Room;
@@ -45,12 +45,14 @@ export class GetBookingSummaryUseCase {
   async execute(dto: BookingSummaryDto): Promise<BookingSummaryResult> {
     const room = await this.roomRepository.findById(dto.roomId);
     if (!room) {
-      throw new NotFoundException(`Room with id ${dto.roomId} not found`);
+      throw new NotFoundException(
+        `Chambre introuvable pour l'identifiant ${dto.roomId}`,
+      );
     }
 
     if (!room.isAvailable()) {
       throw new ConflictException(
-        `Room with id ${dto.roomId} is not available for booking`,
+        `La chambre ${dto.roomId} n'est pas disponible pour une reservation`,
       );
     }
 
@@ -64,7 +66,7 @@ export class GetBookingSummaryUseCase {
       nights = calculateNights(checkInDate, checkOutDate);
     } catch (error) {
       throw new BadRequestException(
-        error instanceof Error ? error.message : 'Invalid booking dates',
+        error instanceof Error ? error.message : 'Dates de reservation invalides',
       );
     }
 
@@ -76,7 +78,7 @@ export class GetBookingSummaryUseCase {
 
     if (conflicts.length > 0) {
       throw new ConflictException(
-        `Room with id ${dto.roomId} is already booked for these dates`,
+        `La chambre ${dto.roomId} est deja reservee pour ces dates`,
       );
     }
 

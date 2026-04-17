@@ -3,73 +3,70 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { IPasswordHasher } from './application/ports/password-hasher.port';
-import { BcryptPasswordHasher } from './infrastructure/adapters/bcrypt-password-hasher.adapter';
+import { MailjetModule } from '@/mailjet/mailjet.module';
 import {
-  IRefreshTokenRepository,
-  IRefreshTokenRepository as IRefreshTokenRepositorySymbol,
-} from './application/ports/refresh-token-repository.port';
-import { TypeOrmRefreshTokenRepository } from './infrastructure/adapters/typeorm-refresh-token-repository.adapter';
-import {
+  ChangePasswordUseCase,
+  ForgotPasswordUseCase,
+  IPasswordHasher,
+  IPasswordHasher as IPasswordHasherSymbol,
+  IPasswordResetTokenRepository,
+  IPasswordResetTokenRepository as IPasswordResetTokenRepositorySymbol,
   ITokenGenerator,
   ITokenGenerator as ITokenGeneratorSymbol,
-} from './application/ports/token-generator.port';
-import { JwtTokenGenerator } from './infrastructure/adapters/jwt-token-generator.adapter';
-import {
   IUserRepository,
   IUserRepository as IUserRepositorySymbol,
-} from './application/ports/user-repository.port';
-import { TypeOrmUserRepository } from './infrastructure/adapters/typeorm-user-repository.adapter';
-import { RegisterClientUseCase } from './application/use-cases/register-client.use-case';
-import { RegisterPersonnelUseCase } from './application/use-cases/register-personnel.use-case';
-import { LoginUseCase } from './application/use-cases/login.use-case';
-import { RefreshTokenUseCase } from './application/use-cases/refresh-token.use-case';
-import { ChangePasswordUseCase } from './application/use-cases/change-password.use-case';
-import { LogoutUseCase } from './application/use-cases/logout.use-case';
-import { AuthenticationDomainService } from './domain/authentication.domain-service';
-import { LocalStrategy } from './application/strategies/local.strategy';
-import { JwtStrategy } from './application/strategies/jwt.strategy';
-import { RefreshTokenStrategy } from './application/strategies/refresh-token.strategy';
+  JwtStrategy,
+  LocalStrategy,
+  LoginUseCase,
+  RegisterUseCase,
+  ResetPasswordUseCase,
+  VerifyEmailUseCase,
+} from './index';
+import {
+  BcryptPasswordHasher,
+  JwtTokenGenerator,
+  TypeOrmPasswordResetTokenRepository,
+  TypeOrmUserRepository,
+} from './infrastructure/adapters';
 import { AuthController } from './infrastructure/auth.controller';
+import { PasswordResetTokenSchema } from './infrastructure/persistence/typeorm/password-reset-token.schema';
 import { UserSchema } from './infrastructure/persistence/typeorm/user.schema';
-import { RefreshTokenSchema } from './infrastructure/persistence/typeorm/refresh-token.schema';
+import { AuthenticationDomainService } from './domain';
 
 @Module({
   imports: [
     ConfigModule,
+    MailjetModule,
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
+        secret:
+          configService.get<string>('JWT_SECRET') ??
+          configService.get<string>('app.jwtSecret'),
         signOptions: { expiresIn: '15m' },
       }),
     }),
-    TypeOrmModule.forFeature([UserSchema, RefreshTokenSchema]),
+    TypeOrmModule.forFeature([UserSchema, PasswordResetTokenSchema]),
   ],
   providers: [
-    // Use Cases
-    RegisterClientUseCase,
-    RegisterPersonnelUseCase,
+    RegisterUseCase,
     LoginUseCase,
-    RefreshTokenUseCase,
     ChangePasswordUseCase,
-    LogoutUseCase,
-    // Domain Services
+    VerifyEmailUseCase,
+    ForgotPasswordUseCase,
+    ResetPasswordUseCase,
     AuthenticationDomainService,
-    // Strategies
     LocalStrategy,
     JwtStrategy,
-    RefreshTokenStrategy,
-    // Adapters (mapping ports to implementations)
     {
-      provide: IPasswordHasher,
+      provide: IPasswordHasherSymbol,
       useClass: BcryptPasswordHasher,
     },
     {
-      provide: IRefreshTokenRepositorySymbol,
-      useClass: TypeOrmRefreshTokenRepository,
+      provide: IPasswordResetTokenRepositorySymbol,
+      useClass: TypeOrmPasswordResetTokenRepository,
     },
     {
       provide: ITokenGeneratorSymbol,
@@ -81,5 +78,11 @@ import { RefreshTokenSchema } from './infrastructure/persistence/typeorm/refresh
     },
   ],
   controllers: [AuthController],
+  exports: [
+    IPasswordHasherSymbol,
+    IPasswordResetTokenRepositorySymbol,
+    ITokenGeneratorSymbol,
+    IUserRepositorySymbol,
+  ],
 })
 export class AuthModule {}

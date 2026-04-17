@@ -1,15 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { UserFactory } from '../../domain/user.factory';
-import { Email } from '../../domain/email.vo';
+import { Email, UserAggregate, UserFactory } from '@/auth/domain';
 import {
   IPasswordHasher,
   IPasswordHasher as IPasswordHasherSymbol,
-} from '../ports/password-hasher.port';
+} from '@/auth/application/ports';
 import {
   IUserRepository,
   IUserRepository as IUserRepositorySymbol,
-} from '../ports/user-repository.port';
-import { UserAggregate } from '../../domain/user.aggregate';
+} from '@/auth/application/ports';
 
 export class UserAlreadyExistsError extends Error {
   constructor(email: string) {
@@ -31,6 +29,7 @@ export class RegisterClientUseCase {
     lastname: string;
     phoneNumber: string;
     email: Email;
+    phone: string;
     rawPassword: string;
   }): Promise<UserAggregate> {
     const existingUser = await this.userRepository.findByEmail(command.email);
@@ -44,6 +43,7 @@ export class RegisterClientUseCase {
         lastname: command.lastname,
         phoneNumber: command.phoneNumber,
         email: command.email,
+        phone: command.phone,
         rawPassword: command.rawPassword,
       },
       this.passwordHasher,

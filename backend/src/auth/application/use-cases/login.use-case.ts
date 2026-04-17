@@ -1,35 +1,26 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { Email } from '../../domain/email.vo';
-import { Password } from '../../domain/password.vo';
-import {
-  IPasswordHasher,
-  IPasswordHasher as IPasswordHasherSymbol,
-} from '../ports/password-hasher.port';
+import { ForbiddenException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { AuthenticationDomainService, Email, Password, UserAggregate } from '@/auth/domain';
 import {
   IUserRepository,
   IUserRepository as IUserRepositorySymbol,
-} from '../ports/user-repository.port';
-import {
+  IPasswordHasher,
+  IPasswordHasher as IPasswordHasherSymbol,
   ITokenGenerator,
   ITokenGenerator as ITokenGeneratorSymbol,
-} from '../ports/token-generator.port';
-import { AuthenticationDomainService } from '../../domain/authentication.domain-service';
-import { UserAggregate } from '../../domain/user.aggregate';
-import { RefreshToken } from '../../domain/refresh-token.entity';
-import {
-  IRefreshTokenRepository,
-  IRefreshTokenRepository as IRefreshTokenRepositorySymbol,
-} from '../ports/refresh-token-repository.port';
+} from '@/auth/application/ports';
 
-export class InvalidCredentialsError extends Error {
+
+export class InvalidCredentialsError extends UnauthorizedException {
   constructor() {
-    super('Invalid email or password.');
+    super('Email ou mot de passe invalide.');
   }
 }
 
-export class UserCannotLoginError extends Error {
-  constructor(userId: string) {
-    super(`User with id ${userId} is not allowed to log in.`);
+export class UserCannotLoginError extends ForbiddenException {
+  constructor() {
+    super(
+      "Le compte n'est pas actif. Verifiez votre adresse e-mail avant de vous connecter.",
+    );
   }
 }
 
@@ -42,15 +33,12 @@ export class LoginUseCase {
     private readonly passwordHasher: IPasswordHasher,
     @Inject(ITokenGeneratorSymbol)
     private readonly tokenGenerator: ITokenGenerator,
-    @Inject(IRefreshTokenRepositorySymbol)
-    private readonly refreshTokenRepository: IRefreshTokenRepository,
     private readonly authDomainService: AuthenticationDomainService,
   ) {}
 
   async execute(command: { email: Email; password: Password }): Promise<{
     user: UserAggregate;
     accessToken: string;
-    refreshToken: RefreshToken;
   }> {
     const user = await this.userRepository.findByEmail(command.email);
     if (!user) {
@@ -69,15 +57,10 @@ export class LoginUseCase {
     }
 
     if (!this.authDomainService.canUserLogin(user)) {
-      throw new UserCannotLoginError(userProps.id.toString());
+      throw new UserCannotLoginError();
     }
 
     const accessToken = await this.tokenGenerator.generateAccessToken(user);
-    // TODO: Make token lifetime configurable
-    const refreshToken = RefreshToken.create(userProps.id, 7);
-
-    await this.refreshTokenRepository.save(refreshToken);
-
-    return { user, accessToken, refreshToken };
+    return { user, accessToken };
   }
 }

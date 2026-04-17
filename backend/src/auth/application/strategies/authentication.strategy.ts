@@ -1,4 +1,4 @@
-import { UserAggregate } from '../../domain/user.aggregate';
+import { UserAggregate } from '@/auth/domain';
 
 export const IAuthenticationStrategy = Symbol('IAuthenticationStrategy');
 
@@ -8,7 +8,7 @@ export const IAuthenticationStrategy = Symbol('IAuthenticationStrategy');
  */
 export interface IAuthenticationStrategy {
   /**
-   * The name of the strategy (e.g., 'local', 'jwt', 'refresh-token').
+   * The name of the strategy (e.g., 'local', 'jwt').
    */
   readonly name: string;
 

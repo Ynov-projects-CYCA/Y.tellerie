@@ -26,7 +26,7 @@ export class BookingFactory {
       nights,
       totalPrice,
       currency,
-      BookingStatusVO.confirmed(),
+      BookingStatusVO.pendingPayment(),
       specialRequests,
     );
   }

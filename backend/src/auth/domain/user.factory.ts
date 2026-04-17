@@ -1,12 +1,9 @@
+import { randomUUID } from 'crypto';
 import { UserAggregate } from './user.aggregate';
 import { UserId } from './user-id.vo';
 import { Email } from './email.vo';
-import { Role } from './role.vo';
-import { UserProperties } from './user.entity';
-
-export interface IPasswordHasher {
-  hash(password: string): Promise<string>;
-}
+import { IPasswordHasher } from '@/auth/application/ports';
+import { Role, UserProperties } from '@/shared/model';
 
 export class UserFactory {
   public static async create(
@@ -15,6 +12,7 @@ export class UserFactory {
       lastname: string;
       phoneNumber: string;
       email: Email;
+      phone: string;
       rawPassword: string;
     },
     passwordHasher: IPasswordHasher,
@@ -25,7 +23,11 @@ export class UserFactory {
       firstname: properties.firstname,
       lastname: properties.lastname,
       phoneNumber: properties.phoneNumber,
+      isActive: false,
+      verifyEmailToken: randomUUID(),
+      resetPasswordToken: null,
       email: properties.email,
+      phone: properties.phone,
       passwordHash: await passwordHasher.hash(properties.rawPassword),
       roles: [initialRole],
       createdAt: new Date(),
