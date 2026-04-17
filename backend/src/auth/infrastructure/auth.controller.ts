@@ -22,40 +22,37 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { SendTransactionalEmailUseCase } from '../../mailjet/application/use-cases/send-transactional-email.use-case';
+import { SendTransactionalEmailUseCase } from '@/mailjet/application/use-cases/send-transactional-email.use-case';
 import {
   buildActionEmailHtml,
   buildActionEmailText,
-} from '../../mailjet/application/templates/action-email.template';
+} from '@/mailjet/application/templates/action-email.template';
 import {
   AuthResponseDto,
+  ChangePasswordDto,
+  ForgotPasswordDto,
+  LoginDto,
+  RegisterDto,
   RegisterResponseDto,
+  ResetPasswordDto,
   UserResponse,
-} from '../application/dtos/auth-response.dto';
-import { ChangePasswordDto } from '../application/dtos/change-password.dto';
-import { ForgotPasswordDto } from '../application/dtos/forgot-password.dto';
-import { LoginDto } from '../application/dtos/login.dto';
-import { RegisterDto } from '../application/dtos/register.dto';
-import { ResetPasswordDto } from '../application/dtos/reset-password.dto';
-import { VerifyEmailDto } from '../application/dtos/verify-email.dto';
-import { ChangePasswordUseCase } from '../application/use-cases/change-password.use-case';
-import { ForgotPasswordUseCase } from '../application/use-cases/forgot-password.use-case';
+  VerifyEmailDto,
+} from '@/auth/application/dtos';
 import {
+  ChangePasswordUseCase,
+  ForgotPasswordUseCase,
   InvalidCredentialsError,
   LoginUseCase,
+  RegisterUseCase,
+  UserAlreadyExistsError,
   UserCannotLoginError,
-} from '../application/use-cases/login.use-case';
-import { RegisterUseCase, UserAlreadyExistsError } from '../application/use-cases/register.use-case';
-import {
   InvalidPasswordResetTokenError,
   ResetPasswordUseCase,
-} from '../application/use-cases/reset-password.use-case';
-import { VerifyEmailUseCase } from '../application/use-cases/verify-email.use-case';
-import { Email } from '../domain/email.vo';
-import { Password } from '../domain/password.vo';
-import { Role } from '../domain/role.vo';
-import { UserAggregate } from '../domain/user.aggregate';
-import { InvalidOldPasswordError } from '../application/use-cases/change-password.use-case';
+  VerifyEmailUseCase,
+  InvalidOldPasswordError,
+} from '@/auth/application/use-cases';
+import { Email, Password, UserAggregate } from '@/auth/domain';
+import { Role } from '@/shared/model';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -91,12 +88,12 @@ export class AuthController {
   @ApiOperation({ summary: 'Register a new user' })
   @ApiResponse({
     status: HttpStatus.CREATED,
-    description: 'User successfully registered. Email verification required.',
+    description: "Utilisateur inscrit avec succes. Verification de l'email requise.",
     type: RegisterResponseDto,
   })
   @ApiResponse({
     status: HttpStatus.CONFLICT,
-    description: 'User with this email already exists.',
+    description: 'Un utilisateur avec cet email existe deja.',
   })
   async register(
     @Body() registerDto: RegisterDto,
@@ -115,12 +112,12 @@ export class AuthController {
       await this.sendVerificationEmail(user);
 
       return {
-        message: 'Account created. Verify your email before logging in.',
+        message: 'Compte cree. Verifiez votre adresse e-mail avant de vous connecter.',
         user: this.mapUserResponse(user),
       };
     } catch (error) {
       if (error instanceof UserAlreadyExistsError) {
-        throw new ConflictException('User with this email already exists.');
+        throw new ConflictException('Un utilisateur avec cet email existe deja.');
       }
 
       throw error;
@@ -134,16 +131,16 @@ export class AuthController {
   @ApiBody({ type: LoginDto })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'User successfully logged in.',
+    description: 'Utilisateur connecte avec succes.',
     type: AuthResponseDto,
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
-    description: 'Invalid credentials.',
+    description: 'Identifiants invalides.',
   })
   @ApiResponse({
     status: HttpStatus.FORBIDDEN,
-    description: 'Account is not active.',
+    description: "Le compte n'est pas actif.",
   })
   async login(
     @Request() req: { user: UserAggregate },
@@ -161,12 +158,12 @@ export class AuthController {
       };
     } catch (error) {
       if (error instanceof InvalidCredentialsError) {
-        throw new UnauthorizedException('Invalid email or password.');
+        throw new UnauthorizedException('Email ou mot de passe invalide.');
       }
 
       if (error instanceof UserCannotLoginError) {
         throw new ForbiddenException(
-          'Account is not active. Verify your email before logging in.',
+          "Le compte n'est pas actif. Verifiez votre adresse e-mail avant de vous connecter.",
         );
       }
 
@@ -180,18 +177,18 @@ export class AuthController {
   @ApiBody({ type: VerifyEmailDto })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Email successfully verified.',
+    description: 'Adresse e-mail verifiee avec succes.',
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Verification token is invalid or missing.',
+    description: 'Le jeton de verification est invalide ou manquant.',
   })
   async verifyEmail(
     @Body() verifyEmailDto: VerifyEmailDto,
   ): Promise<{ message: string }> {
     await this.verifyEmailUseCase.execute(verifyEmailDto.token);
 
-    return { message: 'Email verified successfully.' };
+    return { message: 'Adresse e-mail verifiee avec succes.' };
   }
 
   @Post('forgot-password')
@@ -199,7 +196,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Request a password reset link' })
   @ApiResponse({
     status: HttpStatus.NO_CONTENT,
-    description: 'Password reset request accepted.',
+    description: 'Demande de reinitialisation du mot de passe acceptee.',
   })
   async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto): Promise<void> {
     await this.forgotPasswordUseCase.execute({
@@ -212,11 +209,11 @@ export class AuthController {
   @ApiOperation({ summary: 'Reset a password using a token received by email' })
   @ApiResponse({
     status: HttpStatus.NO_CONTENT,
-    description: 'Password successfully reset.',
+    description: 'Mot de passe reinitialise avec succes.',
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
-    description: 'Invalid or expired password reset token.',
+    description: 'Le jeton de reinitialisation du mot de passe est invalide ou expire.',
   })
   async resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<void> {
     try {
@@ -227,7 +224,7 @@ export class AuthController {
     } catch (error) {
       if (error instanceof InvalidPasswordResetTokenError) {
         throw new UnauthorizedException(
-          'Invalid or expired password reset token.',
+          'Le jeton de reinitialisation du mot de passe est invalide ou expire.',
         );
       }
 
@@ -242,11 +239,11 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiResponse({
     status: HttpStatus.NO_CONTENT,
-    description: 'Password successfully changed.',
+    description: 'Mot de passe modifie avec succes.',
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
-    description: 'User not authenticated.',
+    description: 'Utilisateur non authentifie.',
   })
   async modifyPassword(
     @Request() req: { user: UserAggregate },
@@ -260,7 +257,7 @@ export class AuthController {
       });
     } catch (error) {
       if (error instanceof InvalidOldPasswordError) {
-        throw new UnauthorizedException('The old password does not match.');
+        throw new UnauthorizedException("L'ancien mot de passe ne correspond pas.");
       }
 
       throw error;
@@ -284,7 +281,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Log out the current user' })
   @ApiResponse({
     status: HttpStatus.NO_CONTENT,
-    description: 'User successfully logged out.',
+    description: 'Utilisateur deconnecte avec succes.',
   })
   async logout(): Promise<void> {
     return;

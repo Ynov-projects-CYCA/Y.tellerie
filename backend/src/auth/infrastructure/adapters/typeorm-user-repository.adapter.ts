@@ -1,12 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { IUserRepository } from '../../application/ports/user-repository.port';
-import { UserAggregate } from '../../domain/user.aggregate';
-import { UserId } from '../../domain/user-id.vo';
-import { Email } from '../../domain/email.vo';
-import { UserFactory } from '../../domain/user.factory';
-import { UserOrmEntity, UserSchema } from '../persistence/typeorm/user.schema';
+import { IUserRepository } from '@/auth/application/ports';
+import { Email, UserAggregate, UserFactory, UserId } from '@/auth/domain';
+import { UserOrmEntity, UserSchema } from '@/auth/infrastructure/persistence/typeorm/user.schema';
 
 @Injectable()
 export class TypeOrmUserRepository implements IUserRepository {

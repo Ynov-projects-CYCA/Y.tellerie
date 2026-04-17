@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { BookingRepositoryPort } from '../../application/ports/booking-repository.port';
-import { Booking } from '../../domain/booking.entity';
-import { BookingEntity } from '../persistence/booking.entity';
-import { BookingFactory } from '../../domain/booking.factory';
-import { BookingStatusVO } from '../../domain/booking-status.vo';
+import { BookingRepositoryPort } from '@/bookings/application/ports/booking-repository.port';
+import { Booking } from '@/bookings/domain/booking.entity';
+import { BookingEntity } from '@/bookings/infrastructure/persistence/booking.entity';
+import { BookingFactory } from '@/bookings/domain/booking.factory';
+import { BookingStatusVO } from '@/bookings/domain/booking-status.vo';
 
 @Injectable()
 export class TypeOrmBookingRepositoryAdapter implements BookingRepositoryPort {

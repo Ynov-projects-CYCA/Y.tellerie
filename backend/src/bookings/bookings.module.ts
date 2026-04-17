@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { BookingEntity } from './infrastructure/persistence/booking.entity';
 import { BookingsController } from './infrastructure/bookings.controller';
 import { BookingFactory } from './domain/booking.factory';
-import { RoomsModule } from '../rooms/rooms.module';
+import { RoomsModule } from '@/rooms/rooms.module';
 import { BOOKING_REPOSITORY } from './application/ports/booking-repository.port';
 import { TypeOrmBookingRepositoryAdapter } from './infrastructure/adapters/typeorm-booking-repository.adapter';
 import { SearchAvailabilityUseCase } from './application/use-cases/search-availability.use-case';

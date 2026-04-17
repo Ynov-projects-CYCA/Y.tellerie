@@ -54,8 +54,8 @@ export class AuthResponseDto {
 
 export class RegisterResponseDto {
   @ApiProperty({
-    description: 'A message describing the registration outcome',
-    example: 'Account created. Verify your email before logging in.',
+    description: "Message de resultat de l'inscription",
+    example: 'Compte cree. Verifiez votre adresse e-mail avant de vous connecter.',
   })
   message: string;
 

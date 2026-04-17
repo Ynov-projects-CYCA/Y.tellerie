@@ -16,7 +16,9 @@ export class InvalidPasswordError extends Error {
 export class Password {
   @IsString()
   @IsNotEmpty()
-  @MinLength(8, { message: 'Password must be at least 8 characters long' })
+  @MinLength(8, {
+    message: 'Le mot de passe doit contenir au moins 8 caracteres',
+  })
   private readonly value: string;
 
   private constructor(value: string) {

@@ -2,7 +2,7 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
   ROOM_REPOSITORY,
   RoomRepositoryPort,
-} from '../ports/room-repository.port';
+} from '@/rooms/application/ports/room-repository.port';
 
 @Injectable()
 export class DeleteRoomUseCase {
@@ -14,7 +14,7 @@ export class DeleteRoomUseCase {
   async execute(id: string): Promise<void> {
     const room = await this.roomRepository.findById(id);
     if (!room) {
-      throw new NotFoundException(`Room with id ${id} not found`);
+      throw new NotFoundException(`Chambre introuvable pour l'identifiant ${id}`);
     }
 
     await this.roomRepository.delete(id);

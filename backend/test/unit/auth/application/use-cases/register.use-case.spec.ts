@@ -1,14 +1,14 @@
 import {
   RegisterUseCase,
+  Email,
+  IPasswordHasher,
+  IUserRepository,
+  Role,
+  UserAggregate,
   UserAlreadyExistsError,
-} from '../../../../../src/auth/application/use-cases/register.use-case';
-import { IUserRepository } from '../../../../../src/auth/application/ports/user-repository.port';
-import { IPasswordHasher } from '../../../../../src/auth/application/ports/password-hasher.port';
-import { Email } from '../../../../../src/auth/domain/email.vo';
-import { Role } from '../../../../../src/auth/domain/role.vo';
-import { UserAggregate } from '../../../../../src/auth/domain/user.aggregate';
-import { UserProperties } from '../../../../../src/auth/domain/user.entity';
-import { UserId } from '../../../../../src/auth/domain/user-id.vo';
+  UserId,
+  UserProperties,
+} from '../../../../../src/auth';
 
 describe('RegisterUseCase', () => {
   let registerUseCase: RegisterUseCase;

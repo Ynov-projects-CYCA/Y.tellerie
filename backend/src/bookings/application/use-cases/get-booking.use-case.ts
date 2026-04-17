@@ -2,13 +2,13 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
   BOOKING_REPOSITORY,
   BookingRepositoryPort,
-} from '../ports/booking-repository.port';
+} from '@/bookings/application/ports/booking-repository.port';
 import {
   ROOM_REPOSITORY,
   RoomRepositoryPort,
-} from '../../../rooms/application/ports/room-repository.port';
-import { Booking } from '../../domain/booking.entity';
-import { Room } from '../../../rooms/domain/room.entity';
+} from '@/rooms/application/ports/room-repository.port';
+import { Booking } from '@/bookings/domain/booking.entity';
+import { Room } from '@/rooms/domain/room.entity';
 
 export interface GetBookingResult {
   booking: Booking;
@@ -27,13 +27,15 @@ export class GetBookingUseCase {
   async execute(id: string): Promise<GetBookingResult> {
     const booking = await this.bookingRepository.findById(id);
     if (!booking) {
-      throw new NotFoundException(`Booking with id ${id} not found`);
+      throw new NotFoundException(
+        `Reservation introuvable pour l'identifiant ${id}`,
+      );
     }
 
     const room = await this.roomRepository.findById(booking.getRoomId());
     if (!room) {
       throw new NotFoundException(
-        `Room with id ${booking.getRoomId()} not found for booking ${id}`,
+        `Chambre introuvable pour la reservation ${id}`,
       );
     }
 

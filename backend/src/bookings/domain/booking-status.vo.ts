@@ -11,7 +11,7 @@ export class BookingStatusVO {
   static create(status: string): BookingStatusVO {
     const upperStatus = status.toUpperCase();
     if (!Object.values(BookingStatus).includes(upperStatus as BookingStatus)) {
-      throw new Error(`Invalid booking status: ${status}`);
+      throw new Error(`Statut de reservation invalide : ${status}`);
     }
     return new BookingStatusVO(upperStatus as BookingStatus);
   }

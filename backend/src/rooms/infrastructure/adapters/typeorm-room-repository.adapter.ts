@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { RoomRepositoryPort } from '../../application/ports/room-repository.port';
-import { Room } from '../../domain/room.entity';
-import { RoomEntity } from '../persistence/room.entity';
-import { RoomFactory } from '../../domain/room.factory';
-import { RoomTypeVO } from '../../domain/room-type.vo';
-import { PriceVO } from '../../domain/price.vo';
-import { RoomStatusVO } from '../../domain/room-status.vo';
+import { RoomRepositoryPort } from '@/rooms/application/ports/room-repository.port';
+import { Room } from '@/rooms/domain/room.entity';
+import { RoomEntity } from '@/rooms/infrastructure/persistence/room.entity';
+import { RoomFactory } from '@/rooms/domain/room.factory';
+import { RoomTypeVO } from '@/rooms/domain/room-type.vo';
+import { PriceVO } from '@/rooms/domain/price.vo';
+import { RoomStatusVO } from '@/rooms/domain/room-status.vo';
 
 @Injectable()
 export class TypeOrmRoomRepositoryAdapter implements RoomRepositoryPort {

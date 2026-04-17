@@ -9,17 +9,17 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { CreateRoomDto } from '../application/dtos/create-room.dto';
-import { UpdateRoomDto } from '../application/dtos/update-room.dto';
-import { RoomResponseDto } from '../application/dtos/room-response.dto';
-import { CreateRoomUseCase } from '../application/use-cases/create-room.use-case';
-import { UpdateRoomUseCase } from '../application/use-cases/update-room.use-case';
-import { DeleteRoomUseCase } from '../application/use-cases/delete-room.use-case';
-import { GetRoomUseCase } from '../application/use-cases/get-room.use-case';
-import { ListRoomsUseCase } from '../application/use-cases/list-rooms.use-case';
-import { CheckoutRoomUseCase } from '../application/use-cases/checkout-room.use-case';
-import { CleanRoomUseCase } from '../application/use-cases/clean-room.use-case';
-import { CheckinRoomUseCase } from '../application/use-cases/checkin-room.use-case';
+import { CreateRoomDto } from '@/rooms/application/dtos/create-room.dto';
+import { UpdateRoomDto } from '@/rooms/application/dtos/update-room.dto';
+import { RoomResponseDto } from '@/rooms/application/dtos/room-response.dto';
+import { CreateRoomUseCase } from '@/rooms/application/use-cases/create-room.use-case';
+import { UpdateRoomUseCase } from '@/rooms/application/use-cases/update-room.use-case';
+import { DeleteRoomUseCase } from '@/rooms/application/use-cases/delete-room.use-case';
+import { GetRoomUseCase } from '@/rooms/application/use-cases/get-room.use-case';
+import { ListRoomsUseCase } from '@/rooms/application/use-cases/list-rooms.use-case';
+import { CheckoutRoomUseCase } from '@/rooms/application/use-cases/checkout-room.use-case';
+import { CleanRoomUseCase } from '@/rooms/application/use-cases/clean-room.use-case';
+import { CheckinRoomUseCase } from '@/rooms/application/use-cases/checkin-room.use-case';
 
 @Controller('rooms')
 export class RoomsController {

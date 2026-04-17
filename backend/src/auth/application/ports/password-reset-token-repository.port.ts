@@ -1,4 +1,4 @@
-import { PasswordResetToken } from '../../domain/password-reset-token.entity';
+import { PasswordResetToken } from '@/auth/domain';
 
 export const IPasswordResetTokenRepository = Symbol(
   'IPasswordResetTokenRepository',

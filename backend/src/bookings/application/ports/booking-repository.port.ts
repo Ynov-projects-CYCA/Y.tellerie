@@ -1,4 +1,4 @@
-import { Booking } from '../../domain/booking.entity';
+import { Booking } from '@/bookings/domain/booking.entity';
 
 export interface BookingRepositoryPort {
   save(booking: Booking): Promise<Booking>;

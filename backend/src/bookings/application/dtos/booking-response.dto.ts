@@ -1,5 +1,5 @@
-import { BookingStatus } from '../../domain/booking-status.vo';
-import { RoomResponseDto } from '../../../rooms/application/dtos/room-response.dto';
+import { BookingStatus } from '@/bookings/domain/booking-status.vo';
+import { RoomResponseDto } from '@/rooms/application/dtos/room-response.dto';
 
 export class BookingResponseDto {
   id!: string;

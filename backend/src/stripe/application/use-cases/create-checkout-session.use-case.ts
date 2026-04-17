@@ -3,17 +3,17 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   BOOKING_REPOSITORY,
   BookingRepositoryPort,
-} from '../../../bookings/application/ports/booking-repository.port';
-import { Payment } from '../../domain/payment.entity';
-import { Money } from '../../domain/money.vo';
+} from '@/bookings/application/ports/booking-repository.port';
+import { Payment } from '@/stripe/domain/payment.entity';
+import { Money } from '@/stripe/domain/money.vo';
 import {
   IPaymentProvider,
   IPaymentProvider as IPaymentProviderSymbol,
-} from '../ports/payment-provider.port';
+} from '@/stripe/application/ports/payment-provider.port';
 import {
   PAYMENT_REPOSITORY,
   PaymentRepositoryPort,
-} from '../ports/payment-repository.port';
+} from '@/stripe/application/ports/payment-repository.port';
 
 @Injectable()
 export class CreateCheckoutSessionUseCase {
@@ -33,19 +33,19 @@ export class CreateCheckoutSessionUseCase {
     const booking = await this.bookingRepository.findById(command.bookingId);
     if (!booking) {
       throw new NotFoundException(
-        `Booking with id ${command.bookingId} not found`,
+        `Reservation introuvable pour l'identifiant ${command.bookingId}`,
       );
     }
 
     const bookingStatus = booking.getStatus().getValue();
     if (bookingStatus === 'CONFIRMED') {
       throw new ConflictException(
-        `Booking with id ${command.bookingId} is already paid`,
+        `La reservation ${command.bookingId} est deja payee`,
       );
     }
     if (bookingStatus === 'CANCELED') {
       throw new ConflictException(
-        `Booking with id ${command.bookingId} is canceled`,
+        `La reservation ${command.bookingId} est annulee`,
       );
     }
 
@@ -55,7 +55,7 @@ export class CreateCheckoutSessionUseCase {
       amount: Money.create(Math.round(booking.getTotalPrice() * 100), booking.getCurrency()),
       status: 'pending',
       description:
-        command.description ?? `Reservation ${booking.getId()} payment`,
+        command.description ?? `Paiement de la reservation ${booking.getId()}`,
       customerEmail: booking.getGuestEmail(),
     });
 

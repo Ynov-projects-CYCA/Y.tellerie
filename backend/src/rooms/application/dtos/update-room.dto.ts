@@ -1,6 +1,6 @@
 import { IsOptional, IsString, IsNumber, IsEnum, Min, Max } from 'class-validator';
-import { RoomType } from '../../domain/room-type.vo';
-import { RoomStatus } from '../../domain/room-status.vo';
+import { RoomType } from '@/rooms/domain/room-type.vo';
+import { RoomStatus } from '@/rooms/domain/room-status.vo';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateRoomDto {

@@ -1,7 +1,7 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { SendMailDto } from '../application/dtos/send-mail.dto';
-import { SendTransactionalEmailUseCase } from '../application/use-cases/send-transactional-email.use-case';
+import { SendMailDto } from '@/mailjet/application/dtos/send-mail.dto';
+import { SendTransactionalEmailUseCase } from '@/mailjet/application/use-cases/send-transactional-email.use-case';
 
 @ApiTags('Mailjet')
 @Controller('mailjet')

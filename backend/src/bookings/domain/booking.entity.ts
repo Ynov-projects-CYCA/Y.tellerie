@@ -22,22 +22,22 @@ export class Booking {
 
   private validate(): void {
     if (!this.roomId) {
-      throw new Error('Room id is required');
+      throw new Error("L'identifiant de la chambre est requis");
     }
     if (!this.guestFirstName.trim() || !this.guestLastName.trim()) {
-      throw new Error('Guest name is required');
+      throw new Error('Le nom du client est requis');
     }
     if (!this.guestEmail.trim()) {
-      throw new Error('Guest email is required');
+      throw new Error("L'email du client est requis");
     }
     if (this.checkOutDate <= this.checkInDate) {
-      throw new Error('Check-out date must be after check-in date');
+      throw new Error("La date de depart doit etre posterieure a la date d'arrivee");
     }
     if (this.nights < 1) {
-      throw new Error('Booking must be at least one night');
+      throw new Error('La reservation doit etre au minimum dune nuit');
     }
     if (this.totalPrice < 0) {
-      throw new Error('Booking total cannot be negative');
+      throw new Error('Le montant total de la reservation ne peut pas etre negatif');
     }
   }
 

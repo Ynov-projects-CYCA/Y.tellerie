@@ -1,27 +1,27 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { SearchAvailabilityQueryDto } from '../application/dtos/search-availability-query.dto';
+import { SearchAvailabilityQueryDto } from '@/bookings/application/dtos/search-availability-query.dto';
 import {
   AvailableRoomResult,
   SearchAvailabilityUseCase,
-} from '../application/use-cases/search-availability.use-case';
-import { AvailabilityResponseDto } from '../application/dtos/availability-response.dto';
-import { RoomResponseDto } from '../../rooms/application/dtos/room-response.dto';
-import { BookingSummaryDto } from '../application/dtos/booking-summary.dto';
+} from '@/bookings/application/use-cases/search-availability.use-case';
+import { AvailabilityResponseDto } from '@/bookings/application/dtos/availability-response.dto';
+import { RoomResponseDto } from '@/rooms/application/dtos/room-response.dto';
+import { BookingSummaryDto } from '@/bookings/application/dtos/booking-summary.dto';
 import {
   BookingSummaryResult,
   GetBookingSummaryUseCase,
-} from '../application/use-cases/get-booking-summary.use-case';
-import { BookingSummaryResponseDto } from '../application/dtos/booking-summary-response.dto';
+} from '@/bookings/application/use-cases/get-booking-summary.use-case';
+import { BookingSummaryResponseDto } from '@/bookings/application/dtos/booking-summary-response.dto';
 import {
   ConfirmBookingResult,
   ConfirmBookingUseCase,
-} from '../application/use-cases/confirm-booking.use-case';
-import { BookingResponseDto } from '../application/dtos/booking-response.dto';
+} from '@/bookings/application/use-cases/confirm-booking.use-case';
+import { BookingResponseDto } from '@/bookings/application/dtos/booking-response.dto';
 import {
   GetBookingResult,
   GetBookingUseCase,
-} from '../application/use-cases/get-booking.use-case';
+} from '@/bookings/application/use-cases/get-booking.use-case';
 
 @ApiTags('Bookings')
 @Controller('bookings')

@@ -1,11 +1,8 @@
 import { Strategy } from 'passport-local';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { LoginUseCase } from '../use-cases/login.use-case';
-import { Email } from '../../domain/email.vo';
-import { Password } from '../../domain/password.vo';
-import { UserAggregate } from '../../domain/user.aggregate';
-import { InvalidCredentialsError } from '../use-cases/login.use-case';
+import { InvalidCredentialsError, LoginUseCase } from '@/auth/application/use-cases';
+import { Email, Password, UserAggregate } from '@/auth/domain';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
@@ -33,7 +30,7 @@ export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
       return user;
     } catch (error) {
       if (error instanceof InvalidCredentialsError) {
-        throw new UnauthorizedException('Invalid email or password.');
+        throw new UnauthorizedException('Email ou mot de passe invalide.');
       }
 
       throw error;

@@ -1,5 +1,5 @@
 import { RegisterPersonnelUseCase } from '../../../../../src/auth/application/use-cases/register-personnel.use-case';
-import { UserAlreadyExistsError } from '../../../../../src/auth/application/use-cases/register-client.use-case';
+import { UserAlreadyExistsError } from '../../../../../src/auth/application/use-cases/register.use-case';
 import { IUserRepository } from '../../../../../src/auth/application/ports/user-repository.port';
 import { IPasswordHasher } from '../../../../../src/auth/application/ports/password-hasher.port';
 import { Email } from '../../../../../src/auth/domain/email.vo';

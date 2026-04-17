@@ -12,12 +12,12 @@ import {
   Req,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { CreateCheckoutDto } from '../application/dtos/create-checkout.dto';
-import { PaymentStatusResponseDto } from '../application/dtos/payment-status-response.dto';
-import { CancelBookingPaymentUseCase } from '../application/use-cases/cancel-booking-payment.use-case';
-import { CreateCheckoutSessionUseCase } from '../application/use-cases/create-checkout-session.use-case';
-import { GetBookingPaymentStatusUseCase } from '../application/use-cases/get-booking-payment-status.use-case';
-import { HandleWebhookUseCase } from '../application/use-cases/handle-webhook.use-case';
+import { CreateCheckoutDto } from '@/stripe/application/dtos/create-checkout.dto';
+import { PaymentStatusResponseDto } from '@/stripe/application/dtos/payment-status-response.dto';
+import { CancelBookingPaymentUseCase } from '@/stripe/application/use-cases/cancel-booking-payment.use-case';
+import { CreateCheckoutSessionUseCase } from '@/stripe/application/use-cases/create-checkout-session.use-case';
+import { GetBookingPaymentStatusUseCase } from '@/stripe/application/use-cases/get-booking-payment-status.use-case';
+import { HandleWebhookUseCase } from '@/stripe/application/use-cases/handle-webhook.use-case';
 import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
 
 @ApiTags('Stripe')
@@ -77,10 +77,10 @@ export class StripeController {
   ) {
     const payload = req.rawBody;
     if (!payload) {
-      throw new BadRequestException('Missing raw body for Stripe webhook');
+      throw new BadRequestException('Le corps brut est manquant pour le webhook Stripe.');
     }
     if (!signature) {
-      throw new BadRequestException('Missing Stripe signature');
+      throw new BadRequestException('La signature Stripe est manquante.');
     }
     return this.handleWebhookUseCase.execute(payload, signature);
   }

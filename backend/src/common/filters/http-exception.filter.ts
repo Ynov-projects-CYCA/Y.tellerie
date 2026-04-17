@@ -36,7 +36,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
 function normalizeExceptionMessage(exception: unknown): unknown {
   if (!(exception instanceof HttpException)) {
-    return 'Internal server error';
+    return 'Erreur interne du serveur';
   }
 
   const response = exception.getResponse() as
@@ -53,7 +53,7 @@ function normalizeExceptionMessage(exception: unknown): unknown {
     return {
       ...response,
       message:
-        'Invalid JSON body. Check for unescaped line breaks, tabs, or quotes in string values.',
+        "Corps JSON invalide. Verifiez les retours a la ligne, tabulations ou guillemets non echappes dans les chaines.",
       details: rawMessage,
     };
   }

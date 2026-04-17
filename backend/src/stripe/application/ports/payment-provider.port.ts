@@ -1,5 +1,5 @@
 import Stripe from 'stripe';
-import { Payment } from '../../domain/payment.entity';
+import { Payment } from '@/stripe/domain/payment.entity';
 
 export const IPaymentProvider = Symbol('IPaymentProvider');
 

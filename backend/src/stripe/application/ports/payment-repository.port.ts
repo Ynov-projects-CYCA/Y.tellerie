@@ -1,4 +1,4 @@
-import { Payment } from '../../domain/payment.entity';
+import { Payment } from '@/stripe/domain/payment.entity';
 
 export interface PaymentRepositoryPort {
   save(payment: Payment): Promise<Payment>;

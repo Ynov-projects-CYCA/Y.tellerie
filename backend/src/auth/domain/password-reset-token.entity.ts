@@ -1,14 +1,6 @@
 import { randomUUID } from 'crypto';
 import { UserId } from './user-id.vo';
-
-export interface PasswordResetTokenProperties {
-  id: string;
-  userId: UserId;
-  tokenHash: string;
-  expiresAt: Date;
-  usedAt: Date | null;
-  createdAt: Date;
-}
+import { PasswordResetTokenProperties } from '@/shared/model';
 
 export class PasswordResetToken {
   constructor(private readonly properties: PasswordResetTokenProperties) {}

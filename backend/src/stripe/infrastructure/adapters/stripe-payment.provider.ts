@@ -1,8 +1,8 @@
 import Stripe from 'stripe';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Payment } from '../../domain/payment.entity';
-import { IPaymentProvider } from '../../application/ports/payment-provider.port';
+import { Payment } from '@/stripe/domain/payment.entity';
+import { IPaymentProvider } from '@/stripe/application/ports/payment-provider.port';
 
 @Injectable()
 export class StripePaymentProvider implements IPaymentProvider {

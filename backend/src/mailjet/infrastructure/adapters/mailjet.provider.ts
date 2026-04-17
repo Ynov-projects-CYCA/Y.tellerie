@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 // node-mailjet typings do not expose apiConnect properly; use `any` to access it safely.
 // Using require because node-mailjet CommonJS export breaks with ESM default import in runtime
 const Mailjet: any = require('node-mailjet');
-import { IMailProvider } from '../../application/ports/mail-provider.port';
-import { EmailMessage } from '../../domain/email-message.entity';
+import { IMailProvider } from '@/mailjet/application/ports/mail-provider.port';
+import { EmailMessage } from '@/mailjet/domain/email-message.entity';
 
 @Injectable()
 export class MailjetProvider implements IMailProvider {

@@ -13,7 +13,7 @@ import { RegisterUseCase, UserAlreadyExistsError } from '../../../../src/auth/ap
 import { VerifyEmailUseCase } from '../../../../src/auth/application/use-cases/verify-email.use-case';
 import { RegisterDto } from '../../../../src/auth/application/dtos/register.dto';
 import { Email } from '../../../../src/auth/domain/email.vo';
-import { Role } from '../../../../src/auth/domain/role.vo';
+import { Role } from '../../../../src/shared/model/role.enum';
 import { UserAggregate } from '../../../../src/auth/domain/user.aggregate';
 import { UserId } from '../../../../src/auth/domain/user-id.vo';
 import { SendTransactionalEmailUseCase } from '../../../../src/mailjet/application/use-cases/send-transactional-email.use-case';
@@ -142,7 +142,8 @@ describe('AuthController', () => {
       ).toContain('Activez votre compte avec elegance');
       expect(result).toEqual(
         expect.objectContaining({
-          message: 'Account created. Verify your email before logging in.',
+          message:
+            'Compte cree. Verifiez votre adresse e-mail avant de vous connecter.',
         }),
       );
       expect(result.user.email).toBe(registerDto.email);
@@ -191,7 +192,9 @@ describe('AuthController', () => {
       const result = await authController.verifyEmail({ token: 'verify-token' });
 
       expect(verifyEmailUseCase.execute).toHaveBeenCalledWith('verify-token');
-      expect(result).toEqual({ message: 'Email verified successfully.' });
+      expect(result).toEqual({
+        message: 'Adresse e-mail verifiee avec succes.',
+      });
     });
   });
 

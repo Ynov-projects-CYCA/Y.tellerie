@@ -1,13 +1,13 @@
 import { Inject, Injectable, ConflictException } from '@nestjs/common';
-import { CreateRoomDto } from '../dtos/create-room.dto';
-import { RoomFactory } from '../../domain/room.factory';
+import { CreateRoomDto } from '@/rooms/application/dtos/create-room.dto';
+import { RoomFactory } from '@/rooms/domain/room.factory';
 import {
   ROOM_REPOSITORY,
   RoomRepositoryPort,
-} from '../ports/room-repository.port';
-import { RoomTypeVO } from '../../domain/room-type.vo';
-import { PriceVO } from '../../domain/price.vo';
-import { Room } from '../../domain/room.entity';
+} from '@/rooms/application/ports/room-repository.port';
+import { RoomTypeVO } from '@/rooms/domain/room-type.vo';
+import { PriceVO } from '@/rooms/domain/price.vo';
+import { Room } from '@/rooms/domain/room.entity';
 
 @Injectable()
 export class CreateRoomUseCase {
@@ -22,7 +22,7 @@ export class CreateRoomUseCase {
     const exists = await this.roomRepository.exists(dto.roomNumber);
     if (exists) {
       throw new ConflictException(
-        `Room number ${dto.roomNumber} already exists`,
+        `Le numero de chambre ${dto.roomNumber} existe deja`,
       );
     }
 

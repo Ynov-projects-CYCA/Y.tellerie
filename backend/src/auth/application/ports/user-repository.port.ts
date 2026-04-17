@@ -1,6 +1,4 @@
-import { UserAggregate } from '../../domain/user.aggregate';
-import { UserId } from '../../domain/user-id.vo';
-import { Email } from '../../domain/email.vo';
+import { UserAggregate, UserId, Email } from '@/auth/domain';
 
 export const IUserRepository = Symbol('IUserRepository');
 

@@ -1,4 +1,4 @@
-import { EmailMessage } from '../../domain/email-message.entity';
+import { EmailMessage } from '@/mailjet/domain/email-message.entity';
 
 export const IMailProvider = Symbol('IMailProvider');
 
