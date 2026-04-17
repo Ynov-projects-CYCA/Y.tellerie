@@ -20,15 +20,18 @@
       </p>
 
       <div class="hero-actions">
-        <a routerLink="/login" class="btn btn-primary btn-lg">
+        <a routerLink="/login" appButton variant="primary" size="lg">
           Essayer gratuitement
         </a>
-        <button class="btn btn-outline btn-lg" (click)="scrollTo('#features')">
+        <button appButton variant="outline" size="lg" (click)="scrollTo('#features')">
           Voir la démo
         </button>
       </div>
     </div>
   </section>
+
+
+  <!-- Features Section -->
   <section class="features-section" id="features">
     <div class="container">
       <div class="section-header">
@@ -39,16 +42,19 @@
       </div>
 
       <div class="features-grid">
-        <div class="feature-card" *ngFor="let feature of features; let i = index" [style.--delay]="i * 80 + 'ms'">
+        <app-card class="feature-card" *ngFor="let feature of features; let i = index" [style.--delay]="i * 80 + 'ms'">
           <div class="feature-icon-wrapper">
              <ng-container *ngComponentOutlet="feature.icon"></ng-container>
           </div>
           <h3 class="feature-title">{{ feature.title }}</h3>
           <p class="feature-description">{{ feature.description }}</p>
-        </div>
+        </app-card>
       </div>
     </div>
   </section>
+
+
+  <!-- Benefits Section -->
   <section class="benefits-section" id="benefits">
     <div class="container">
       <div class="benefits-grid">
@@ -67,7 +73,7 @@
           </ol>
         </div>
 
-        <div class="stats-card">
+        <app-card class="stats-card">
           <div class="stats-headline">97<span>%</span></div>
           <p class="stats-label">de satisfaction client</p>
           <div class="stats-grid">
@@ -76,11 +82,14 @@
               <div class="stat-label">{{ s.label }}</div>
             </div>
           </div>
-        </div>
+        </app-card>
 
       </div>
     </div>
   </section>
+
+
+  <!-- CTA Section -->
   <section class="cta-section" id="contact">
     <div class="cta-texture" aria-hidden="true"></div>
     <div class="container cta-container">
@@ -91,8 +100,8 @@
         Rejoignez des centaines d'hôtels qui nous font confiance
       </p>
       <div class="cta-actions">
-        <a routerLink="/login" class="btn btn-white btn-lg">Commencer gratuitement</a>
-        <a href="mailto:contact@ytellerie.com" class="btn btn-white-outline btn-lg">Contactez-nous</a>
+        <a routerLink="/login" appButton variant="white" size="lg">Commencer gratuitement</a>
+        <a href="mailto:contact@ytellerie.com" appButton variant="white-outline" size="lg">Contactez-nous</a>
       </div>
     </div>
   </section>

@@ -9,6 +9,8 @@ import {
   LucideShieldCheck,
   LucideClock,
 } from '@lucide/angular';
+import { ButtonComponent } from '../../shared/components/button.component';
+import { CardComponent } from '../../shared/components/card.component';
 
 interface Feature {
   icon: any;
@@ -28,6 +30,8 @@ interface Benefit {
   imports: [
     CommonModule,
     RouterModule,
+    ButtonComponent,
+    CardComponent,
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],

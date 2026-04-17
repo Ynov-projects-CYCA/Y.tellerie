@@ -11,6 +11,6 @@ import { Component, input } from '@angular/core';
   }
 })
 export class ButtonComponent {
-  variant = input<'default' | 'outline' | 'ghost'>('default');
-  size = input<'default' | 'sm' | 'lg'>('default');
+  variant = input<'primary' | 'outline' | 'ghost' | 'white' | 'white-outline'>('primary');
+  size = input<'default' | 'sm' | 'lg' | 'full'>('default');
 }

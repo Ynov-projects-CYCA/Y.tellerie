@@ -1,0 +1,318 @@
+<div class="booking-page">
+  <div class="container">
+
+    <!-- ══════════════════════════════════════════════
+         PAGE HEADER
+    ══════════════════════════════════════════════ -->
+    <header class="page-header">
+      <h1 class="page-title">Réservation de chambre</h1>
+      <p class="page-subtitle">Trouvez et réservez la chambre idéale pour votre séjour</p>
+    </header>
+
+
+    <!-- ══════════════════════════════════════════════
+         SEARCH PANEL
+    ══════════════════════════════════════════════ -->
+    <section class="search-panel">
+      <div class="search-panel-header">
+        <h2 class="search-panel-title">Rechercher une chambre</h2>
+        <p class="search-panel-subtitle">Sélectionnez vos dates et le nombre de personnes</p>
+      </div>
+
+      <div class="search-fields">
+
+        <!-- Check-in -->
+        <div class="field-group">
+          <label class="field-label" for="checkIn">
+            <svg lucideCalendar class="field-label-icon"></svg>
+            Date d'arrivée
+          </label>
+          <input
+            id="checkIn"
+            type="date"
+            class="field-input"
+            [min]="today"
+            [ngModel]="checkIn()"
+            (ngModelChange)="checkIn.set($event)"
+          />
+        </div>
+
+        <!-- Check-out -->
+        <div class="field-group">
+          <label class="field-label" for="checkOut">
+            <svg lucideCalendar class="field-label-icon"></svg>
+            Date de départ
+          </label>
+          <input
+            id="checkOut"
+            type="date"
+            class="field-input"
+            [min]="checkIn() || today"
+            [ngModel]="checkOut()"
+            (ngModelChange)="checkOut.set($event)"
+          />
+        </div>
+
+        <!-- Guests -->
+        <div class="field-group">
+          <label class="field-label" for="guests">
+            <svg lucideUsers class="field-label-icon"></svg>
+            Nombre de personnes
+          </label>
+          <input
+            id="guests"
+            type="number"
+            class="field-input"
+            min="1"
+            max="10"
+            [ngModel]="guests()"
+            (ngModelChange)="guests.set(+$event)"
+          />
+        </div>
+
+        <!-- Search Button -->
+        <div class="field-group field-group--action">
+          <button appButton variant="primary" size="full" (click)="handleSearch()">
+            <svg lucideSearch style="width: 18px; height: 18px;"></svg>
+            Rechercher
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ══════════════════════════════════════════════
+         RESULTS HEADER
+    ══════════════════════════════════════════════ -->
+    <div class="results-header" *ngIf="hasSearched()">
+      <p class="results-count">
+        <strong>{{ filteredRooms().length }}</strong>
+        chambre{{ filteredRooms().length !== 1 ? 's' : '' }} disponible{{ filteredRooms().length !== 1 ? 's' : '' }}
+        pour {{ guests() }} personne{{ guests() !== 1 ? 's' : '' }}
+      </p>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════════
+         ROOMS GRID
+    ══════════════════════════════════════════════ -->
+    <section class="rooms-grid">
+      <app-card
+        class="room-card"
+        *ngFor="let room of filteredRooms(); let i = index"
+        [style.--delay]="i * 60 + 'ms'"
+        [class.room-card--unavailable]="room.status !== 'available'"
+      >
+
+        <!-- Image -->
+        <div class="room-card-image-wrap">
+          <img
+            [src]="room.image"
+            [alt]="room.type"
+            class="room-card-image"
+            loading="lazy"
+          />
+
+          <!-- Status badge -->
+          <span class="room-badge" [class]="'room-badge--' + room.status">
+            {{ statusLabel(room.status) }}
+          </span>
+
+          <!-- Previously stayed badge -->
+          <span class="room-badge-stayed" *ngIf="hasBookedBefore(room.id)">
+            <svg lucideCheckCircle class="badge-icon"></svg>
+            Déjà séjourné
+          </span>
+
+          <!-- Price overlay -->
+          <div class="room-price-tag">
+            <span class="room-price-amount">{{ room.price }}€</span>
+            <span class="room-price-unit">/ nuit</span>
+          </div>
+        </div>
+
+
+        <!-- Card body -->
+        <div class="room-card-body">
+
+          <div class="room-card-meta">
+            <div>
+              <h3 class="room-card-type">{{ room.type }}</h3>
+              <p class="room-card-location">
+                <svg lucideMapPin class="meta-icon"></svg>
+                Chambre n°{{ room.number }} · Étage {{ room.floor }}
+              </p>
+            </div>
+            <div class="room-card-capacity">
+              <svg lucideUsers class="meta-icon"></svg>
+              {{ room.capacity }} pers.
+            </div>
+          </div>
+
+          <!-- Amenities -->
+          <ul class="amenities-list">
+            <li class="amenity-tag" *ngFor="let a of room.amenities">
+              {{ a }}
+            </li>
+          </ul>
+
+          <!-- Book button -->
+          <button
+            appButton
+            variant="primary"
+            size="full"
+            [disabled]="room.status !== 'available'"
+            (click)="openDialog(room)"
+          >
+            {{ room.status === 'available' ? 'Réserver cette chambre' : 'Non disponible' }}
+          </button>
+
+        </div>
+      </app-card>
+
+      <!-- Empty state -->
+      <div class="empty-state" *ngIf="filteredRooms().length === 0">
+        <svg lucideSearch class="empty-icon"></svg>
+        <h3 class="empty-title">Aucune chambre disponible</h3>
+        <p class="empty-desc">Essayez de modifier vos critères de recherche.</p>
+      </div>
+
+    </section>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════
+     BOOKING DIALOG
+════════════════════════════════════════════════ -->
+<div class="dialog-overlay" *ngIf="dialogOpen()" (click)="onOverlayClick($event)">
+  <div class="dialog" role="dialog" aria-modal="true">
+
+    <!-- Close -->
+    <button class="dialog-close" (click)="closeDialog()" aria-label="Fermer">
+      <svg lucideX></svg>
+    </button>
+
+    <!-- ── Success state ── -->
+    <ng-container *ngIf="bookingSuccess(); else formState">
+      <div class="dialog-success">
+        <div class="success-icon-wrap">
+          <svg lucideCheckCircle class="success-icon"></svg>
+        </div>
+        <h2 class="success-title">Réservation confirmée&nbsp;!</h2>
+        <p class="success-msg">
+          Un email de confirmation a été envoyé à
+          <strong>{{ guestEmail() }}</strong>.
+        </p>
+        <div class="success-recap">
+          <div class="recap-row">
+            <span class="recap-key">Chambre</span>
+            <span class="recap-val">{{ selectedRoom()?.type }} n°{{ selectedRoom()?.number }}</span>
+          </div>
+          <div class="recap-row">
+            <span class="recap-key">Arrivée</span>
+            <span class="recap-val">{{ checkIn() | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="recap-row">
+            <span class="recap-key">Départ</span>
+            <span class="recap-val">{{ checkOut() | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="recap-row recap-row--total">
+            <span class="recap-key">Total</span>
+            <span class="recap-val">{{ totalPrice() }}€</span>
+          </div>
+        </div>
+        <button appButton variant="primary" size="full" (click)="closeDialog()">Fermer</button>
+      </div>
+    </ng-container>
+
+    <!-- ── Form state ── -->
+    <ng-template #formState>
+      <div class="dialog-header">
+        <div class="dialog-room-img-wrap">
+          <img
+            [src]="selectedRoom()?.image"
+            [alt]="selectedRoom()?.type"
+            class="dialog-room-img"
+          />
+        </div>
+        <div>
+          <h2 class="dialog-title">{{ selectedRoom()?.type }}</h2>
+          <p class="dialog-subtitle">
+            Chambre n°{{ selectedRoom()?.number }} ·
+            <strong>{{ selectedRoom()?.price }}€</strong> / nuit
+          </p>
+        </div>
+      </div>
+
+      <div class="dialog-body">
+
+        <!-- Guest name -->
+        <div class="field-group">
+          <label class="field-label" for="guestName">Nom complet</label>
+          <input
+            id="guestName"
+            type="text"
+            class="field-input"
+            placeholder="Jean Dupont"
+            [ngModel]="guestName()"
+            (ngModelChange)="guestName.set($event)"
+          />
+        </div>
+
+        <!-- Guest email -->
+        <div class="field-group">
+          <label class="field-label" for="guestEmail">Email</label>
+          <input
+            id="guestEmail"
+            type="email"
+            class="field-input"
+            placeholder="jean.dupont@email.com"
+            [ngModel]="guestEmail()"
+            (ngModelChange)="guestEmail.set($event)"
+          />
+        </div>
+
+        <!-- Dates recap -->
+        <div class="dates-recap">
+          <div class="field-group">
+            <label class="field-label">Arrivée</label>
+            <input type="date" class="field-input field-input--readonly" [value]="checkIn()" readonly />
+          </div>
+          <div class="field-group">
+            <label class="field-label">Départ</label>
+            <input type="date" class="field-input field-input--readonly" [value]="checkOut()" readonly />
+          </div>
+        </div>
+
+        <!-- Price summary -->
+        <div class="price-summary" *ngIf="totalNights() > 0">
+          <div class="price-summary-row">
+            <span>{{ selectedRoom()?.price }}€ × {{ totalNights() }} nuit{{ totalNights() !== 1 ? 's' : '' }}</span>
+            <span class="price-summary-total">{{ totalPrice() }}€</span>
+          </div>
+        </div>
+
+        <!-- No dates warning -->
+        <p class="dates-warning" *ngIf="totalNights() === 0">
+          ⚠ Veuillez sélectionner des dates dans le formulaire de recherche avant de réserver.
+        </p>
+
+      </div>
+
+      <div class="dialog-footer" style="padding: 0 1.5rem 1.5rem;">
+        <button
+          appButton
+          variant="primary"
+          size="full"
+          [disabled]="!canConfirm()"
+          (click)="confirmBooking()"
+        >
+          Confirmer la réservation
+        </button>
+      </div>
+    </ng-template>
+
+  </div>
+</div>
