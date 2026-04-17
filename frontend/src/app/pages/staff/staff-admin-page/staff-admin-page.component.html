@@ -1,0 +1,180 @@
+<div class="staff-page" *ngIf="currentUser.isAdmin; else accessDenied">
+  <div class="staff-page__header">
+    <div class="admin-heading">
+      <div class="admin-heading__icon">🛡️</div>
+      <div>
+        <h1 class="staff-page__title">Administration</h1>
+        <p class="staff-page__subtitle">Gestion du personnel</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-grid stats-grid--three">
+    <div class="card">
+      <div class="card__label">Total Personnel</div>
+      <div class="card__value">{{ employees.length }}</div>
+    </div>
+
+    <div class="card">
+      <div class="card__label">Actifs</div>
+      <div class="card__value card__value--success">{{ activeCount }}</div>
+    </div>
+
+    <div class="card">
+      <div class="card__label">Inactifs</div>
+      <div class="card__value card__value--danger">{{ inactiveCount }}</div>
+    </div>
+  </div>
+
+  <div class="card card--toolbar">
+    <div class="toolbar">
+      <input
+        class="input-field"
+        [(ngModel)]="searchTerm"
+        placeholder="Rechercher par nom, rôle ou shift..."
+      />
+
+      <button class="button button--primary" (click)="openAddDialog()">
+        Ajouter un employé
+      </button>
+    </div>
+  </div>
+
+  <div class="cards-list">
+    <div class="employee-card" *ngFor="let employee of filteredEmployees">
+      <div class="employee-card__body">
+        <div class="employee-card__top">
+          <div class="employee-card__avatar">👤</div>
+
+          <div>
+            <div class="employee-card__title-row">
+              <h3 class="employee-card__name">{{ employee.name }}</h3>
+              <span [class]="getStatusClass(employee.status)">
+                {{ getStatusLabel(employee.status) }}
+              </span>
+            </div>
+
+            <p class="employee-card__role">{{ employee.role }}</p>
+            <p class="employee-card__id">ID: {{ employee.id }}</p>
+          </div>
+        </div>
+
+        <div class="employee-card__details">
+          <div>🕒 {{ employee.shift }}</div>
+        </div>
+      </div>
+
+      <div class="employee-card__actions">
+        <button class="button button--secondary button--small" (click)="openEditDialog(employee)">
+          Modifier
+        </button>
+
+        <button
+          class="button button--small"
+          [class.button--danger-outline]="employee.status === 'active'"
+          [class.button--success-outline]="employee.status !== 'active'"
+          (click)="toggleEmployeeStatus(employee.id)"
+        >
+          {{ employee.status === 'active' ? 'Désactiver' : 'Activer' }}
+        </button>
+
+        <button class="button button--danger-outline button--small" (click)="deleteEmployee(employee.id)">
+          Supprimer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-state card" *ngIf="filteredEmployees.length === 0">
+    <div class="empty-state__icon">👥</div>
+    <p class="empty-state__title">Aucun employé trouvé</p>
+  </div>
+
+  <div class="modal-backdrop" *ngIf="isAddDialogOpen || isEditDialogOpen"></div>
+
+  <div class="modal" *ngIf="isAddDialogOpen">
+    <div class="modal__content">
+      <div class="modal__header">
+        <h2 class="modal__title">Ajouter un employé</h2>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-field">
+          <label class="form-label">Nom</label>
+          <input class="input-field" [(ngModel)]="employeeFormData.name" />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Rôle</label>
+          <input class="input-field" [(ngModel)]="employeeFormData.role" />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Shift</label>
+          <input class="input-field" [(ngModel)]="employeeFormData.shift" />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Statut</label>
+          <select class="select-field" [(ngModel)]="employeeFormData.status">
+            <option value="active">Actif</option>
+            <option value="inactive">Inactif</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal__footer">
+        <button class="button button--secondary" (click)="closeAddDialog()">Annuler</button>
+        <button class="button button--primary" (click)="addEmployee()">Ajouter</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" *ngIf="isEditDialogOpen">
+    <div class="modal__content">
+      <div class="modal__header">
+        <h2 class="modal__title">Modifier l'employé</h2>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-field">
+          <label class="form-label">Nom</label>
+          <input class="input-field" [(ngModel)]="employeeFormData.name" />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Rôle</label>
+          <input class="input-field" [(ngModel)]="employeeFormData.role" />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Shift</label>
+          <input class="input-field" [(ngModel)]="employeeFormData.shift" />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Statut</label>
+          <select class="select-field" [(ngModel)]="employeeFormData.status">
+            <option value="active">Actif</option>
+            <option value="inactive">Inactif</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal__footer">
+        <button class="button button--secondary" (click)="closeEditDialog()">Annuler</button>
+        <button class="button button--primary" (click)="editEmployee()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #accessDenied>
+  <div class="staff-page">
+    <div class="card access-denied">
+      <div class="access-denied__icon">🛡️</div>
+      <h2 class="access-denied__title">Accès refusé</h2>
+      <p class="access-denied__text">Vous n'avez pas les permissions nécessaires.</p>
+    </div>
+  </div>
+</ng-template>

@@ -1,0 +1,87 @@
+<div class="staff-page">
+  <div class="staff-page__header">
+    <div>
+      <h1 class="staff-page__title">Gestion des Réservations</h1>
+      <p class="staff-page__subtitle">Consultez et gérez toutes les réservations</p>
+    </div>
+
+    <div class="staff-page__filter">
+      <label class="staff-page__filter-label" for="statusFilter">Filtrer par statut</label>
+      <select id="statusFilter" class="select-field" [(ngModel)]="filterStatus">
+        <option value="all">Toutes</option>
+        <option value="confirmed">Confirmées</option>
+        <option value="pending">En attente</option>
+        <option value="completed">Terminées</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="stats-grid stats-grid--four">
+    <div class="card">
+      <div class="card__label">Total</div>
+      <div class="card__value">{{ reservations.length }}</div>
+    </div>
+
+    <div class="card">
+      <div class="card__label">Confirmées</div>
+      <div class="card__value card__value--success">{{ confirmedCount }}</div>
+    </div>
+
+    <div class="card">
+      <div class="card__label">En attente</div>
+      <div class="card__value card__value--warning">{{ pendingCount }}</div>
+    </div>
+
+    <div class="card">
+      <div class="card__label">Revenus</div>
+      <div class="card__value card__value--info">{{ totalRevenue }}€</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card__header">
+      <h2 class="card__title">Liste des réservations ({{ filteredReservations.length }})</h2>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Client</th>
+            <th>Chambre</th>
+            <th>Arrivée</th>
+            <th>Prix total</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let reservation of filteredReservations">
+            <td class="data-table__strong">#{{ reservation.id }}</td>
+            <td>{{ reservation.guestName }}</td>
+            <td><span class="outline-badge">N° {{ reservation.roomNumber }}</span></td>
+            <td>{{ reservation.checkIn | date:'dd/MM/yyyy' }}</td>
+            <td class="data-table__strong">{{ reservation.totalPrice }}€</td>
+            <td>
+              <div class="status-cell">
+                <span [class]="getStatusClass(reservation.status)">
+                  {{ getStatusLabel(reservation.status) }}
+                </span>
+
+                <select
+                  class="select-field select-field--small"
+                  [ngModel]="reservation.status"
+                  (ngModelChange)="updateStatus(reservation.id, $event)"
+                >
+                  <option value="confirmed">Confirmée</option>
+                  <option value="pending">En attente</option>
+                  <option value="completed">Terminée</option>
+                </select>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

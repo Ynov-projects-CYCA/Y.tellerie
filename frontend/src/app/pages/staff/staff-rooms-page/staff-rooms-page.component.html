@@ -1,0 +1,102 @@
+<div class="staff-page">
+  <div class="staff-page__header">
+    <div>
+      <h1 class="staff-page__title">Gestion des Chambres</h1>
+      <p class="staff-page__subtitle">Gérez les chambres disponibles et occupées</p>
+    </div>
+
+    <button class="button button--primary" (click)="openAddDialog()">
+      Ajouter une chambre
+    </button>
+  </div>
+
+  <div class="stats-grid stats-grid--three">
+    <div class="card">
+      <div class="card__label">Total Chambres</div>
+      <div class="card__value">{{ rooms.length }}</div>
+    </div>
+
+    <div class="card">
+      <div class="card__label">Disponibles</div>
+      <div class="card__value card__value--success">{{ availableCount }}</div>
+    </div>
+
+    <div class="card">
+      <div class="card__label">Occupées</div>
+      <div class="card__value card__value--danger">{{ occupiedCount }}</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card__header">
+      <h2 class="card__title">Liste des chambres</h2>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Numéro affiché</th>
+            <th>Statut</th>
+            <th class="data-table__align-right">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let room of rooms">
+            <td class="data-table__strong">#{{ room.id }}</td>
+            <td>{{ getRoomNumber(room.id) }}</td>
+            <td>
+              <div class="status-cell">
+                <span [class]="getStatusClass(room.status)">
+                  {{ getStatusLabel(room.status) }}
+                </span>
+
+                <select
+                  class="select-field select-field--small"
+                  [ngModel]="room.status"
+                  (ngModelChange)="updateRoomStatus(room.id, $event)"
+                >
+                  <option value="available">Disponible</option>
+                  <option value="occupied">Occupée</option>
+                </select>
+              </div>
+            </td>
+            <td class="data-table__align-right">
+              <button class="button button--danger-outline button--small" (click)="deleteRoom(room.id)">
+                Supprimer
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" *ngIf="isAddDialogOpen"></div>
+
+  <div class="modal" *ngIf="isAddDialogOpen">
+    <div class="modal__content">
+      <div class="modal__header">
+        <h2 class="modal__title">Ajouter une chambre</h2>
+        <p class="modal__subtitle">Création simplifiée avec ton modèle de données actuel</p>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-field">
+          <label class="form-label" for="room-status">Statut</label>
+          <select id="room-status" class="select-field" [(ngModel)]="newRoom.status">
+            <option value="available">Disponible</option>
+            <option value="occupied">Occupée</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal__footer">
+        <button class="button button--secondary" (click)="closeAddDialog()">Annuler</button>
+        <button class="button button--primary" (click)="addRoom()">Ajouter</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,4 +1,36 @@
-export const mockRooms = [
+export type RoomStatus = 'available' | 'occupied';
+export type ReservationStatus = 'confirmed' | 'pending' | 'completed';
+export type EmployeeStatus = 'active' | 'inactive';
+
+export interface Room {
+  id: number;
+  status: RoomStatus;
+}
+
+export interface Reservation {
+  id: number;
+  guestName: string;
+  roomNumber: number;
+  status: ReservationStatus;
+  totalPrice: number;
+  checkIn: string;
+}
+
+export interface Employee {
+  id: number;
+  name: string;
+  role: string;
+  status: EmployeeStatus;
+  shift: string;
+}
+
+export interface CurrentUser {
+  id: number;
+  name: string;
+  isAdmin: boolean;
+}
+
+export const mockRooms: Room[] = [
   { id: 1, status: 'available' },
   { id: 2, status: 'occupied' },
   { id: 3, status: 'available' },
@@ -9,7 +41,7 @@ export const mockRooms = [
   { id: 8, status: 'available' },
 ];
 
-export const mockReservations = [
+export const mockReservations: Reservation[] = [
   {
     id: 1,
     guestName: 'Jean Dupont',
@@ -52,7 +84,7 @@ export const mockReservations = [
   },
 ];
 
-export const mockEmployees = [
+export const mockEmployees: Employee[] = [
   {
     id: 1,
     name: 'Alice Johnson',
@@ -83,7 +115,7 @@ export const mockEmployees = [
   },
 ];
 
-export const currentUser = {
+export const currentUser: CurrentUser = {
   id: 1,
   name: 'Admin User',
   isAdmin: true,

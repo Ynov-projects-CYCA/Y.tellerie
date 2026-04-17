@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { mockRooms, mockReservations, mockEmployees, currentUser } from '../../data/mockData';
+import { mockRooms, mockReservations, mockEmployees, currentUser } from '../../../data/mockData';
 
 @Component({
   selector: 'app-staff-dashboard-page',

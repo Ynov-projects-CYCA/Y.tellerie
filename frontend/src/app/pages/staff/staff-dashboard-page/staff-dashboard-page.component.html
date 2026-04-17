@@ -1,0 +1,165 @@
+<div class="dashboard">
+  <!-- Stats -->
+  <div class="dashboard__stats">
+    <!-- Chambres disponibles -->
+    <div class="stat-card">
+      <div class="stat-card__header">
+        <h3 class="stat-card__title">Chambres disponibles</h3>
+        <svg class="stat-card__icon stat-card__icon--success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-3m0 0l7-4 7 4M5 9v10a1 1 0 001 1h1m6-10v10a1 1 0 001 1h1m-6-10V9a2 2 0 012-2h2a2 2 0 012 2v10a1 1 0 001 1h1m-6 0h6m0 0a1 1 0 001-1v-4a1 1 0 00-1-1m0 4a1 1 0 11-2 0m2 0a2 2 0 11-4 0"></path>
+        </svg>
+      </div>
+      <div class="stat-card__value">{{ availableRooms }}</div>
+      <p class="stat-card__meta">
+        sur {{ mockRooms.length }} chambres totales
+      </p>
+    </div>
+
+    <!-- Chambres occupées -->
+    <div class="stat-card">
+      <div class="stat-card__header">
+        <h3 class="stat-card__title">Chambres occupées</h3>
+        <svg class="stat-card__icon stat-card__icon--danger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-3m0 0l7-4 7 4M5 9v10a1 1 0 001 1h1m6-10v10a1 1 0 001 1h1m-6-10V9a2 2 0 012-2h2a2 2 0 012 2v10a1 1 0 001 1h1m-6 0h6m0 0a1 1 0 001-1v-4a1 1 0 00-1-1m0 4a1 1 0 11-2 0m2 0a2 2 0 11-4 0"></path>
+        </svg>
+      </div>
+      <div class="stat-card__value">{{ occupiedRooms }}</div>
+      <p class="stat-card__meta">
+        Taux d'occupation: {{ occupancyRate }}%
+      </p>
+    </div>
+
+    <!-- Réservations actives -->
+    <div class="stat-card">
+      <div class="stat-card__header">
+        <h3 class="stat-card__title">Réservations actives</h3>
+        <svg class="stat-card__icon stat-card__icon--info" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+      </div>
+      <div class="stat-card__value">{{ activeReservations }}</div>
+      <p class="stat-card__meta">
+        {{ getPendingReservations() }} en attente
+      </p>
+    </div>
+
+    <!-- Revenus totaux -->
+    <div class="stat-card">
+      <div class="stat-card__header">
+        <h3 class="stat-card__title">Revenus totaux</h3>
+        <svg class="stat-card__icon stat-card__icon--warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <div class="stat-card__value">{{ totalRevenue | number:'1.0-0' }}€</div>
+      <p class="stat-card__meta stat-card__meta--trend">
+        <span>↑ +12% ce mois</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="dashboard__content">
+    <!-- Réservations récentes -->
+    <div class="panel">
+      <h2 class="panel__title">Réservations récentes</h2>
+      <p class="panel__subtitle">Dernières réservations confirmées</p>
+
+      <div class="panel__list">
+        <div
+          *ngFor="let reservation of mockReservations.slice(0, 3); let last = last"
+          class="list-item"
+          [ngClass]="{ 'list-item--with-border': !last }"
+        >
+          <div class="list-item__content">
+            <div class="list-item__title">{{ reservation.guestName }}</div>
+            <div class="list-item__subtitle">
+              Chambre {{ reservation.roomNumber }}
+            </div>
+          </div>
+
+          <div class="list-item__aside list-item__aside--right">
+            <div class="list-item__price">{{ reservation.totalPrice }}€</div>
+            <div class="list-item__date">
+              {{ reservation.checkIn | date:'dd/MM/yyyy' }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <a routerLink="/staff/reservations" class="panel__link">
+        <button class="button button--secondary button--full">
+          Voir toutes les réservations
+        </button>
+      </a>
+    </div>
+
+    <!-- Personnel actif -->
+    <div class="panel">
+      <h2 class="panel__title">Personnel actif</h2>
+      <p class="panel__subtitle">Employés en service aujourd'hui</p>
+
+      <div class="panel__list">
+        <div
+          *ngFor="let employee of getActiveEmployees(); let last = last"
+          class="list-item"
+          [ngClass]="{ 'list-item--with-border': !last }"
+        >
+          <div class="list-item__content">
+            <div class="list-item__title">{{ employee.name }}</div>
+            <div class="list-item__subtitle">{{ employee.role }}</div>
+          </div>
+
+          <div class="list-item__aside list-item__aside--right">
+            <div class="list-item__date">{{ employee.shift }}</div>
+          </div>
+        </div>
+      </div>
+
+      <ng-container *ngIf="currentUser.isAdmin">
+        <a routerLink="/staff/admin" class="panel__link">
+          <button class="button button--secondary button--full button--icon">
+            <span>🛡️</span>
+            Gérer le personnel
+          </button>
+        </a>
+      </ng-container>
+
+      <ng-container *ngIf="!currentUser.isAdmin">
+        <div class="panel__notice">
+          <p class="panel__notice-text">
+            Gestion du personnel réservée aux administrateurs
+          </p>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+
+  <!-- Actions rapides -->
+  <div class="panel">
+    <h2 class="panel__title">Actions rapides</h2>
+
+    <div class="quick-actions">
+      <a routerLink="/staff/rooms" class="quick-actions__link">
+        <button class="quick-actions__button">
+          <span>🛏️</span>
+          Gérer les chambres
+        </button>
+      </a>
+
+      <a routerLink="/staff/reservations" class="quick-actions__link">
+        <button class="quick-actions__button">
+          <span>📅</span>
+          Nouvelle réservation
+        </button>
+      </a>
+
+      <a *ngIf="currentUser.isAdmin" routerLink="/staff/admin" class="quick-actions__link">
+        <button class="quick-actions__button">
+          <span>🛡️</span>
+          Administration
+        </button>
+      </a>
+    </div>
+  </div>
+</div>
