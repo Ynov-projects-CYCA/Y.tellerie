@@ -59,7 +59,7 @@ describe('CleanRoomUseCase', () => {
     mockRepository.findById.mockResolvedValue(room);
 
     await expect(useCase.execute('test-id')).rejects.toThrow(
-      `Room with id test-id is not dirty`,
+      "n'est pas sale",
     );
   });
 
@@ -70,7 +70,7 @@ describe('CleanRoomUseCase', () => {
     mockRepository.findById.mockResolvedValue(room);
 
     await expect(useCase.execute('test-id')).rejects.toThrow(
-      'is not dirty',
+      "n'est pas sale",
     );
   });
 });

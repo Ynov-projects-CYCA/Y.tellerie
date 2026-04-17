@@ -1,5 +1,7 @@
 import { Role } from '@/shared/model';
 
+export { Role };
+
 export class Roles {
   private constructor(private readonly values: Role[]) {}
 

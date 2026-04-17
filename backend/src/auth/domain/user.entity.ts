@@ -2,6 +2,8 @@ import { Email } from './email.vo';
 import { UserId } from './user-id.vo';
 import { Role, UserProperties } from '@/shared/model';
 
+export type { UserProperties };
+
 export class User {
   private readonly id: UserId;
   private firstname: string;

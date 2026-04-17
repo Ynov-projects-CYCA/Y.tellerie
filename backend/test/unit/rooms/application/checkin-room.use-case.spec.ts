@@ -62,7 +62,7 @@ describe('CheckinRoomUseCase', () => {
       mockRepository.findById.mockResolvedValue(room);
 
       await expect(useCase.execute('test-id')).rejects.toThrow(
-        'is not available for check-in',
+        "n'est pas disponible pour le check-in",
       );
       expect(mockRepository.save).not.toHaveBeenCalled();
     });
@@ -74,7 +74,7 @@ describe('CheckinRoomUseCase', () => {
       mockRepository.findById.mockResolvedValue(room);
 
       await expect(useCase.execute('test-id')).rejects.toThrow(
-        'is not available for check-in',
+        "n'est pas disponible pour le check-in",
       );
     });
 
@@ -84,7 +84,7 @@ describe('CheckinRoomUseCase', () => {
       mockRepository.findById.mockResolvedValue(room);
 
       await expect(useCase.execute('test-id')).rejects.toThrow(
-        'is not available for check-in',
+        "n'est pas disponible pour le check-in",
       );
     });
 

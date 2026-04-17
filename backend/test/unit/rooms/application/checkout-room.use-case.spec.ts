@@ -58,7 +58,7 @@ describe('CheckoutRoomUseCase', () => {
     mockRepository.findById.mockResolvedValue(room);
 
     await expect(useCase.execute('test-id')).rejects.toThrow(
-      'is not occupied',
+      "n'est pas occupee",
     );
   });
 
@@ -70,7 +70,7 @@ describe('CheckoutRoomUseCase', () => {
     mockRepository.findById.mockResolvedValue(room);
 
     await expect(useCase.execute('test-id')).rejects.toThrow(
-      'is not occupied',
+      "n'est pas occupee",
     );
   });
 
@@ -81,7 +81,7 @@ describe('CheckoutRoomUseCase', () => {
     mockRepository.findById.mockResolvedValue(room);
 
     await expect(useCase.execute('test-id')).rejects.toThrow(
-      'is not occupied',
+      "n'est pas occupee",
     );
   });
 });
