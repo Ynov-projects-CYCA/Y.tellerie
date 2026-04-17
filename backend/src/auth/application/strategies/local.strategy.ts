@@ -30,7 +30,7 @@ export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
       return user;
     } catch (error) {
       if (error instanceof InvalidCredentialsError) {
-        throw new UnauthorizedException('Invalid email or password.');
+        throw new UnauthorizedException('Email ou mot de passe invalide.');
       }
 
       throw error;

@@ -7,11 +7,11 @@ import {
 import {
   BOOKING_REPOSITORY,
   BookingRepositoryPort,
-} from '../../../bookings/application/ports/booking-repository.port';
+} from '@/bookings/application/ports/booking-repository.port';
 import {
   PAYMENT_REPOSITORY,
   PaymentRepositoryPort,
-} from '../ports/payment-repository.port';
+} from '@/stripe/application/ports/payment-repository.port';
 
 @Injectable()
 export class CancelBookingPaymentUseCase {
@@ -25,20 +25,22 @@ export class CancelBookingPaymentUseCase {
   async execute(bookingId: string) {
     const booking = await this.bookingRepository.findById(bookingId);
     if (!booking) {
-      throw new NotFoundException(`Booking with id ${bookingId} not found`);
+      throw new NotFoundException(
+        `Reservation introuvable pour l'identifiant ${bookingId}`,
+      );
     }
 
     const payment = await this.paymentRepository.findLatestByBookingId(bookingId);
     if (!payment) {
       throw new NotFoundException(
-        `No payment found for booking with id ${bookingId}`,
+        `Aucun paiement trouve pour la reservation ${bookingId}`,
       );
     }
 
     const { status } = payment.getProperties();
     if (status === 'succeeded') {
       throw new ConflictException(
-        `Payment for booking with id ${bookingId} is already completed`,
+        `Le paiement de la reservation ${bookingId} est deja finalise`,
       );
     }
 

@@ -11,7 +11,7 @@ export class RoomStatusVO {
   static create(status: string): RoomStatusVO {
     const upperStatus = status.toUpperCase();
     if (!Object.values(RoomStatus).includes(upperStatus as RoomStatus)) {
-      throw new Error(`Invalid room status: ${status}`);
+      throw new Error(`Statut de chambre invalide : ${status}`);
     }
     return new RoomStatusVO(upperStatus as RoomStatus);
   }

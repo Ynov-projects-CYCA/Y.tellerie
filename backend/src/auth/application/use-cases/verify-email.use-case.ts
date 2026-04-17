@@ -15,7 +15,7 @@ export class VerifyEmailUseCase {
     const normalizedToken = token.trim();
 
     if (!normalizedToken) {
-      throw new BadRequestException('Verification token is required.');
+      throw new BadRequestException('Le jeton de verification est requis.');
     }
 
     const user = await this.userRepository.findByVerifyEmailToken(
@@ -23,7 +23,7 @@ export class VerifyEmailUseCase {
     );
 
     if (!user) {
-      throw new BadRequestException('Invalid verification token.');
+      throw new BadRequestException('Le jeton de verification est invalide.');
     }
 
     user.verifyEmail();

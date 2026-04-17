@@ -18,10 +18,10 @@ export class Room {
 
   private validate(): void {
     if (!this.roomNumber || this.roomNumber.trim().length === 0) {
-      throw new Error('Room number is required');
+      throw new Error('Le numero de chambre est requis');
     }
     if (this.capacity < 1 || this.capacity > 10) {
-      throw new Error('Capacity must be between 1 and 10');
+      throw new Error('La capacite doit etre comprise entre 1 et 10');
     }
   }
 
@@ -90,7 +90,7 @@ export class Room {
 
   checkout(): void {
     if (!this.status.equals(RoomStatusVO.occupied())) {
-      throw new Error('Only occupied rooms can be checked out');
+      throw new Error('Seules les chambres occupees peuvent etre liberees');
     }
     this.status = RoomStatusVO.dirty();
     this.updatedAt = new Date();
@@ -98,7 +98,7 @@ export class Room {
 
   clean(): void {
     if (!this.status.isDirty()) {
-      throw new Error('Only dirty rooms can be cleaned');
+      throw new Error('Seules les chambres sales peuvent etre nettoyees');
     }
     this.status = RoomStatusVO.available();
     this.updatedAt = new Date();
@@ -106,7 +106,7 @@ export class Room {
 
   occupy(): void {
     if (!this.status.isAvailable()) {
-      throw new Error('Only available rooms can be occupied');
+      throw new Error('Seules les chambres disponibles peuvent etre occupees');
     }
     this.status = RoomStatusVO.occupied();
     this.updatedAt = new Date();

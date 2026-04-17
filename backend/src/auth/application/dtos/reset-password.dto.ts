@@ -16,6 +16,8 @@ export class ResetPasswordDto {
   })
   @IsString()
   @IsNotEmpty()
-  @MinLength(8, { message: 'Password must be at least 8 characters long' })
+  @MinLength(8, {
+    message: 'Le mot de passe doit contenir au moins 8 caracteres',
+  })
   password: string;
 }
