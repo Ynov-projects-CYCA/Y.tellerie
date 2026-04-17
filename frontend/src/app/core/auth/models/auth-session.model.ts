@@ -5,6 +5,7 @@ export interface AuthenticatedUser {
   firstname: string;
   lastname: string;
   email: string;
+  isActive?: boolean;
   phoneNumber?: string;
   phone: string;
   roles: AuthRole[];
@@ -12,8 +13,12 @@ export interface AuthenticatedUser {
 
 export interface AuthResponse {
   accessToken: string;
-  refreshToken: string;
   user: AuthenticatedUser;
+}
+
+export interface ChangePasswordPayload {
+  oldPassword: string;
+  newPassword: string;
 }
 
 export interface LoginPayload {

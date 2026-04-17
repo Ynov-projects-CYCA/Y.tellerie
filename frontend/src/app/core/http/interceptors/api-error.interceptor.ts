@@ -25,6 +25,9 @@ export const apiErrorInterceptor: HttpInterceptorFn = (request, next) => {
 
       const payload = isBackendErrorPayload(error.error) ? error.error : null;
 
+      // On invalide la session uniquement sur les routes qui supposent
+      // deja un utilisateur connecte, pour eviter de polluer les parcours
+      // publics avec une redirection vers la connexion.
       if (error.status === 401 && shouldInvalidateSession(request.url)) {
         authSessionService.clearSession();
         void router?.navigateByUrl('/connexion');

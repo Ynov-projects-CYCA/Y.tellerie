@@ -27,6 +27,8 @@ describe('App', () => {
 
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Socle frontend prêt');
+    expect(compiled.querySelector('h1')?.textContent).toContain(
+      'Gérez votre hôtel avec élégance',
+    );
   });
 });

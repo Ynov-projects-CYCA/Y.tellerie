@@ -20,7 +20,10 @@ export class ApiContractPageComponent {
   protected readonly contractItems = [
     'Les réponses HTTP sont décapsulées avant d’arriver aux services métier.',
     'Les erreurs backend sont converties en AppHttpError avec message UI prêt à afficher.',
-    'Le bearer token est injecté automatiquement si un access token est stocké.',
+    'Le bearer token est injecté automatiquement si une session auth valide est stockée.',
+    'La session frontend repose sur le JWT d’accès stocké dans ytellerie.auth_session.',
+    'La deconnexion purge uniquement la session locale tant qu aucune revocation serveur n est introduite.',
+    'Les vues compte affichent seulement les données issues de l’authentification tant que les endpoints profil restent fictifs.',
   ];
 
   checkBackend(): void {

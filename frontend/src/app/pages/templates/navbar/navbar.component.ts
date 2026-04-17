@@ -1,8 +1,9 @@
-import { Component, HostListener, OnInit, inject, signal } from '@angular/core';
+import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
-import { AuthApiService } from '../../../core/auth/auth-api.service';
+import { AuthAccountService } from '../../../core/auth/auth-account.service';
+import { AuthRedirectService } from '../../../core/auth/auth-redirect.service';
 import { AuthSessionService } from '../../../core/auth/auth-session.service';
 
 @Component({
@@ -13,13 +14,18 @@ import { AuthSessionService } from '../../../core/auth/auth-session.service';
   styleUrls: ['./navbar.component.scss'],
 })
 export class NavbarComponent implements OnInit {
-  private readonly authApiService = inject(AuthApiService);
+  private readonly authAccountService = inject(AuthAccountService);
+  private readonly authRedirectService = inject(AuthRedirectService);
   protected readonly authSessionService = inject(AuthSessionService);
-  private readonly router = inject(Router);
 
   isScrolled = false;
   isMobileMenuOpen = false;
   protected readonly isLoggingOut = signal(false);
+  protected readonly currentUser = computed(() => this.authSessionService.currentUser());
+  protected readonly dashboardLink = computed(() => {
+    const user = this.currentUser();
+    return user ? this.authRedirectService.getPostAuthUrl(user) : null;
+  });
 
   navLinks = [
     { label: 'Fonctionnalités', anchor: '#features' },
@@ -53,26 +59,13 @@ export class NavbarComponent implements OnInit {
   protected logout(): void {
     this.closeMobileMenu();
 
-    const session = this.authSessionService.currentSession();
-    if (!session) {
-      this.authSessionService.clearSession();
-      void this.router.navigateByUrl('/connexion');
-      return;
-    }
-
     this.isLoggingOut.set(true);
 
-    this.authApiService
-      .logout(session.refreshToken)
+    this.authAccountService
+      .logout()
       .pipe(
-        finalize(() => {
-          this.isLoggingOut.set(false);
-          this.authSessionService.clearSession();
-          void this.router.navigateByUrl('/connexion');
-        }),
+        finalize(() => this.isLoggingOut.set(false)),
       )
-      .subscribe({
-        error: () => undefined,
-      });
+      .subscribe();
   }
 }

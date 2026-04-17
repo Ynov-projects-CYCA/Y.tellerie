@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { ApiClient } from '../http/api-client.service';
 import {
   AuthResponse,
+  ChangePasswordPayload,
   ForgotPasswordPayload,
   LoginPayload,
   RegisterPayload,
@@ -46,9 +47,10 @@ export class AuthApiService {
     );
   }
 
-  logout(refreshToken: string): Observable<void> {
-    return this.apiClient.post<void, { refreshToken: string }>('/auth/logout', {
-      refreshToken,
-    });
+  changePassword(payload: ChangePasswordPayload): Observable<void> {
+    return this.apiClient.patch<void, ChangePasswordPayload>(
+      '/auth/change-password',
+      payload,
+    );
   }
 }

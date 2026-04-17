@@ -1,10 +1,14 @@
 import { TestBed } from '@angular/core/testing';
+import { Component } from '@angular/core';
 import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthApiService } from '../../../core/auth/auth-api.service';
 import { AppHttpError } from '../../../core/http/models/app-http-error.model';
 import { ResetPasswordPageComponent } from './reset-password-page.component';
+
+@Component({ standalone: true, template: '' })
+class DummyRouteComponent {}
 
 describe('ResetPasswordPageComponent', () => {
   const authApiService = {
@@ -17,7 +21,7 @@ describe('ResetPasswordPageComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ResetPasswordPageComponent],
       providers: [
-        provideRouter([]),
+        provideRouter([{ path: 'connexion', component: DummyRouteComponent }]),
         {
           provide: AuthApiService,
           useValue: authApiService,

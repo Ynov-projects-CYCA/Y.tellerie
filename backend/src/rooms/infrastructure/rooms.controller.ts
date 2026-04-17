@@ -8,6 +8,7 @@ import {
   Body,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateRoomDto } from '@/rooms/application/dtos/create-room.dto';
 import { UpdateRoomDto } from '@/rooms/application/dtos/update-room.dto';
@@ -20,6 +21,10 @@ import { ListRoomsUseCase } from '@/rooms/application/use-cases/list-rooms.use-c
 import { CheckoutRoomUseCase } from '@/rooms/application/use-cases/checkout-room.use-case';
 import { CleanRoomUseCase } from '@/rooms/application/use-cases/clean-room.use-case';
 import { CheckinRoomUseCase } from '@/rooms/application/use-cases/checkin-room.use-case';
+import { Roles } from '@/auth/infrastructure/decorators';
+import { JwtAuthGuard } from '@/auth/infrastructure/guards/jwt-auth.guard';
+import { RolesGuard } from '@/auth/infrastructure/guards/roles.guard';
+import { Role } from '@/shared/model';
 
 @Controller('rooms')
 export class RoomsController {
@@ -36,6 +41,8 @@ export class RoomsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.PERSONNEL)
   async create(@Body() dto: CreateRoomDto): Promise<RoomResponseDto> {
     const room = await this.createRoomUseCase.execute(dto);
     return RoomResponseDto.fromDomain(room);
@@ -54,6 +61,8 @@ export class RoomsController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.PERSONNEL)
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateRoomDto,
@@ -64,25 +73,33 @@ export class RoomsController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.PERSONNEL)
   async remove(@Param('id') id: string): Promise<void> {
     await this.deleteRoomUseCase.execute(id);
   }
 
-
-
+  // Les mutations d'exploitation hoteliere restent reservees au personnel.
+  // Les parcours de consultation ou de reservation publique demeurent ouverts.
   @Post(':id/checkout')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.PERSONNEL)
   async checkout(@Param('id') id: string): Promise<RoomResponseDto> {
     const room = await this.checkoutRoomUseCase.execute(id);
     return RoomResponseDto.fromDomain(room);
   }
 
   @Post(':id/clean')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.PERSONNEL)
   async clean(@Param('id') id: string): Promise<RoomResponseDto> {
     const room = await this.cleanRoomUseCase.execute(id);
     return RoomResponseDto.fromDomain(room);
   }
 
   @Post(':id/checkin')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.PERSONNEL)
   async checkin(@Param('id') id: string): Promise<RoomResponseDto> {
     const room = await this.checkinRoomUseCase.execute(id);
     return RoomResponseDto.fromDomain(room);
