@@ -12,7 +12,7 @@ import { Password } from '@/auth/domain';
 
 export class InvalidPasswordResetTokenError extends Error {
   constructor() {
-    super('Invalid or expired password reset token.');
+    super('Le jeton de reinitialisation du mot de passe est invalide ou expire.');
   }
 }
 

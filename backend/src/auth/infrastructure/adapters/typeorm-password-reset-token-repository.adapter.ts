@@ -6,7 +6,7 @@ import { PasswordResetToken, UserId } from '@/auth/domain';
 import {
   PasswordResetTokenOrmEntity,
   PasswordResetTokenSchema,
-} from '../persistence/typeorm/password-reset-token.schema';
+} from '@/auth/infrastructure/persistence/typeorm/password-reset-token.schema';
 
 @Injectable()
 export class TypeOrmPasswordResetTokenRepository

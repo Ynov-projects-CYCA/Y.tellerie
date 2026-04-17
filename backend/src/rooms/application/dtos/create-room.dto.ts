@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsString, IsNumber, IsEnum, Min, Max } from 'class-validator';
-import { RoomType } from '../../domain/room-type.vo';
+import { RoomType } from '@/rooms/domain/room-type.vo';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateRoomDto {

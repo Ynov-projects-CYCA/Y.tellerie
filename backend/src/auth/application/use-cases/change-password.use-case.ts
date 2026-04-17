@@ -9,13 +9,13 @@ import { UserId, Password } from '@/auth/domain';
 
 export class UserNotFoundError extends Error {
   constructor(userId: string) {
-    super(`User with id ${userId} not found.`);
+    super(`Utilisateur introuvable pour l'identifiant ${userId}.`);
   }
 }
 
 export class InvalidOldPasswordError extends Error {
   constructor() {
-    super('The old password does not match.');
+    super("L'ancien mot de passe ne correspond pas.");
   }
 }
 

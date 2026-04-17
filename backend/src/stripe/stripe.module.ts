@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BookingsModule } from '../bookings/bookings.module';
+import { BookingsModule } from '@/bookings/bookings.module';
 import {
   PAYMENT_REPOSITORY,
 } from './application/ports/payment-repository.port';

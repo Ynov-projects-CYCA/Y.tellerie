@@ -1,4 +1,4 @@
-import { RoomResponseDto } from '../../../rooms/application/dtos/room-response.dto';
+import { RoomResponseDto } from '@/rooms/application/dtos/room-response.dto';
 
 export class BookingSummaryResponseDto {
   room!: RoomResponseDto;

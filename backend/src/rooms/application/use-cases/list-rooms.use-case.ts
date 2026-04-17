@@ -2,8 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   ROOM_REPOSITORY,
   RoomRepositoryPort,
-} from '../ports/room-repository.port';
-import { Room } from '../../domain/room.entity';
+} from '@/rooms/application/ports/room-repository.port';
+import { Room } from '@/rooms/domain/room.entity';
 
 @Injectable()
 export class ListRoomsUseCase {

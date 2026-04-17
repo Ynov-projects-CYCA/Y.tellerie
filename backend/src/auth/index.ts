@@ -6,4 +6,4 @@ export * from './application/use-cases';
 export * from './domain';
 export * from './infrastructure/adapters';
 export * from './infrastructure/guards';
-export * from '../shared/model';
+export * from '@/shared/model';

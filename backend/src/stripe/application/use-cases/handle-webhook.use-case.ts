@@ -3,15 +3,15 @@ import Stripe from 'stripe';
 import {
   BOOKING_REPOSITORY,
   BookingRepositoryPort,
-} from '../../../bookings/application/ports/booking-repository.port';
+} from '@/bookings/application/ports/booking-repository.port';
 import {
   IPaymentProvider,
   IPaymentProvider as IPaymentProviderSymbol,
-} from '../ports/payment-provider.port';
+} from '@/stripe/application/ports/payment-provider.port';
 import {
   PAYMENT_REPOSITORY,
   PaymentRepositoryPort,
-} from '../ports/payment-repository.port';
+} from '@/stripe/application/ports/payment-repository.port';
 
 @Injectable()
 export class HandleWebhookUseCase {

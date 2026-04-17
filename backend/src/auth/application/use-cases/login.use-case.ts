@@ -12,13 +12,15 @@ import {
 
 export class InvalidCredentialsError extends UnauthorizedException {
   constructor() {
-    super('Invalid email or password.');
+    super('Email ou mot de passe invalide.');
   }
 }
 
 export class UserCannotLoginError extends ForbiddenException {
   constructor() {
-    super('Account is not active. Verify your email before logging in.');
+    super(
+      "Le compte n'est pas actif. Verifiez votre adresse e-mail avant de vous connecter.",
+    );
   }
 }
 

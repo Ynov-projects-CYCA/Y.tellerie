@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PaymentRepositoryPort } from '../../application/ports/payment-repository.port';
-import { Payment } from '../../domain/payment.entity';
-import { PaymentStatus } from '../../domain/payment-status.vo';
-import { Money } from '../../domain/money.vo';
-import { PaymentEntity } from '../persistence/payment.entity';
+import { PaymentRepositoryPort } from '@/stripe/application/ports/payment-repository.port';
+import { Payment } from '@/stripe/domain/payment.entity';
+import { PaymentStatus } from '@/stripe/domain/payment-status.vo';
+import { Money } from '@/stripe/domain/money.vo';
+import { PaymentEntity } from '@/stripe/infrastructure/persistence/payment.entity';
 
 @Injectable()
 export class TypeOrmPaymentRepositoryAdapter implements PaymentRepositoryPort {
