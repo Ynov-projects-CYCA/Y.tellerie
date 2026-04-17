@@ -1,7 +1,9 @@
 <app-auth-shell
   [title]="'Creer un compte'"
   [subtitle]="'Rejoignez-nous pour reserver vos sejours'"
-  [badgeText]="'OK'"
+  [badgeText]="'YT'"
+  [topActionLabel]="'Se connecter'"
+  [topActionLink]="'/connexion'"
 >
   <form [formGroup]="registerForm" (ngSubmit)="submit()">
     <div class="auth-grid">

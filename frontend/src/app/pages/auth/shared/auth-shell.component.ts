@@ -10,5 +10,7 @@ export class AuthShellComponent {
   readonly title = input.required<string>();
   readonly subtitle = input.required<string>();
   readonly compact = input(false);
-  readonly badgeText = input('GH');
+  readonly badgeText = input('YT');
+  readonly topActionLabel = input('Retour a l accueil');
+  readonly topActionLink = input('/');
 }

@@ -232,10 +232,10 @@ export class AuthController {
     }
   }
 
-  @Patch('modify-password')
+  @Patch('change-password')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AuthGuard('jwt'))
-  @ApiOperation({ summary: 'Modify the current user password' })
+  @ApiOperation({ summary: 'Modifier le mot de passe de l utilisateur connecte' })
   @ApiBearerAuth()
   @ApiResponse({
     status: HttpStatus.NO_CONTENT,
@@ -245,7 +245,7 @@ export class AuthController {
     status: HttpStatus.UNAUTHORIZED,
     description: 'Utilisateur non authentifie.',
   })
-  async modifyPassword(
+  async changePassword(
     @Request() req: { user: UserAggregate },
     @Body() changePasswordDto: ChangePasswordDto,
   ): Promise<void> {
@@ -262,29 +262,6 @@ export class AuthController {
 
       throw error;
     }
-  }
-
-  @Patch('change-password')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(AuthGuard('jwt'))
-  @ApiOperation({ summary: 'Deprecated alias for modify-password' })
-  @ApiBearerAuth()
-  async changePassword(
-    @Request() req: { user: UserAggregate },
-    @Body() changePasswordDto: ChangePasswordDto,
-  ): Promise<void> {
-    return this.modifyPassword(req, changePasswordDto);
-  }
-
-  @Post('logout')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Log out the current user' })
-  @ApiResponse({
-    status: HttpStatus.NO_CONTENT,
-    description: 'Utilisateur deconnecte avec succes.',
-  })
-  async logout(): Promise<void> {
-    return;
   }
 
   private mapUserResponse(user: UserAggregate): UserResponse {

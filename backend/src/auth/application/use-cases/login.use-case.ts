@@ -9,7 +9,6 @@ import {
   ITokenGenerator as ITokenGeneratorSymbol,
 } from '@/auth/application/ports';
 
-
 export class InvalidCredentialsError extends UnauthorizedException {
   constructor() {
     super('Email ou mot de passe invalide.');
@@ -60,6 +59,8 @@ export class LoginUseCase {
       throw new UserCannotLoginError();
     }
 
+    // Le token n'est emis qu'apres verification des credentials et du statut
+    // du compte afin d'eviter toute session exploitable pour un compte bloque.
     const accessToken = await this.tokenGenerator.generateAccessToken(user);
     return { user, accessToken };
   }

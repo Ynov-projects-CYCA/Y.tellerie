@@ -20,7 +20,10 @@
 
     <!-- Desktop CTAs -->
     <div class="nav-actions">
-      @if (authSessionService.getAccessToken()) {
+      @if (currentUser(); as user) {
+        <a [routerLink]="dashboardLink()" class="btn btn-ghost">
+          {{ user.roles.includes('personnel') ? 'Espace personnel' : 'Espace client' }}
+        </a>
         <button class="btn btn-ghost" type="button" (click)="logout()">
           {{ isLoggingOut() ? 'Deconnexion...' : 'Deconnexion' }}
         </button>
@@ -47,7 +50,14 @@
       </li>
     </ul>
     <div class="mobile-actions">
-      @if (authSessionService.getAccessToken()) {
+      @if (currentUser(); as user) {
+        <a
+          [routerLink]="dashboardLink()"
+          class="btn btn-ghost btn-full"
+          (click)="closeMobileMenu()"
+        >
+          {{ user.roles.includes('personnel') ? 'Espace personnel' : 'Espace client' }}
+        </a>
         <button class="btn btn-ghost btn-full" type="button" (click)="logout()">
           {{ isLoggingOut() ? 'Deconnexion...' : 'Deconnexion' }}
         </button>

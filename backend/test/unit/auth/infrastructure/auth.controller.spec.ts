@@ -254,11 +254,11 @@ describe('AuthController', () => {
     });
   });
 
-  describe('modifyPassword', () => {
+  describe('changePassword', () => {
     it('should change the password for the authenticated user', async () => {
       jest.spyOn(changePasswordUseCase, 'execute').mockResolvedValue(undefined);
 
-      await authController.modifyPassword(
+      await authController.changePassword(
         { user: mockUserAggregate },
         {
           oldPassword: 'oldPassword123',
@@ -267,12 +267,6 @@ describe('AuthController', () => {
       );
 
       expect(changePasswordUseCase.execute).toHaveBeenCalled();
-    });
-  });
-
-  describe('logout', () => {
-    it('should resolve without error', async () => {
-      await expect(authController.logout()).resolves.toBeUndefined();
     });
   });
 });

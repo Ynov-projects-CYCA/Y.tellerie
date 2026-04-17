@@ -24,7 +24,10 @@ En développement, `ng serve` utilise `proxy.conf.json` pour rediriger `/api/*` 
 - Les réponses de succès du backend sont attendues au format `{ data, timestamp }`.
 - La couche HTTP frontend retire automatiquement l’enveloppe et expose directement `data`.
 - Les erreurs backend sont converties en `AppHttpError` avec un message prêt pour l’UI.
-- Le bearer token est injecté automatiquement si `ytellerie.access_token` est présent dans le stockage local.
+- Le bearer token est injecté automatiquement si une session valide est présente dans `ytellerie.auth_session`.
+- La validité de session repose sur le JWT d’accès courant: présence du token, décodage possible et date d’expiration non dépassée.
+- La déconnexion purge actuellement uniquement la session locale. Si une révocation serveur devient nécessaire, il faudra introduire une vraie stratégie de session côté backend.
+- Les vues de compte affichent uniquement les informations disponibles dans les données d’authentification. Les endpoints de profil métier client/personnel restent fictifs à ce stade.
 
 ## Point CORS
 
