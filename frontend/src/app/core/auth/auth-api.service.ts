@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiClient } from '../http/api-client.service';
 import {
+  AuthenticatedUser,
   AuthResponse,
   ForgotPasswordPayload,
   LoginPayload,
@@ -50,5 +51,12 @@ export class AuthApiService {
     return this.apiClient.post<void, { refreshToken: string }>('/auth/logout', {
       refreshToken,
     });
+  }
+
+  updateProfile(payload: Partial<AuthenticatedUser>): Observable<AuthenticatedUser> {
+    return this.apiClient.patch<AuthenticatedUser, Partial<AuthenticatedUser>>(
+      '/users/profile',
+      payload,
+    );
   }
 }

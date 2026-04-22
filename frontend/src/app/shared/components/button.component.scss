@@ -1,15 +1,12 @@
-@use 'styles/variables' as *;
-@use 'styles/mixins' as *;
-
 :host {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: $spacing-2;
+  gap: var(--spacing-2);
   padding: 0.5rem 1.125rem;
   font-size: 0.875rem;
   font-weight: 500;
-  border-radius: $radius-sm;
+  border-radius: var(--radius-sm);
   text-decoration: none;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -28,42 +25,42 @@
 
 // ── Variants ───────────────────────────────────────
 :host[variant='primary'] {
-  background: $color-amber-800;
-  color: $color-amber-50;
-  border-color: $color-amber-900;
+  background: var(--color-amber-800);
+  color: var(--color-amber-50);
+  border-color: var(--color-amber-900);
 
   &:hover:not(:disabled) {
-    background: $color-amber-900;
+    background: var(--color-amber-900);
     transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba($color-amber-900, 0.35);
+    box-shadow: 0 6px 18px rgba(120, 53, 15, 0.35); // Hardcoded color-amber-900 rgb
   }
 }
 
 :host[variant='outline'] {
-  color: $color-amber-900;
-  border-color: $color-amber-800;
+  color: var(--color-amber-900);
+  border-color: var(--color-amber-800);
   background: transparent;
 
-  &:hover:not(:disabled) { background: $color-amber-100; }
+  &:hover:not(:disabled) { background: var(--color-amber-100); }
 }
 
 :host[variant='ghost'] {
-  color: $color-amber-900;
+  color: var(--color-amber-900);
   background: transparent;
 
   &:hover:not(:disabled) {
-    background: $color-amber-100;
-    color: $color-amber-950;
+    background: var(--color-amber-100);
+    color: var(--color-amber-950);
   }
 }
 
 :host[variant='white'] {
   background: #fff;
-  color: $color-amber-900;
+  color: var(--color-amber-900);
   border-color: #fff;
 
   &:hover:not(:disabled) {
-    background: $color-amber-50;
+    background: var(--color-amber-50);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0,0,0,0.2);
   }
@@ -85,7 +82,7 @@
   height: 52px;
   padding: 0 2rem;
   font-size: 1rem;
-  border-radius: $radius-md;
+  border-radius: var(--radius-md);
 }
 
 :host[size='full'] {

@@ -10,21 +10,24 @@ import { SearchAvailabilityUseCase } from './application/use-cases/search-availa
 import { GetBookingSummaryUseCase } from './application/use-cases/get-booking-summary.use-case';
 import { ConfirmBookingUseCase } from './application/use-cases/confirm-booking.use-case';
 import { GetBookingUseCase } from './application/use-cases/get-booking.use-case';
+import { ListBookingsUseCase } from './application/use-cases/list-bookings.use-case';
 
 @Module({
   imports: [TypeOrmModule.forFeature([BookingEntity]), RoomsModule],
   controllers: [BookingsController],
   providers: [
-    BookingFactory,
     {
       provide: BOOKING_REPOSITORY,
       useClass: TypeOrmBookingRepositoryAdapter,
     },
+    BookingFactory,
     SearchAvailabilityUseCase,
     GetBookingSummaryUseCase,
     ConfirmBookingUseCase,
     GetBookingUseCase,
+    ListBookingsUseCase,
   ],
   exports: [BOOKING_REPOSITORY],
 })
+
 export class BookingsModule {}

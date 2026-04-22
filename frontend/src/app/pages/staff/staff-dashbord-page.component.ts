@@ -5,11 +5,11 @@ import { AuthApiService } from '../../core/auth/auth-api.service';
 import { AuthSessionService } from '../../core/auth/auth-session.service';
 
 @Component({
-  selector: 'app-personnel-space-page',
-  templateUrl: './personnel-space-page.component.html',
-  styleUrl: './personnel-space-page.component.scss',
+  selector: 'app-staff-page',
+  templateUrl: './staff-dashbord-page.component.html',
+  styleUrl: './staff-dashbord-page.scss',
 })
-export class PersonnelSpacePageComponent {
+export class StaffDashboardPageComponent {
   private readonly authApiService = inject(AuthApiService);
   private readonly authSessionService = inject(AuthSessionService);
   private readonly router = inject(Router);

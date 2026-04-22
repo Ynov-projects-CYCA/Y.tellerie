@@ -1,8 +1,8 @@
 <app-auth-shell
   [title]="'Creer un compte'"
   [subtitle]="'Rejoignez-nous pour reserver vos sejours'"
-  [badgeText]="'OK'"
 >
+  <svg lucideUserPlus badgeIcon></svg>
   <form [formGroup]="registerForm" (ngSubmit)="submit()">
     <div class="auth-grid">
       <div class="auth-field">

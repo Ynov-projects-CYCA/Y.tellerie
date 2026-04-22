@@ -57,6 +57,22 @@ export class AuthSessionService {
     this.sessionState.set(null);
   }
 
+  updateUser(user: AuthenticatedUser): void {
+    const current = this.sessionState();
+    if (!current) return;
+
+    const updatedSession: AuthSession = {
+      ...current,
+      user,
+    };
+
+    this.getStorage(updatedSession.persistence)?.setItem(
+      this.storageKey,
+      JSON.stringify(updatedSession),
+    );
+    this.sessionState.set(updatedSession);
+  }
+
   private restoreSession(): AuthSession | null {
     const storages: SessionPersistence[] = ['session', 'local'];
 

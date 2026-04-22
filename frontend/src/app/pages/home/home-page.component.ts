@@ -9,9 +9,8 @@ import {
   LucideShieldCheck,
   LucideClock,
 } from '@lucide/angular';
-import { ButtonComponent } from '../../shared/components/button.component';
-import { CardComponent } from '../../shared/components/card.component';
-
+import {ButtonComponent} from '../../shared/components/button.component';
+import {CardComponent} from '../../shared/components/card.component';
 interface Feature {
   icon: any;
   title: string;
@@ -33,10 +32,10 @@ interface Benefit {
     ButtonComponent,
     CardComponent,
   ],
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss'],
+  templateUrl: './home-page.component.html',
+  styleUrls: ['./home-page.component.scss'],
 })
-export class HomeComponent {
+export class HomePageComponent {
   features: Feature[] = [
     {
       icon: LucideCalendar,

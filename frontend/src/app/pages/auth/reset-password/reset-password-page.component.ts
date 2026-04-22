@@ -1,15 +1,15 @@
-import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { Component, OnDestroy, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, ValidationErrors, ValidatorFn, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
-import { AuthApiService } from '../../../core/auth/auth-api.service';
-import { AppHttpError } from '../../../core/http/models/app-http-error.model';
+import { LucideKeyRound } from '@lucide/angular';
 import { AuthShellComponent } from '../shared/auth-shell.component';
+import {AuthApiService} from '../../../core/auth/auth-api.service';
+import {AppHttpError} from '../../../core/http/models/app-http-error.model';
 
 @Component({
   selector: 'app-reset-password-page',
-  imports: [ReactiveFormsModule, RouterLink, AuthShellComponent],
+  imports: [ReactiveFormsModule, RouterLink, AuthShellComponent, LucideKeyRound],
   templateUrl: './reset-password-page.component.html',
 })
 export class ResetPasswordPageComponent implements OnDestroy {
