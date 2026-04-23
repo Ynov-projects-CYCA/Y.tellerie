@@ -1,13 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import {BOOKING_REPOSITORY, BookingRepositoryPort} from "@/bookings/application/ports/booking-repository.port";
 import {ROOM_REPOSITORY, RoomRepositoryPort} from "@/rooms/application/ports/room-repository.port";
-import {Room} from "@/rooms/domain/room.entity";
-import {Booking} from "@/bookings/domain/booking.entity";
-
-export interface ListBookingsResult {
-  booking: Booking;
-  room: Room;
-}
+import { ListBookingsResult } from "@/shared/model";
 
 @Injectable()
 export class ListBookingsUseCase {
@@ -24,7 +18,6 @@ export class ListBookingsUseCase {
     const results = await Promise.all(
       bookings.map(async (booking) => {
         const room = await this.roomRepository.findById(booking.getRoomId());
-        // Normalement la chambre existe toujours si la réservation existe
         return { booking, room: room! };
       })
     );

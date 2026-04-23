@@ -1,0 +1,16 @@
+<div class="field-group">
+  @if (label()) {
+    <label [for]="id()" class="field-label">{{ label() }}</label>
+  }
+  <input
+    [id]="id()"
+    [type]="type()"
+    [formControl]="control()"
+    [placeholder]="placeholder()"
+    class="field-input"
+    [class.field-input--error]="control().invalid && control().touched"
+  />
+  @if (control().invalid && control().touched) {
+    <span class="field-error">Champ invalide</span>
+  }
+</div>

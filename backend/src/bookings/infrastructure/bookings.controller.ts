@@ -23,9 +23,9 @@ import {
   GetBookingUseCase,
 } from '@/bookings/application/use-cases/get-booking.use-case';
 import {
-  ListBookingsResult,
   ListBookingsUseCase,
 } from '@/bookings/application/use-cases/list-bookings.use-case';
+import { ListBookingsResult } from "@/shared/model";
 import { JwtAuthGuard } from '@/auth/infrastructure/guards/jwt-auth.guard';
 import { CurrentUser } from '@/auth/infrastructure/decorators/current-user.decorator';
 import { UserAggregate } from '@/auth/domain/user.aggregate';

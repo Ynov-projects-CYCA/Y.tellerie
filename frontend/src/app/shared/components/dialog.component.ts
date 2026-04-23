@@ -6,18 +6,7 @@ import { LucideX } from '@lucide/angular';
   selector: 'app-dialog',
   standalone: true,
   imports: [CommonModule, LucideX],
-  template: `
-    <div class="dialog-overlay" (click)="onOverlayClick($event)">
-      <div class="dialog-content" [class.dialog-content--large]="size() === 'lg'" [class.dialog-content--small]="size() === 'sm'">
-        <button class="dialog-close" (click)="close.emit()" aria-label="Fermer">
-          <svg lucideX></svg>
-        </button>
-        <div class="dialog-inner">
-          <ng-content></ng-content>
-        </div>
-      </div>
-    </div>
-  `,
+  templateUrl: './dialog.component.html',
   styleUrl: './dialog.component.scss'
 })
 export class DialogComponent {
