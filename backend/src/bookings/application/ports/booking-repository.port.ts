@@ -9,6 +9,7 @@ export interface BookingRepositoryPort {
     checkInDate: Date,
     checkOutDate: Date,
   ): Promise<Booking[]>;
+  findByGuestEmail(email: string): Promise<Booking[]>;
 }
 
 export const BOOKING_REPOSITORY = Symbol('BOOKING_REPOSITORY');

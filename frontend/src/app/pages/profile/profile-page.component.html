@@ -1,0 +1,94 @@
+<div class="profile-container">
+  <app-card class="profile-card">
+    <app-card-header class="profile-header">
+      <div class="profile-avatar">
+        {{ user()?.firstname?.charAt(0) }}{{ user()?.lastname?.charAt(0) }}
+      </div>
+      <div class="profile-title">
+        <app-card-title>Mon Profil</app-card-title>
+        <app-card-description>Gérez vos informations personnelles et vos coordonnées.</app-card-description>
+      </div>
+    </app-card-header>
+
+    <app-card-content>
+      <form [formGroup]="profileForm" (ngSubmit)="submit()" class="profile-form">
+        <div class="form-grid">
+          <div class="field-group">
+            <label class="field-label">
+              <svg lucideUser class="field-label-icon"></svg>
+              Prénom
+            </label>
+            <input
+              type="text"
+              formControlName="firstname"
+              class="field-input"
+              [class.is-invalid]="hasError('firstname')"
+              placeholder="Votre prénom"
+            />
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">
+              <svg lucideUser class="field-label-icon"></svg>
+              Nom
+            </label>
+            <input
+              type="text"
+              formControlName="lastname"
+              class="field-input"
+              [class.is-invalid]="hasError('lastname')"
+              placeholder="Votre nom"
+            />
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">
+              <svg lucideMail class="field-label-icon"></svg>
+              Email
+            </label>
+            <input
+              type="email"
+              formControlName="email"
+              class="field-input"
+              [class.is-invalid]="hasError('email')"
+              placeholder="votre@email.com"
+            />
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">
+              <svg lucidePhone class="field-label-icon"></svg>
+              Téléphone
+            </label>
+            <input
+              type="tel"
+              formControlName="phone"
+              class="field-input"
+              [class.is-invalid]="hasError('phone')"
+              placeholder="+33 6 12 34 56 78"
+            />
+          </div>
+        </div>
+
+        <div class="form-feedback" *ngIf="errorMessage() || isSuccess()">
+          <p class="error-message" *ngIf="errorMessage()">{{ errorMessage() }}</p>
+          <p class="success-message" *ngIf="isSuccess()">Profil mis à jour avec succès !</p>
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="submit"
+            appButton
+            variant="primary"
+            [disabled]="isSubmitting() || profileForm.invalid"
+            class="submit-btn"
+          >
+            <svg lucideLoader2 *ngIf="isSubmitting()" class="animate-spin"></svg>
+            <svg lucideSave *ngIf="!isSubmitting()"></svg>
+            {{ isSubmitting() ? 'Enregistrement...' : 'Enregistrer les modifications' }}
+          </button>
+        </div>
+      </form>
+    </app-card-content>
+  </app-card>
+</div>

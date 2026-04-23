@@ -2,8 +2,8 @@
   [title]="'Validation de votre email'"
   [subtitle]="'Nous confirmons votre compte Ytellerie'"
   [compact]="true"
-  [badgeText]="'OK'"
 >
+  <svg lucideMailCheck badgeIcon></svg>
   @if (isLoading()) {
     <p class="auth-feedback">Verification en cours...</p>
   } @else if (isSuccess()) {

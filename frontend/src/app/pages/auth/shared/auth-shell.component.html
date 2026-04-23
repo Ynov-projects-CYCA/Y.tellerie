@@ -1,21 +1,11 @@
 <section class="auth-view">
   <div class="auth-layout">
-    <header class="auth-layout__header">
-      <a class="auth-layout__brand" routerLink="/">
-        <span class="auth-layout__logo">GH</span>
-        <strong class="auth-layout__title">Grand Hotel Manager</strong>
-      </a>
-
-      <a class="auth-layout__back" routerLink="/">
-        <span>←</span>
-        <span>Retour</span>
-      </a>
-    </header>
-
     <main class="auth-layout__main">
       <section class="auth-card" [class.auth-card--compact]="compact()">
         <div class="auth-card__hero">
-          <div class="auth-card__badge">{{ badgeText() }}</div>
+          <div class="auth-card__badge">
+            <ng-content select="[badgeIcon]" />
+          </div>
           <h1>{{ title() }}</h1>
           <p>{{ subtitle() }}</p>
         </div>

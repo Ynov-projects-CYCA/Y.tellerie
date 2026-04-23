@@ -1,60 +1,123 @@
-<nav class="nav" [class.nav--scrolled]="isScrolled">
+<nav class="nav"
+     [class.nav--scrolled]="isScrolled"
+     [class.nav--customer]="currentMode() === 'client'"
+     [class.nav--staff]="currentMode() === 'staff'">
+
   <div class="nav-container">
 
-    <!-- Logo -->
-    <a routerLink="/" class="nav-brand">
-      <div class="brand-icon-wrapper">
-        <span class="brand-icon" aria-hidden="true">⌂</span>
+    <!-- LEFT -->
+    <div class="nav-left">
+
+      <!-- Logo Section -->
+      <div class="nav-brand-group">
+        <a [routerLink]="
+            currentMode() === 'staff' ? '/staff' :
+            currentMode() === 'client' ? '/client' : '/'
+          "
+           class="nav-brand">
+
+          <div class="brand-icon-wrapper">
+            <svg lucideHouse class="brand-icon" *ngIf="currentMode() === 'staff'"></svg>
+            <svg lucideHotel class="brand-icon" *ngIf="currentMode() !== 'staff'"></svg>
+          </div>
+
+          <div class="brand-text">
+            <span class="brand-name">Ytellerie</span>
+            <span class="brand-subtitle" *ngIf="currentMode() === 'client'">Espace Client</span>
+            <span class="brand-subtitle" *ngIf="currentMode() === 'staff'">Espace Personnel</span>
+          </div>
+        </a>
       </div>
-      <span class="brand-name">Ytellerie</span>
-    </a>
 
-    <!-- Desktop Nav Links -->
-    <ul class="nav-menu">
-      <li *ngFor="let link of navLinks">
-        <button class="nav-link" (click)="scrollTo(link.anchor)">
-          {{ link.label }}
-        </button>
-      </li>
-    </ul>
+    </div>
 
-    <!-- Desktop CTAs -->
+    <!-- CENTER (Home Page Only) -->
+    <div class="nav-center" *ngIf="isHomePage()">
+      <ul class="nav-menu">
+        <li *ngFor="let link of navLinks">
+          <button class="nav-link" (click)="scrollTo(link.anchor)">{{ link.label }}</button>
+        </li>
+      </ul>
+    </div>
+
+    <!-- RIGHT -->
     <div class="nav-actions">
-      @if (authSessionService.getAccessToken()) {
-        <button class="btn btn-ghost" type="button" (click)="logout()">
-          {{ isLoggingOut() ? 'Deconnexion...' : 'Deconnexion' }}
+
+      <!-- Customer Menu -->
+      <ul class="nav-menu" *ngIf="currentMode() === 'client'">
+        <li><a routerLink="/client" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+               class="nav-link">
+          <svg lucideCalendar class="link-icon"></svg>
+          Réserver</a></li>
+        <li><a routerLink="/client/historique" routerLinkActive="active" class="nav-link">
+          <svg lucideHistory class="link-icon"></svg>
+          Historique</a></li>
+      </ul>
+
+      <!-- Staff Menu -->
+      <ul class="nav-menu" *ngIf="currentMode() === 'staff'">
+        <li><a routerLink="/staff" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">
+          <svg lucideHouse class="link-icon"></svg>
+          Dashboard</a></li>
+        <li><a routerLink="/staff/chambres" routerLinkActive="active" class="nav-link">
+          <svg lucideBed class="link-icon"></svg>
+          Chambres</a></li>
+        <li><a routerLink="/staff/reservations" routerLinkActive="active" class="nav-link">
+          <svg lucideCalendar class="link-icon"></svg>
+          Réservations</a></li>
+      </ul>
+
+      <!-- Divider for Staff and Customer -->
+      <div class="nav-divider" *ngIf="currentMode() === 'staff' || currentMode() === 'client'"></div>
+
+      <!-- Admin Link (Staff only) -->
+<!--      <ul class="nav-menu" *ngIf="currentMode() === 'staff' && isAdmin()">-->
+<!--        <li><a routerLink="/staff/admin" routerLinkActive="active" class="nav-link">-->
+<!--          <svg lucideShield class="link-icon"></svg>-->
+<!--          Admin</a></li>-->
+<!--      </ul>-->
+
+
+      <!-- Public Actions -->
+      <ng-container *ngIf="currentMode() === 'public'">
+        <a routerLink="/connexion" appButton variant="ghost">Connexion</a>
+        <a routerLink="/connexion" appButton variant="primary">Commencer</a>
+      </ng-container>
+
+      <!-- Profile Dropdown -->
+      <div class="profile-dropdown"
+           *ngIf="currentMode() !== 'public' && currentUser() as user">
+        <button (click)="toggleProfileMenu(); $event.stopPropagation()" appButton variant="ghost" class="profile-trigger">
+          <svg lucideUser class="trigger-icon"></svg>
+          <span class="trigger-name">{{ user.firstname }} {{ user.lastname }}</span>
+          <svg lucideChevronDown class="trigger-chevron" [class.is-open]="isProfileMenuOpen"></svg>
         </button>
-      } @else {
-        <a routerLink="/connexion" class="btn btn-ghost">Connexion</a>
-        <a routerLink="/connexion" class="btn btn-primary">Commencer</a>
-      }
+
+        <!-- Dropdown -->
+        <div class="dropdown-menu" *ngIf="isProfileMenuOpen">
+
+          <a routerLink="/profile" class="menu-item" (click)="toggleProfileMenu()">
+            <svg lucideUser class="item-icon"></svg>
+            Mon Profil
+          </a>
+
+          <div class="menu-divider"></div>
+
+          <button class="menu-item menu-item--danger" (click)="logout()">
+            <svg lucideLogOut class="item-icon"></svg>
+            Déconnexion
+          </button>
+
+        </div>
+      </div>
+
     </div>
 
-    <!-- Mobile Hamburger -->
-    <button class="menu-toggle" (click)="toggleMobileMenu()" [class.is-open]="isMobileMenuOpen" aria-label="Menu">
-      <span *ngIf="!isMobileMenuOpen" class="toggle-icon" aria-hidden="true">☰</span>
-      <span *ngIf="isMobileMenuOpen" class="toggle-icon" aria-hidden="true">✕</span>
+    <!-- Mobile -->
+    <button class="menu-toggle" (click)="toggleMobileMenu()" [class.is-open]="isMobileMenuOpen">
+      <svg *ngIf="!isMobileMenuOpen" lucideMenu class="toggle-icon"></svg>
+      <svg *ngIf="isMobileMenuOpen" lucideX class="toggle-icon"></svg>
     </button>
-  </div>
 
-  <!-- Mobile Menu Drawer -->
-  <div class="mobile-drawer" [class.is-open]="isMobileMenuOpen">
-    <ul class="mobile-nav-list">
-      <li *ngFor="let link of navLinks">
-        <button class="mobile-nav-link" (click)="scrollTo(link.anchor)">
-          {{ link.label }}
-        </button>
-      </li>
-    </ul>
-    <div class="mobile-actions">
-      @if (authSessionService.getAccessToken()) {
-        <button class="btn btn-ghost btn-full" type="button" (click)="logout()">
-          {{ isLoggingOut() ? 'Deconnexion...' : 'Deconnexion' }}
-        </button>
-      } @else {
-        <a routerLink="/connexion" class="btn btn-ghost btn-full" (click)="closeMobileMenu()">Connexion</a>
-        <a routerLink="/connexion" class="btn btn-primary btn-full" (click)="closeMobileMenu()">Commencer</a>
-      }
-    </div>
   </div>
 </nav>

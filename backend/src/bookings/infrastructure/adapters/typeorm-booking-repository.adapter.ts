@@ -62,6 +62,16 @@ export class TypeOrmBookingRepositoryAdapter implements BookingRepositoryPort {
     return entities.map((entity) => this.toDomain(entity));
   }
 
+  async findByGuestEmail(email: string): Promise<Booking[]> {
+    const entities = await this.repository.find({
+      where: { guestEmail: email },
+      order: { createdAt: 'DESC' },
+    });
+
+    return entities.map((entity) => this.toDomain(entity));
+  }
+
+
   private toEntity(booking: Booking): BookingEntity {
     const entity = new BookingEntity();
     entity.id = booking.getId();

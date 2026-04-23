@@ -1,0 +1,122 @@
+<div class="history-container">
+  <header class="page-header">
+    <h1>Mon Historique</h1>
+    <p>Gérez vos réservations passées et à venir.</p>
+  </header>
+
+  @if (bookings$ | async; as bookings) {
+    @if (bookings.length > 0) {
+      <div class="booking-list">
+        @for (booking of bookings; track booking.id) {
+          <app-card class="booking-card">
+            <div class="card-header">
+              <app-badge [variant]="getStatusVariant(booking.status)">
+                @switch (booking.status) {
+                  @case ('CONFIRMED') { <svg lucideCheckCircle class="icon-sm"></svg> }
+                  @case ('PENDING_PAYMENT') { <svg lucideClock class="icon-sm"></svg> }
+                  @case ('PAYMENT_FAILED') { <svg lucideXCircle class="icon-sm"></svg> }
+                  @case ('CANCELED') { <svg lucideXCircle class="icon-sm"></svg> }
+                  @default { <svg lucideInfo class="icon-sm"></svg> }
+                }
+                {{ getStatusLabel(booking.status) }}
+              </app-badge>
+              <span class="booking-date">Réservée le {{ booking.createdAt | date:'dd/MM/yyyy' }}</span>
+            </div>
+
+            <div class="card-content">
+              <div class="room-info">
+                <h3>Chambre {{ booking.room.roomNumber }} - {{ booking.room.type }}</h3>
+                <div class="info-item">
+                  <svg lucideCalendar class="icon-sm"></svg>
+                  <span>Du {{ booking.checkInDate | date:'dd/MM/yyyy' }} au {{ booking.checkOutDate | date:'dd/MM/yyyy' }}</span>
+                </div>
+              </div>
+
+              <div class="price-info">
+                <div class="total-price">
+                  <span class="label">Total</span>
+                  <span class="amount">{{ booking.totalPrice | currency:booking.currency }}</span>
+                </div>
+                <button appButton variant="outline" size="sm" (click)="openDetails(booking)">
+                  Détails
+                  <svg lucideChevronRight class="icon-sm"></svg>
+                </button>
+              </div>
+            </div>
+          </app-card>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <svg lucideCalendar class="empty-icon"></svg>
+        <h2>Aucune réservation</h2>
+        <p>Vous n'avez pas encore séjourné chez nous.</p>
+        <a routerLink="/client" appButton variant="primary">Réserver une chambre</a>
+      </div>
+    }
+  } @else {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Chargement...</p>
+    </div>
+  }
+</div>
+
+<!-- Modal Facture -->
+<app-dialog *ngIf="isModalOpen()" (close)="closeDetails()" size="md">
+  <div class="invoice" *ngIf="selectedBooking() as booking">
+    <div class="invoice-header">
+      <div class="brand">
+        <span class="brand-name">Y.tellerie</span>
+        <span class="invoice-title">Facture</span>
+      </div>
+      <div class="meta">
+        <p><strong>N° :</strong> {{ booking.id.substring(0, 8).toUpperCase() }}</p>
+        <p><strong>Date :</strong> {{ booking.createdAt | date:'dd/MM/yyyy' }}</p>
+      </div>
+    </div>
+
+    <div class="invoice-body">
+      <div class="invoice-grid">
+        <div class="grid-item">
+          <h4 class="section-title"><svg lucideUser class="icon-xs"></svg> Client</h4>
+          <p>{{ booking.guestFirstName }} {{ booking.guestLastName }}</p>
+          <p><svg lucideMail class="icon-xs"></svg> {{ booking.guestEmail }}</p>
+        </div>
+        <div class="grid-item">
+          <h4 class="section-title"><svg lucideMapPin class="icon-xs"></svg> Hôtel</h4>
+          <p>Y.tellerie Paris</p>
+          <p>75008 Paris</p>
+        </div>
+      </div>
+
+      <div class="invoice-table">
+        <div class="table-header">
+          <span>Description</span>
+          <span class="text-right">Montant</span>
+        </div>
+        <div class="table-row">
+          <span>
+            <strong>Chambre {{ booking.room.roomNumber }}</strong><br>
+            <small>{{ booking.room.type }} · {{ booking.nights }} nuit(s)</small>
+          </span>
+          <span class="text-right">{{ booking.totalPrice | currency:booking.currency }}</span>
+        </div>
+      </div>
+
+      <div class="invoice-total">
+        <div class="total-line total">
+          <span>Total TTC</span>
+          <span>{{ booking.totalPrice | currency:booking.currency }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="invoice-actions">
+      <button appButton variant="outline" size="sm" (click)="printInvoice()">
+        <svg lucideDownload class="icon-sm"></svg> Imprimer
+      </button>
+      <button appButton variant="primary" size="sm" (click)="closeDetails()">Fermer</button>
+    </div>
+  </div>
+</app-dialog>

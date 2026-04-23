@@ -1,0 +1,189 @@
+.history-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 120px var(--spacing-6) var(--spacing-20);
+}
+
+.page-header {
+  margin-bottom: var(--spacing-12);
+
+  h1 {
+    font-family: var(--font-serif);
+    font-size: 2.5rem;
+    color: var(--color-amber-950);
+    margin-bottom: var(--spacing-2);
+  }
+
+  p {
+    color: var(--color-amber-700);
+    font-size: 1.1rem;
+  }
+}
+
+.booking-list {
+  display: grid;
+  gap: var(--spacing-6);
+}
+
+.booking-card {
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-4) var(--spacing-6);
+    background: var(--color-amber-50);
+    border-bottom: 1px solid var(--color-amber-100);
+
+    .booking-date {
+      font-size: 0.8125rem;
+      color: var(--color-amber-600);
+    }
+  }
+
+  .card-content {
+    padding: var(--spacing-6);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-6);
+
+    @media (max-width: 640px) {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
+  .room-info {
+    h3 {
+      font-size: 1.125rem;
+      color: var(--color-amber-900);
+      margin-bottom: var(--spacing-2);
+    }
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-2);
+      color: var(--color-amber-700);
+      font-size: 0.875rem;
+    }
+  }
+
+  .price-info {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+
+    @media (max-width: 640px) {
+      width: 100%;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--color-amber-50);
+      padding-top: var(--spacing-4);
+    }
+
+    .total-price {
+      .label { display: block; font-size: 0.75rem; color: var(--color-amber-600); text-transform: uppercase; }
+      .amount { font-size: 1.5rem; font-weight: 700; color: var(--color-amber-950); }
+    }
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: var(--spacing-20);
+  background: white;
+  border-radius: var(--radius-lg);
+  border: 2px dashed var(--color-amber-200);
+
+  .empty-icon { width: 64px; height: 64px; color: var(--color-amber-200); margin-bottom: var(--spacing-6); }
+  h2 { color: var(--color-amber-900); margin-bottom: var(--spacing-2); }
+  p { color: var(--color-amber-600); margin-bottom: var(--spacing-8); }
+}
+
+// ── Invoice Styles ────────────────────────────────────────
+.invoice {
+  padding: var(--spacing-10);
+
+  .invoice-header {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--color-amber-950);
+    padding-bottom: var(--spacing-6);
+    margin-bottom: var(--spacing-8);
+
+    .brand-name { font-family: var(--font-serif); font-size: 1.5rem; font-weight: 700; color: var(--color-amber-950); display: block; }
+    .invoice-title { font-size: 1.25rem; color: var(--color-amber-700); }
+    .meta { text-align: right; font-size: 0.875rem; color: var(--color-amber-800); }
+  }
+
+  .invoice-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-8);
+    margin-bottom: var(--spacing-10);
+
+    .section-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-amber-600);
+      margin-bottom: var(--spacing-3);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    p { font-size: 0.9375rem; color: var(--color-amber-950); line-height: 1.5; }
+  }
+
+  .invoice-table {
+    margin-bottom: var(--spacing-8);
+
+    .table-header {
+      display: grid;
+      grid-template-columns: 1fr 100px;
+      padding: var(--spacing-3) 0;
+      border-bottom: 1px solid var(--color-amber-200);
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--color-amber-900);
+    }
+
+    .table-row {
+      display: grid;
+      grid-template-columns: 1fr 100px;
+      padding: var(--spacing-4) 0;
+      border-bottom: 1px solid var(--color-amber-100);
+      font-size: 0.9375rem;
+
+      small { color: var(--color-amber-600); }
+    }
+  }
+
+  .invoice-total {
+    border-top: 2px solid var(--color-amber-100);
+    padding-top: var(--spacing-4);
+
+    .total-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--color-amber-950);
+    }
+  }
+
+  .invoice-actions {
+    margin-top: var(--spacing-10);
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-4);
+  }
+}
+
+.icon-sm { width: 16px; height: 16px; }
+.icon-xs { width: 12px; height: 12px; }
+.text-right { text-align: right; }
