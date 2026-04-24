@@ -35,6 +35,10 @@ export class PaymentEntity {
   @Column({ nullable: true })
   checkoutSessionId?: string;
 
+  @Index('IDX_PAYMENTS_PAYMENT_INTENT_ID', { unique: true })
+  @Column({ nullable: true })
+  paymentIntentId?: string;
+
   @Column({ type: 'text', nullable: true })
   failureReason?: string;
 

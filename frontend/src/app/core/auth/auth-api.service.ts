@@ -59,9 +59,9 @@ export class AuthApiService {
     });
   }
 
-  updateProfile(payload: Partial<AuthenticatedUser>): Observable<AuthenticatedUser> {
-    return this.apiClient.patch<AuthenticatedUser, Partial<AuthenticatedUser>>(
-      '/users/profile',
+  updateProfile(payload: Partial<AuthenticatedUser>): Observable<AuthResponse> {
+    return this.apiClient.patch<AuthResponse, Partial<AuthenticatedUser>>(
+      '/auth/profile',
       payload,
     );
   }

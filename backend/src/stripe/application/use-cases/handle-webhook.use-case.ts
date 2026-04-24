@@ -12,6 +12,8 @@ import {
   PAYMENT_REPOSITORY,
   PaymentRepositoryPort,
 } from '@/stripe/application/ports/payment-repository.port';
+import { SendTransactionalEmailUseCase } from '@/mailjet/application/use-cases/send-transactional-email.use-case';
+import { buildActionEmailHtml, buildActionEmailText } from '@/mailjet/application/templates/action-email.template';
 
 @Injectable()
 export class HandleWebhookUseCase {
@@ -24,6 +26,7 @@ export class HandleWebhookUseCase {
     private readonly paymentRepository: PaymentRepositoryPort,
     @Inject(BOOKING_REPOSITORY)
     private readonly bookingRepository: BookingRepositoryPort,
+    private readonly sendMailUseCase: SendTransactionalEmailUseCase,
   ) {}
 
   async execute(payload: Buffer, signature: string) {
@@ -64,10 +67,35 @@ export class HandleWebhookUseCase {
     }
 
     payment.markSucceeded();
+    if (typeof session.payment_intent === 'string') {
+      payment.setPaymentIntentId(session.payment_intent);
+    }
     booking.markConfirmed();
 
     await this.paymentRepository.save(payment);
     await this.bookingRepository.save(booking);
+
+    try {
+      const emailParams = {
+        recipientName: `${booking.getGuestFirstName()} ${booking.getGuestLastName()}`,
+        preheader: 'Votre réservation est confirmée !',
+        title: 'Confirmation de paiement',
+        intro: `Nous avons bien reçu votre paiement pour votre séjour du ${booking.getCheckInDate().toLocaleDateString('fr-FR')} au ${booking.getCheckOutDate().toLocaleDateString('fr-FR')}.`,
+        body: `Votre réservation n° ${booking.getId().substring(0, 8).toUpperCase()} est désormais confirmée. Nous avons hâte de vous accueillir dans notre établissement.`,
+        ctaLabel: 'Voir ma réservation',
+        actionUrl: `${process.env['FRONTEND_URL'] || 'http://localhost:4200'}/client/historique`,
+        footerNote: 'Merci de votre confiance.',
+      };
+
+      await this.sendMailUseCase.execute({
+        to: { email: booking.getGuestEmail(), name: emailParams.recipientName },
+        subject: 'Confirmation de votre réservation - Ytellerie',
+        html: buildActionEmailHtml(emailParams),
+        text: buildActionEmailText(emailParams),
+      });
+    } catch (error: any) {
+      this.logger.error(`Failed to send confirmation email: ${error.message}`);
+    }
 
     this.logger.log(
       `Checkout session completed: ${session.id} for booking ${booking.getId()}`,

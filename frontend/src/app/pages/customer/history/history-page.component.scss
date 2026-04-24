@@ -40,6 +40,26 @@
     }
   }
 
+  .status-alert {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    padding: var(--spacing-3) var(--spacing-6);
+    margin: var(--spacing-4) var(--spacing-6) 0;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+
+    &.info {
+      background-color: #f0f9ff;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+    }
+
+    p {
+      margin: 0;
+    }
+  }
+
   .card-content {
     padding: var(--spacing-6);
     display: flex;

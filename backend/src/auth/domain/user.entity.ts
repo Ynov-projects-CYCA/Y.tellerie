@@ -51,4 +51,19 @@ export class User {
     this.verifyEmailToken = null;
     this.updatedAt = new Date();
   }
+
+  updateProfile(data: {
+    firstname?: string;
+    lastname?: string;
+    phoneNumber?: string;
+    phone?: string;
+    email?: Email;
+  }) {
+    if (data.firstname !== undefined) this.firstname = data.firstname;
+    if (data.lastname !== undefined) this.lastname = data.lastname;
+    if (data.phoneNumber !== undefined) this.phoneNumber = data.phoneNumber;
+    if (data.phone !== undefined) this.phone = data.phone;
+    if (data.email !== undefined) this.email = data.email;
+    this.updatedAt = new Date();
+  }
 }

@@ -38,7 +38,9 @@ export class TypeOrmBookingRepositoryAdapter implements BookingRepositoryPort {
       .andWhere('booking.checkOutDate > :checkInDate', {
         checkInDate: this.toDateColumn(checkInDate),
       })
-      .andWhere('booking.status != :canceled', { canceled: 'CANCELED' })
+      .andWhere('booking.status NOT IN (:...excludedStatuses)', {
+        excludedStatuses: ['CANCELED', 'REFUNDED'],
+      })
       .getMany();
 
     return entities.map((entity) => this.toDomain(entity));
@@ -58,7 +60,9 @@ export class TypeOrmBookingRepositoryAdapter implements BookingRepositoryPort {
       .andWhere('booking.checkOutDate > :checkInDate', {
         checkInDate: this.toDateColumn(checkInDate),
       })
-      .andWhere('booking.status != :canceled', { canceled: 'CANCELED' })
+      .andWhere('booking.status NOT IN (:...excludedStatuses)', {
+        excludedStatuses: ['CANCELED', 'REFUNDED'],
+      })
       .getMany();
 
     return entities.map((entity) => this.toDomain(entity));

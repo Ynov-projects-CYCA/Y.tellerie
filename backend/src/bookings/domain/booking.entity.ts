@@ -112,6 +112,16 @@ export class Booking {
     this.updatedAt = new Date();
   }
 
+  markRefundRequested(): void {
+    this.status = BookingStatusVO.refundRequested();
+    this.updatedAt = new Date();
+  }
+
+  markRefunded(): void {
+    this.status = BookingStatusVO.refunded();
+    this.updatedAt = new Date();
+  }
+
   overlaps(checkInDate: Date, checkOutDate: Date): boolean {
     return this.checkInDate < checkOutDate && this.checkOutDate > checkInDate;
   }

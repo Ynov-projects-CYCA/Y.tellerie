@@ -3,6 +3,8 @@ export enum BookingStatus {
   CONFIRMED = 'CONFIRMED',
   PAYMENT_FAILED = 'PAYMENT_FAILED',
   CANCELED = 'CANCELED',
+  REFUND_REQUESTED = 'REFUND_REQUESTED',
+  REFUNDED = 'REFUNDED',
 }
 
 export class BookingStatusVO {
@@ -30,6 +32,14 @@ export class BookingStatusVO {
 
   static canceled(): BookingStatusVO {
     return new BookingStatusVO(BookingStatus.CANCELED);
+  }
+
+  static refundRequested(): BookingStatusVO {
+    return new BookingStatusVO(BookingStatus.REFUND_REQUESTED);
+  }
+
+  static refunded(): BookingStatusVO {
+    return new BookingStatusVO(BookingStatus.REFUNDED);
   }
 
   getValue(): BookingStatus {

@@ -148,7 +148,9 @@ export class HistoryPageComponent implements OnInit {
       [BookingStatus.CONFIRMED]: 'Confirmée',
       [BookingStatus.PENDING_PAYMENT]: 'En attente',
       [BookingStatus.PAYMENT_FAILED]: 'Échouée',
-      [BookingStatus.CANCELED]: 'Annulée'
+      [BookingStatus.CANCELED]: 'Annulée',
+      [BookingStatus.REFUND_REQUESTED]: 'Remboursement demandé',
+      [BookingStatus.REFUNDED]: 'Remboursée'
     };
     return labels[status] || status;
   }
@@ -161,7 +163,9 @@ export class HistoryPageComponent implements OnInit {
       [BookingStatus.CONFIRMED]: 'success',
       [BookingStatus.PENDING_PAYMENT]: 'warning',
       [BookingStatus.PAYMENT_FAILED]: 'danger',
-      [BookingStatus.CANCELED]: 'danger'
+      [BookingStatus.CANCELED]: 'danger',
+      [BookingStatus.REFUND_REQUESTED]: 'warning',
+      [BookingStatus.REFUNDED]: 'neutral'
     };
     return variants[status] || 'neutral';
   }
