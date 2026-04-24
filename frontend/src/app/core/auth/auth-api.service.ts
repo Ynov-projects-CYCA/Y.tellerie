@@ -61,6 +61,12 @@ export class AuthApiService {
     );
   }
 
+  logout(refreshToken: string): Observable<void> {
+    return this.apiClient.post<void, { refreshToken: string }>('/auth/logout', {
+      refreshToken,
+    });
+  }
+
   updateProfile(payload: Partial<AuthenticatedUser>): Observable<AuthResponse> {
     return this.apiClient.patch<AuthResponse, Partial<AuthenticatedUser>>(
       '/auth/profile',

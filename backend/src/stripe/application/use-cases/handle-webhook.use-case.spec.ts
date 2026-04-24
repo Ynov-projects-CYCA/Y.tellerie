@@ -11,6 +11,7 @@ describe('HandleWebhookUseCase', () => {
   const paymentProviderMock: jest.Mocked<IPaymentProvider> = {
     createCheckoutSession: jest.fn(),
     retrieveEvent: jest.fn(),
+    refund: jest.fn(),
   };
   const paymentRepositoryMock: jest.Mocked<PaymentRepositoryPort> = {
     save: jest.fn(),
@@ -21,6 +22,9 @@ describe('HandleWebhookUseCase', () => {
   const bookingRepositoryMock = {
     save: jest.fn(),
     findById: jest.fn(),
+  };
+  const sendMailUseCaseMock = {
+    execute: jest.fn().mockResolvedValue({ messageId: '123' }),
   };
 
   let useCase: HandleWebhookUseCase;
@@ -33,6 +37,7 @@ describe('HandleWebhookUseCase', () => {
       paymentProviderMock,
       paymentRepositoryMock,
       bookingRepositoryMock as any,
+      sendMailUseCaseMock as any,
     );
   });
 

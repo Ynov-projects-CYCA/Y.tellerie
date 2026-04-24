@@ -35,6 +35,7 @@ describe('auth guards', () => {
     authSessionService.startSession(
       {
         accessToken: createJwtToken({}, -60),
+        refreshToken: 'dummy_refresh_token',
         user: {
           id: 'user-1',
           firstname: 'John',
@@ -61,6 +62,7 @@ describe('auth guards', () => {
     authSessionService.startSession(
       {
         accessToken: createJwtToken(),
+        refreshToken: 'dummy_refresh_token',
         user: {
           id: 'user-1',
           firstname: 'John',
@@ -82,6 +84,7 @@ describe('auth guards', () => {
     authSessionService.startSession(
       {
         accessToken: createJwtToken(),
+        refreshToken: 'dummy_refresh_token',
         user: {
           id: 'user-1',
           firstname: 'John',

@@ -5,6 +5,7 @@ import {
   IPasswordHasher,
   ITokenGenerator,
   IUserRepository,
+  IRefreshTokenRepository,
   LoginUseCase,
   Password,
   Role,
@@ -17,6 +18,7 @@ describe('LoginUseCase', () => {
   let mockUserRepository: IUserRepository;
   let mockPasswordHasher: IPasswordHasher;
   let mockTokenGenerator: ITokenGenerator;
+  let mockRefreshTokenRepository: IRefreshTokenRepository;
 
   beforeEach(() => {
     mockUserRepository = {
@@ -31,12 +33,19 @@ describe('LoginUseCase', () => {
     };
     mockTokenGenerator = {
       generateAccessToken: jest.fn().mockResolvedValue('access-token'),
+      generateRefreshToken: jest.fn().mockReturnValue('refresh-token'),
+    };
+    mockRefreshTokenRepository = {
+      save: jest.fn(),
+      findByToken: jest.fn(),
+      deleteByUserId: jest.fn(),
     };
 
     useCase = new LoginUseCase(
       mockUserRepository,
       mockPasswordHasher,
       mockTokenGenerator,
+      mockRefreshTokenRepository,
       new AuthenticationDomainService(),
     );
   });
@@ -95,6 +104,7 @@ describe('LoginUseCase', () => {
     });
 
     expect(result.accessToken).toBe('access-token');
+    expect(result.refreshToken).toBe('refresh-token');
     expect(result.user).toBe(activeUser);
   });
 });

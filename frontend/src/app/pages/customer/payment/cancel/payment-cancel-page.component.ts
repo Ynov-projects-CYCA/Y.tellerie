@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { LucideXCircle, LucideRefreshCw } from '@lucide/angular';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import { LucideXCircle, LucideRefreshCw, LucideHistory } from '@lucide/angular';
 import { CardComponent } from '../../../../shared/components/card.component';
 import { ButtonComponent } from '../../../../shared/components/button.component';
+import { StripeApiService } from '../../../../core/api/stripe-api.service';
 
 @Component({
   selector: 'app-payment-cancel',
@@ -14,9 +15,36 @@ import { ButtonComponent } from '../../../../shared/components/button.component'
     CardComponent,
     ButtonComponent,
     LucideXCircle,
-    LucideRefreshCw
+    LucideRefreshCw,
+    LucideHistory
   ],
   templateUrl: './payment-cancel-page.component.html',
   styleUrl: './payment-cancel-page.component.scss'
 })
-export class PaymentCancelPageComponent {}
+export class PaymentCancelPageComponent implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly stripeApi = inject(StripeApiService);
+  
+  protected readonly bookingId = signal<string | null>(null);
+  protected readonly isRetrying = signal(false);
+
+  ngOnInit(): void {
+    this.bookingId.set(this.route.snapshot.queryParamMap.get('booking_id'));
+  }
+
+  protected retryPayment(): void {
+    const id = this.bookingId();
+    if (!id) return;
+
+    this.isRetrying.set(true);
+    this.stripeApi.createCheckoutSession({ bookingId: id }).subscribe({
+      next: (response) => {
+        window.location.href = response.url;
+      },
+      error: (err) => {
+        console.error('Failed to retry payment', err);
+        this.isRetrying.set(false);
+      }
+    });
+  }
+}

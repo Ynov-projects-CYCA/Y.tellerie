@@ -179,7 +179,7 @@ a {
 }
 
 .auth-view {
-  min-height: 100dvh;
+  padding-top: 80px;
   background:
     radial-gradient(circle at 18% 24%, rgba(255, 243, 201, 0.82), transparent 32%),
     radial-gradient(circle at 80% 78%, rgba(248, 225, 160, 0.58), transparent 28%),
@@ -187,7 +187,6 @@ a {
 }
 
 .auth-layout {
-  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
@@ -261,9 +260,11 @@ a {
 
 .auth-layout__frame {
   flex: 1;
-  display: grid;
-  place-items: center;
-  padding: 2.5rem 2rem 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 2rem 1.5rem 3rem;
 }
 
 .auth-layout__main {

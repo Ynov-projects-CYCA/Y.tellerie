@@ -131,6 +131,7 @@ export class AuthSessionService {
     const candidate = value as Partial<AuthSession>;
     return (
       typeof candidate.accessToken === 'string' &&
+      typeof candidate.refreshToken === 'string' &&
       candidate.user !== undefined &&
       candidate.user !== null &&
       typeof candidate.user === 'object'

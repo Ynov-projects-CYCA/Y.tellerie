@@ -11,21 +11,31 @@ import { ForgotPasswordUseCase } from '../../../../src/auth/application/use-case
 import { LoginUseCase } from '../../../../src/auth/application/use-cases/login.use-case';
 import { RegisterUseCase, UserAlreadyExistsError } from '../../../../src/auth/application/use-cases/register.use-case';
 import { VerifyEmailUseCase } from '../../../../src/auth/application/use-cases/verify-email.use-case';
+import { RefreshTokenUseCase } from '../../../../src/auth/application/use-cases/refresh-token.use-case';
+import { UpdateProfileUseCase } from '../../../../src/auth/application/use-cases/update-profile.use-case';
 import { RegisterDto } from '../../../../src/auth/application/dtos/register.dto';
 import { Email } from '../../../../src/auth/domain/email.vo';
 import { Role } from '../../../../src/shared/model/role.enum';
 import { UserAggregate } from '../../../../src/auth/domain/user.aggregate';
 import { UserId } from '../../../../src/auth/domain/user-id.vo';
 import { SendTransactionalEmailUseCase } from '../../../../src/mailjet/application/use-cases/send-transactional-email.use-case';
+import {
+  ITokenGenerator as ITokenGeneratorSymbol,
+} from '../../../../src/auth/application/ports/token-generator.port';
+import {
+  IRefreshTokenRepository as IRefreshTokenRepositorySymbol,
+} from '../../../../src/auth/application/ports/refresh-token-repository.port';
 
 describe('AuthController', () => {
   let authController: AuthController;
   let registerUseCase: RegisterUseCase;
   let loginUseCase: LoginUseCase;
+  let refreshTokenUseCase: RefreshTokenUseCase;
   let verifyEmailUseCase: VerifyEmailUseCase;
   let forgotPasswordUseCase: ForgotPasswordUseCase;
   let resetPasswordUseCase: ResetPasswordUseCase;
   let changePasswordUseCase: ChangePasswordUseCase;
+  let updateProfileUseCase: UpdateProfileUseCase;
   let sendTransactionalEmailUseCase: SendTransactionalEmailUseCase;
 
   const mockUserAggregate = new UserAggregate({
@@ -57,6 +67,10 @@ describe('AuthController', () => {
           useValue: { execute: jest.fn() },
         },
         {
+          provide: RefreshTokenUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
           provide: ChangePasswordUseCase,
           useValue: { execute: jest.fn() },
         },
@@ -71,6 +85,25 @@ describe('AuthController', () => {
         {
           provide: ResetPasswordUseCase,
           useValue: { execute: jest.fn() },
+        },
+        {
+          provide: UpdateProfileUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: ITokenGeneratorSymbol,
+          useValue: {
+            generateAccessToken: jest.fn(),
+            generateRefreshToken: jest.fn(),
+          },
+        },
+        {
+          provide: IRefreshTokenRepositorySymbol,
+          useValue: {
+            save: jest.fn(),
+            findByToken: jest.fn(),
+            deleteByUserId: jest.fn(),
+          },
         },
         {
           provide: SendTransactionalEmailUseCase,
@@ -93,6 +126,7 @@ describe('AuthController', () => {
     authController = module.get<AuthController>(AuthController);
     registerUseCase = module.get<RegisterUseCase>(RegisterUseCase);
     loginUseCase = module.get<LoginUseCase>(LoginUseCase);
+    refreshTokenUseCase = module.get<RefreshTokenUseCase>(RefreshTokenUseCase);
     verifyEmailUseCase = module.get<VerifyEmailUseCase>(VerifyEmailUseCase);
     forgotPasswordUseCase = module.get<ForgotPasswordUseCase>(
       ForgotPasswordUseCase,
@@ -103,6 +137,7 @@ describe('AuthController', () => {
     changePasswordUseCase = module.get<ChangePasswordUseCase>(
       ChangePasswordUseCase,
     );
+    updateProfileUseCase = module.get<UpdateProfileUseCase>(UpdateProfileUseCase);
     sendTransactionalEmailUseCase = module.get<SendTransactionalEmailUseCase>(
       SendTransactionalEmailUseCase,
     );
@@ -205,6 +240,7 @@ describe('AuthController', () => {
       jest.spyOn(loginUseCase, 'execute').mockResolvedValue({
         user: mockUserAggregate,
         accessToken: 'access_token',
+        refreshToken: 'refresh_token',
       });
 
       const result = await authController.login(req, {

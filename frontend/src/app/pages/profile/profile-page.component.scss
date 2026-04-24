@@ -1,6 +1,6 @@
 :host {
   display: block;
-  padding: 4rem 1rem;
+  padding: 6rem 1rem 4rem;
 }
 
 .profile-container {
@@ -50,22 +50,30 @@
   flex-direction: column;
   gap: 0.25rem;
 
-  h1 {
+  app-card-title {
     margin: 0;
     font-family: Georgia, 'Times New Roman', serif;
     color: var(--hotel-brown);
     font-size: 2rem;
+    display: block;
+  }
+
+  app-card-description {
+    color: var(--hotel-copper);
+    font-size: 1rem;
+    display: block;
   }
 }
 
 .profile-form {
-  padding-top: 1rem;
+  padding: 1rem 2rem 2rem;
 }
 
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
+  margin-bottom: 2rem;
 
   @media (max-width: 640px) {
     grid-template-columns: 1fr;
@@ -73,9 +81,10 @@
 }
 
 .form-actions {
-  margin-top: 2.5rem;
   display: flex;
   justify-content: flex-end;
+  border-top: 1px solid rgba(241, 187, 43, 0.2);
+  padding-top: 2rem;
 }
 
 .submit-btn {
@@ -83,28 +92,31 @@
 }
 
 .field-input.is-invalid {
-  border-color: #a01d17;
-  background-color: rgba(160, 29, 23, 0.02);
+  border-color: #a01d17 !important;
+  background-color: rgba(160, 29, 23, 0.02) !important;
 
   &:focus {
-    box-shadow: 0 0 0 3px rgba(160, 29, 23, 0.1);
+    box-shadow: 0 0 0 3px rgba(160, 29, 23, 0.1) !important;
   }
 }
 
 .form-feedback {
-  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
   padding: 1rem;
   border-radius: 0.75rem;
   text-align: center;
   font-weight: 500;
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .error-message {
   color: #a01d17;
+  margin: 0;
 }
 
 .success-message {
   color: #2e6b2a;
+  margin: 0;
 }
 
 .animate-spin {

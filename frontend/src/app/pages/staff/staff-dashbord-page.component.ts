@@ -3,9 +3,12 @@ import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthApiService } from '../../core/auth/auth-api.service';
 import { AuthSessionService } from '../../core/auth/auth-session.service';
+import { AccountPanelComponent } from '../account/account-panel.component';
 
 @Component({
   selector: 'app-staff-page',
+  standalone: true,
+  imports: [AccountPanelComponent],
   templateUrl: './staff-dashbord-page.component.html',
   styleUrl: './staff-dashbord-page.scss',
 })

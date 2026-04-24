@@ -13,6 +13,7 @@ describe('AuthSessionService', () => {
     service.startSession(
       {
         accessToken: createJwtToken(),
+        refreshToken: 'dummy_refresh_token',
         user: {
           id: 'user-1',
           firstname: 'John',
@@ -38,6 +39,7 @@ describe('AuthSessionService', () => {
     service.startSession(
       {
         accessToken: createJwtToken(),
+        refreshToken: 'dummy_refresh_token',
         user: {
           id: 'user-1',
           firstname: 'John',
@@ -63,6 +65,7 @@ describe('AuthSessionService', () => {
     service.startSession(
       {
         accessToken: createJwtToken(),
+        refreshToken: 'dummy_refresh_token',
         user: {
           id: 'user-1',
           firstname: 'John',
@@ -87,6 +90,7 @@ describe('AuthSessionService', () => {
       'ytellerie.auth_session',
       JSON.stringify({
         accessToken: createJwtToken({}, -60),
+        refreshToken: 'dummy_refresh_token',
         user: {
           id: 'user-1',
           firstname: 'John',
@@ -109,6 +113,7 @@ describe('AuthSessionService', () => {
       'ytellerie.auth_session',
       JSON.stringify({
         accessToken: 'not-a-jwt',
+        refreshToken: 'dummy_refresh_token',
         user: {
           id: 'user-1',
           firstname: 'John',
