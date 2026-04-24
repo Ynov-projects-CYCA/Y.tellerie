@@ -17,6 +17,8 @@ export class RolesGuard implements CanActivate {
       return true;
     }
     const { user }: { user: UserAggregate } = context.switchToHttp().getRequest();
+    // La garde autorise l'acces si l'utilisateur possede au moins un des roles
+    // declares sur la route, ce qui laisse la possibilite de modeliser des OR.
     return requiredRoles.some((role) => user.getProperties().roles?.includes(role));
   }
 }

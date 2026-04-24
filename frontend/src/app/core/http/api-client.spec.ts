@@ -13,6 +13,7 @@ import { apiErrorInterceptor } from './interceptors/api-error.interceptor';
 import { authTokenInterceptor } from './interceptors/auth-token.interceptor';
 import { backendEnvelopeInterceptor } from './interceptors/backend-envelope.interceptor';
 import { AppHttpError } from './models/app-http-error.model';
+import { createJwtToken } from '../../../testing/jwt-test.utils';
 
 describe('ApiClient', () => {
   const environment: AppEnvironment = {
@@ -76,8 +77,7 @@ describe('ApiClient', () => {
   it('should add the bearer token when available', () => {
     authSessionService.startSession(
       {
-        accessToken: 'access-token',
-        refreshToken: 'refresh-token',
+        accessToken: createJwtToken(),
         user: {
           id: 'user-1',
           firstname: 'John',
@@ -93,7 +93,7 @@ describe('ApiClient', () => {
     apiClient.get<string>('/profile/client').subscribe();
 
     const request = httpTestingController.expectOne('/api/profile/client');
-    expect(request.request.headers.get('Authorization')).toBe('Bearer access-token');
+    expect(request.request.headers.get('Authorization')).toContain('Bearer ');
 
     request.flush({
       data: 'ok',

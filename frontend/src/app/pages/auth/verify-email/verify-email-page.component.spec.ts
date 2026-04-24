@@ -1,10 +1,14 @@
 import { TestBed } from '@angular/core/testing';
+import { Component } from '@angular/core';
 import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthApiService } from '../../../core/auth/auth-api.service';
 import { AppHttpError } from '../../../core/http/models/app-http-error.model';
 import { VerifyEmailPageComponent } from './verify-email-page.component';
+
+@Component({ standalone: true, template: '' })
+class DummyRouteComponent {}
 
 describe('VerifyEmailPageComponent', () => {
   const authApiService = {
@@ -17,7 +21,7 @@ describe('VerifyEmailPageComponent', () => {
     await TestBed.configureTestingModule({
       imports: [VerifyEmailPageComponent],
       providers: [
-        provideRouter([]),
+        provideRouter([{ path: 'connexion', component: DummyRouteComponent }]),
         {
           provide: AuthApiService,
           useValue: authApiService,

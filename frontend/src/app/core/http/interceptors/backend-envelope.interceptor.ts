@@ -15,6 +15,8 @@ export const backendEnvelopeInterceptor: HttpInterceptorFn = (request, next) =>
         return response;
       }
 
+      // Les services applicatifs consomment uniquement la charge utile metier.
+      // Le timestamp reste disponible au niveau HTTP si un besoin apparait plus tard.
       return response.clone({
         body: response.body.data,
       });

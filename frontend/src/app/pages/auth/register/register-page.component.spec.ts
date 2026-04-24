@@ -1,10 +1,14 @@
 import { TestBed } from '@angular/core/testing';
+import { Component } from '@angular/core';
 import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthApiService } from '../../../core/auth/auth-api.service';
 import { AppHttpError } from '../../../core/http/models/app-http-error.model';
 import { RegisterPageComponent } from './register-page.component';
+
+@Component({ standalone: true, template: '' })
+class DummyRouteComponent {}
 
 describe('RegisterPageComponent', () => {
   const authApiService = {
@@ -17,7 +21,10 @@ describe('RegisterPageComponent', () => {
     await TestBed.configureTestingModule({
       imports: [RegisterPageComponent],
       providers: [
-        provideRouter([]),
+        provideRouter([
+          { path: 'connexion', component: DummyRouteComponent },
+          { path: 'client', component: DummyRouteComponent },
+        ]),
         {
           provide: AuthApiService,
           useValue: authApiService,

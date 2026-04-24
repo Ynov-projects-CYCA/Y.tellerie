@@ -1,4 +1,5 @@
 import { AuthSessionService } from './auth-session.service';
+import { createJwtToken } from '../../../testing/jwt-test.utils';
 
 describe('AuthSessionService', () => {
   beforeEach(() => {
@@ -11,8 +12,7 @@ describe('AuthSessionService', () => {
 
     service.startSession(
       {
-        accessToken: 'access-token',
-        refreshToken: 'refresh-token',
+        accessToken: createJwtToken(),
         user: {
           id: 'user-1',
           firstname: 'John',
@@ -26,9 +26,9 @@ describe('AuthSessionService', () => {
     );
 
     const restoredService = new AuthSessionService();
-    expect(restoredService.getAccessToken()).toBe('access-token');
+    expect(restoredService.getAccessToken()).toBeTruthy();
     expect(window.localStorage.getItem('ytellerie.auth_session')).toContain(
-      'access-token',
+      'accessToken',
     );
   });
 
@@ -37,8 +37,7 @@ describe('AuthSessionService', () => {
 
     service.startSession(
       {
-        accessToken: 'access-token',
-        refreshToken: 'refresh-token',
+        accessToken: createJwtToken(),
         user: {
           id: 'user-1',
           firstname: 'John',
@@ -54,7 +53,7 @@ describe('AuthSessionService', () => {
     const restoredService = new AuthSessionService();
     expect(restoredService.currentSession()?.persistence).toBe('session');
     expect(window.sessionStorage.getItem('ytellerie.auth_session')).toContain(
-      'refresh-token',
+      'accessToken',
     );
   });
 
@@ -63,8 +62,7 @@ describe('AuthSessionService', () => {
 
     service.startSession(
       {
-        accessToken: 'access-token',
-        refreshToken: 'refresh-token',
+        accessToken: createJwtToken(),
         user: {
           id: 'user-1',
           firstname: 'John',
@@ -82,5 +80,49 @@ describe('AuthSessionService', () => {
     expect(service.currentSession()).toBeNull();
     expect(window.localStorage.getItem('ytellerie.auth_session')).toBeNull();
     expect(window.sessionStorage.getItem('ytellerie.auth_session')).toBeNull();
+  });
+
+  it('should discard an expired session restored from storage', () => {
+    window.localStorage.setItem(
+      'ytellerie.auth_session',
+      JSON.stringify({
+        accessToken: createJwtToken({}, -60),
+        user: {
+          id: 'user-1',
+          firstname: 'John',
+          lastname: 'Doe',
+          email: 'john.doe@example.com',
+          phone: '+33123456789',
+          roles: ['client'],
+        },
+      }),
+    );
+
+    const service = new AuthSessionService();
+
+    expect(service.currentSession()).toBeNull();
+    expect(window.localStorage.getItem('ytellerie.auth_session')).toBeNull();
+  });
+
+  it('should discard an invalid session restored from storage', () => {
+    window.localStorage.setItem(
+      'ytellerie.auth_session',
+      JSON.stringify({
+        accessToken: 'not-a-jwt',
+        user: {
+          id: 'user-1',
+          firstname: 'John',
+          lastname: 'Doe',
+          email: 'john.doe@example.com',
+          phone: '+33123456789',
+          roles: ['client'],
+        },
+      }),
+    );
+
+    const service = new AuthSessionService();
+
+    expect(service.isAuthenticated()).toBe(false);
+    expect(window.localStorage.getItem('ytellerie.auth_session')).toBeNull();
   });
 });

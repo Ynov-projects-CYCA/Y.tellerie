@@ -4,6 +4,7 @@ import { ApiClient } from '../http/api-client.service';
 import {
   AuthenticatedUser,
   AuthResponse,
+  ChangePasswordPayload,
   ForgotPasswordPayload,
   LoginPayload,
   RegisterPayload,
@@ -53,10 +54,11 @@ export class AuthApiService {
     );
   }
 
-  logout(refreshToken: string): Observable<void> {
-    return this.apiClient.post<void, { refreshToken: string }>('/auth/logout', {
-      refreshToken,
-    });
+  changePassword(payload: ChangePasswordPayload): Observable<void> {
+    return this.apiClient.patch<void, ChangePasswordPayload>(
+      '/auth/change-password',
+      payload,
+    );
   }
 
   updateProfile(payload: Partial<AuthenticatedUser>): Observable<AuthResponse> {

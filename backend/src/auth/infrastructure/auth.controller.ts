@@ -120,7 +120,7 @@ export class AuthController {
   ): Promise<AuthResponseDto> {
     try {
       const { user, accessToken, refreshToken: newRefreshToken } = await this.refreshTokenUseCase.execute(refreshToken);
-      
+
       return {
         accessToken,
         refreshToken: newRefreshToken,

@@ -66,6 +66,8 @@ export class SearchAvailabilityUseCase {
     );
 
     return rooms
+      // Les filtres sont volontairement ordonnes du plus global au plus specifique
+      // pour garder une lecture metier simple du pipeline de disponibilite.
       .filter((room) => room.isAvailable())
       .filter((room) => !bookedRoomIds.has(room.getId()))
       .filter((room) =>

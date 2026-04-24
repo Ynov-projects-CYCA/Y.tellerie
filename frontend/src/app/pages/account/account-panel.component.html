@@ -1,0 +1,111 @@
+<section class="account-panel">
+  <div class="account-panel__hero">
+    <p class="eyebrow">{{ accountTypeLabel() }}</p>
+    <h1>{{ heading() }}</h1>
+    <p class="lede">
+      Cette zone est reservee aux utilisateurs authentifies. Les informations affichees
+      proviennent actuellement du contexte d'authentification.
+    </p>
+  </div>
+
+  @if (user(); as user) {
+    <div class="account-panel__grid">
+      <article class="account-card">
+        <h2>Mon compte</h2>
+        <dl class="account-details">
+          <div>
+            <dt>Nom complet</dt>
+            <dd>{{ user.firstname }} {{ user.lastname }}</dd>
+          </div>
+          <div>
+            <dt>Email</dt>
+            <dd>{{ user.email }}</dd>
+          </div>
+          @if (getPrimaryPhone(); as phone) {
+            <div>
+              <dt>Telephone</dt>
+              <dd>{{ phone }}</dd>
+            </div>
+          }
+          <div>
+            <dt>Roles</dt>
+            <dd>{{ user.roles.join(', ') }}</dd>
+          </div>
+          @if (user.isActive !== undefined) {
+            <div>
+              <dt>Statut du compte</dt>
+              <dd>{{ user.isActive ? 'Actif' : 'En attente d activation' }}</dd>
+            </div>
+          }
+        </dl>
+        <p class="account-note">
+          Les endpoints de profil metier restent fictifs pour le moment. Cette vue ne
+          presente donc que les donnees disponibles via l'authentification.
+        </p>
+      </article>
+
+      <article class="account-card">
+        <h2>Securite</h2>
+        <form class="security-form" [formGroup]="changePasswordForm" (ngSubmit)="submitPasswordChange()">
+          <label>
+            Mot de passe actuel
+            <input
+              type="password"
+              formControlName="oldPassword"
+              placeholder="••••••••"
+              autocomplete="current-password"
+            />
+          </label>
+          @if (hasPasswordError('oldPassword')) {
+            <p class="feedback feedback--error">Le mot de passe actuel est requis.</p>
+          }
+
+          <label>
+            Nouveau mot de passe
+            <input
+              type="password"
+              formControlName="newPassword"
+              placeholder="••••••••"
+              autocomplete="new-password"
+            />
+          </label>
+          @if (hasPasswordError('newPassword')) {
+            <p class="feedback feedback--error">
+              Le nouveau mot de passe doit contenir au moins 8 caracteres.
+            </p>
+          }
+
+          <label>
+            Confirmation du nouveau mot de passe
+            <input
+              type="password"
+              formControlName="confirmPassword"
+              placeholder="••••••••"
+              autocomplete="new-password"
+            />
+          </label>
+          @if (hasPasswordError('confirmPassword')) {
+            <p class="feedback feedback--error">La confirmation est requise.</p>
+          }
+
+          @if (passwordSuccess(); as message) {
+            <p class="feedback feedback--success">{{ message }}</p>
+          }
+
+          @if (passwordError(); as message) {
+            <p class="feedback feedback--error">{{ message }}</p>
+          }
+
+          <div class="security-form__actions">
+            <button type="submit" [disabled]="isChangingPassword()">
+              {{ isChangingPassword() ? 'Mise a jour...' : 'Changer le mot de passe' }}
+            </button>
+            <button type="button" class="button-secondary" (click)="logout()" [disabled]="isLoggingOut()">
+              {{ isLoggingOut() ? 'Deconnexion...' : 'Se deconnecter' }}
+            </button>
+          </div>
+        </form>
+      </article>
+    </div>
+  }
+</section>

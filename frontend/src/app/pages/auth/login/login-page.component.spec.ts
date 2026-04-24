@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { Component } from '@angular/core';
 import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
@@ -6,7 +7,11 @@ import { AuthApiService } from '../../../core/auth/auth-api.service';
 import { AuthRedirectService } from '../../../core/auth/auth-redirect.service';
 import { AuthSessionService } from '../../../core/auth/auth-session.service';
 import { AppHttpError } from '../../../core/http/models/app-http-error.model';
+import { createJwtToken } from '../../../../testing/jwt-test.utils';
 import { LoginPageComponent } from './login-page.component';
+
+@Component({ standalone: true, template: '' })
+class DummyRouteComponent {}
 
 describe('LoginPageComponent', () => {
   const authApiService = {
@@ -21,7 +26,11 @@ describe('LoginPageComponent', () => {
     await TestBed.configureTestingModule({
       imports: [LoginPageComponent],
       providers: [
-        provideRouter([]),
+        provideRouter([
+          { path: 'connexion', component: DummyRouteComponent },
+          { path: 'client', component: DummyRouteComponent },
+          { path: 'staff', component: DummyRouteComponent },
+        ]),
         AuthSessionService,
         AuthRedirectService,
         {
@@ -50,8 +59,7 @@ describe('LoginPageComponent', () => {
 
     authApiService.login.mockReturnValue(
       of({
-        accessToken: 'access-token',
-        refreshToken: 'refresh-token',
+        accessToken: createJwtToken(),
         user: {
           id: 'user-1',
           firstname: 'John',
