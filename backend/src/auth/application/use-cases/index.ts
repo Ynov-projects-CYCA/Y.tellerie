@@ -7,3 +7,4 @@ export { RegisterPersonnelUseCase } from './register-personnel.use-case';
 export { RegisterUseCase, UserAlreadyExistsError } from './register.use-case';
 export * from './reset-password.use-case';
 export * from './verify-email.use-case';
+export * from './update-profile.use-case';

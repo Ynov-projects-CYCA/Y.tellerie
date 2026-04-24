@@ -9,5 +9,7 @@ export interface IPaymentProvider {
     url: string;
   }>;
 
+  refund(paymentId: string): Promise<void>;
+
   retrieveEvent(signature: string, payload: Buffer): Promise<Stripe.Event>;
 }

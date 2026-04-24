@@ -6,6 +6,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Inject,
   Logger,
   Patch,
   Post,
@@ -52,9 +53,13 @@ import {
   VerifyEmailUseCase,
   InvalidOldPasswordError,
   RefreshTokenUseCase,
+  UpdateProfileUseCase,
 } from '@/auth/application/use-cases';
-import { Email, Password, UserAggregate } from '@/auth/domain';
+import { Email, Password, UserAggregate, RefreshToken } from '@/auth/domain';
 import { Role } from '@/shared/model';
+import { UpdateProfileDto } from '../application/dtos/update-profile.dto';
+import { ITokenGenerator, ITokenGenerator as ITokenGeneratorSymbol } from '../application/ports/token-generator.port';
+import { IRefreshTokenRepository, IRefreshTokenRepository as IRefreshTokenRepositorySymbol } from '../application/ports/refresh-token-repository.port';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -69,6 +74,11 @@ export class AuthController {
     private readonly verifyEmailUseCase: VerifyEmailUseCase,
     private readonly forgotPasswordUseCase: ForgotPasswordUseCase,
     private readonly resetPasswordUseCase: ResetPasswordUseCase,
+    private readonly updateProfileUseCase: UpdateProfileUseCase,
+    @Inject(ITokenGeneratorSymbol)
+    private readonly tokenGenerator: ITokenGenerator,
+    @Inject(IRefreshTokenRepositorySymbol)
+    private readonly refreshTokenRepository: IRefreshTokenRepository,
     private readonly sendTransactionalEmailUseCase: SendTransactionalEmailUseCase,
     private readonly configService: ConfigService,
   ) {}
@@ -309,6 +319,51 @@ export class AuthController {
 
       throw error;
     }
+  }
+
+  @Patch('profile')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({ summary: 'Update the current user profile' })
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Profil mis a jour avec succes. Nouveaux jetons fournis.',
+    type: AuthResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Utilisateur non authentifie.',
+  })
+  async updateProfile(
+    @Request() req: { user: UserAggregate },
+    @Body() updateProfileDto: UpdateProfileDto,
+  ): Promise<AuthResponseDto> {
+    const updatedUser = await this.updateProfileUseCase.execute(
+      req.user.getProperties().id.toString(),
+      updateProfileDto,
+    );
+
+    // Suppression des anciens jetons pour garantir la sécurité et la cohérence (surtout si l'email a changé)
+    await this.refreshTokenRepository.deleteByUserId(updatedUser.getProperties().id);
+
+    // Génération des nouveaux jetons
+    const accessToken = await this.tokenGenerator.generateAccessToken(updatedUser);
+    const refreshTokenValue = this.tokenGenerator.generateRefreshToken();
+
+    // Persistance du nouveau jeton de rafraîchissement
+    const refreshToken = RefreshToken.create(
+      updatedUser.getProperties().id,
+      refreshTokenValue,
+      7, // Validité de 7 jours
+    );
+    await this.refreshTokenRepository.save(refreshToken);
+
+    return {
+      accessToken,
+      refreshToken: refreshTokenValue,
+      user: this.mapUserResponse(updatedUser),
+    };
   }
 
   @Patch('change-password')

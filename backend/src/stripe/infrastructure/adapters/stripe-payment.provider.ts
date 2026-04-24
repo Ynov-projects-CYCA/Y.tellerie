@@ -69,6 +69,20 @@ export class StripePaymentProvider implements IPaymentProvider {
     return { sessionId: session.id, url: session.url ?? '' };
   }
 
+  async refund(paymentIntentId: string): Promise<void> {
+    try {
+      await this.stripe.refunds.create({
+        payment_intent: paymentIntentId,
+      });
+      this.logger.log(`Refunded payment intent ${paymentIntentId}`);
+    } catch (error: any) {
+      this.logger.error(
+        `Failed to refund payment intent ${paymentIntentId}: ${error.message}`,
+      );
+      throw error;
+    }
+  }
+
   private addBookingIdToUrl(url: string, bookingId: string): string {
     const parsed = new URL(url);
     parsed.searchParams.set('booking_id', bookingId);

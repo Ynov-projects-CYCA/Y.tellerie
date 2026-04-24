@@ -5,6 +5,8 @@ export enum BookingStatus {
   CONFIRMED = 'CONFIRMED',
   PAYMENT_FAILED = 'PAYMENT_FAILED',
   CANCELED = 'CANCELED',
+  REFUND_REQUESTED = 'REFUND_REQUESTED',
+  REFUNDED = 'REFUNDED',
 }
 
 export interface AvailabilityResponse {

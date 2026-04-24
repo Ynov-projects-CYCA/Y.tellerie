@@ -79,8 +79,8 @@ export class ProfilePageComponent implements OnInit {
       .updateProfile(this.profileForm.getRawValue())
       .pipe(finalize(() => this.isSubmitting.set(false)))
       .subscribe({
-        next: (updatedUser) => {
-          this.authSessionService.updateUser(updatedUser);
+        next: (response) => {
+          this.authSessionService.updateSession(response);
           this.isSuccess.set(true);
           setTimeout(() => this.isSuccess.set(false), 3000);
         },

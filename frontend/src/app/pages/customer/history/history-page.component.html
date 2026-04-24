@@ -24,6 +24,12 @@
                   @case ('CANCELED') {
                     <svg lucideXCircle class="icon-sm"></svg>
                   }
+                  @case ('REFUND_REQUESTED') {
+                    <svg lucideClock class="icon-sm"></svg>
+                  }
+                  @case ('REFUNDED') {
+                    <svg lucideCheckCircle class="icon-sm"></svg>
+                  }
                   @default {
                     <svg lucideInfo class="icon-sm"></svg>
                   }
@@ -32,6 +38,13 @@
               </app-badge>
               <span class="booking-date">Réservée le {{ booking.createdAt | date:'dd/MM/yyyy' }}</span>
             </div>
+
+            @if (booking.status === 'REFUND_REQUESTED') {
+              <div class="status-alert info">
+                <svg lucideInfo class="icon-sm"></svg>
+                <p>Votre demande de remboursement est en cours de traitement par notre équipe.</p>
+              </div>
+            }
 
             <div class="card-content">
               <div class="room-info">
@@ -54,6 +67,12 @@
                             [disabled]="isPaying() || isCancelling()">
                       {{ isPaying() ? '...' : 'Payer' }}
                     </button>
+                    <button appButton variant="outline" size="sm" (click)="openCancelModal(booking.id)"
+                            [disabled]="isPaying() || isCancelling()">
+                      {{ isCancelling() === booking.id ? '...' : 'Annuler' }}
+                    </button>
+                  }
+                  @if (booking.status === 'CONFIRMED') {
                     <button appButton variant="outline" size="sm" (click)="openCancelModal(booking.id)"
                             [disabled]="isPaying() || isCancelling()">
                       {{ isCancelling() === booking.id ? '...' : 'Annuler' }}

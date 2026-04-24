@@ -24,6 +24,7 @@ import {
   RegisterUseCase,
   ResetPasswordUseCase,
   VerifyEmailUseCase,
+  UpdateProfileUseCase,
 } from './index';
 import {
   BcryptPasswordHasher,
@@ -67,6 +68,7 @@ import { AuthenticationDomainService } from './domain';
     VerifyEmailUseCase,
     ForgotPasswordUseCase,
     ResetPasswordUseCase,
+    UpdateProfileUseCase,
     AuthenticationDomainService,
     LocalStrategy,
     JwtStrategy,
