@@ -1,0 +1,17 @@
+<div class="payment-container">
+  <app-card class="payment-card">
+    <div class="content">
+      <svg lucideCheckCircle class="success-icon"></svg>
+      <h1>Paiement réussi !</h1>
+      <p>Votre réservation a été confirmée avec succès. Un e-mail de confirmation vous a été envoyé.</p>
+      <p *ngIf="bookingId" class="booking-ref">Référence : {{ bookingId }}</p>
+      
+      <div class="actions">
+        <button appButton variant="primary" [routerLink]="['/client/historique']" size="full">
+          Voir mes réservations
+          <svg lucideArrowRight class="btn-icon"></svg>
+        </button>
+      </div>
+    </div>
+  </app-card>
+</div>

@@ -6,6 +6,7 @@ import {
   LucideCalendar,
   LucideUsers,
   LucideCheckCircle,
+  LucideRotateCcw
 } from '@lucide/angular';
 import {CardComponent} from '../../../shared/components/card.component';
 import {ButtonComponent} from '../../../shared/components/button.component';
@@ -13,6 +14,7 @@ import {BadgeComponent} from '../../../shared/components/badge.component';
 import {DialogComponent} from '../../../shared/components/dialog.component';
 import {BookingsApiService} from '../../../core/api/bookings-api.service';
 import {RoomsApiService} from '../../../core/api/rooms-api.service';
+import {StripeApiService} from '../../../core/api/stripe-api.service';
 import {AvailabilityResponse} from '../../../core/api/models/booking.model';
 import {Room} from '../../../core/api/models/room.model';
 
@@ -30,6 +32,7 @@ import {Room} from '../../../core/api/models/room.model';
     LucideCalendar,
     LucideUsers,
     LucideCheckCircle,
+    LucideRotateCcw,
   ],
   templateUrl: './booking-page.component.html',
   styleUrl: './booking-page.component.scss',
@@ -37,6 +40,7 @@ import {Room} from '../../../core/api/models/room.model';
 export class BookingPageComponent implements OnInit {
   private readonly bookingsApi = inject(BookingsApiService);
   private readonly roomsApi = inject(RoomsApiService);
+  private readonly stripeApi = inject(StripeApiService);
 
   readonly today = new Date().toISOString().split('T')[0];
 
@@ -47,7 +51,7 @@ export class BookingPageComponent implements OnInit {
   isLoading = signal(false);
   hasSearched = signal(false);
   searchError = signal<string | null>(null);
-  
+
   availableRooms = signal<AvailabilityResponse[]>([]);
   allRooms = signal<Room[]>([]);
 
@@ -137,8 +141,10 @@ export class BookingPageComponent implements OnInit {
    * Ouvre la modale de réservation pour une chambre sélectionnée.
    */
   openDialog(roomData: any): void {
-    if (!this.hasSearched()) {
-      this.searchError.set('Veuillez d\'abord sélectionner vos dates de séjour pour réserver.');
+    if (!this.checkIn() || !this.checkOut()) {
+      this.searchError.set('Veuillez sélectionner vos dates de séjour avant de réserver.');
+      // Scroller vers le haut pour voir l'erreur
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
     this.selectedRoom.set(roomData);
@@ -166,7 +172,7 @@ export class BookingPageComponent implements OnInit {
   }
 
   /**
-   * Confirme la réservation auprès de l'API.
+   * Confirme la réservation auprès de l'API puis redirige vers Stripe.
    */
   confirmBooking(): void {
     const roomData = this.selectedRoom();
@@ -186,9 +192,19 @@ export class BookingPageComponent implements OnInit {
       checkOutDate: this.checkOut(),
       specialRequests: this.specialRequests(),
     }).subscribe({
-      next: () => {
-        this.bookingSuccess.set(true);
-        this.isSubmitting.set(false);
+      next: (booking) => {
+        this.stripeApi.createCheckoutSession({
+          bookingId: booking.id,
+          description: `Réservation chambre ${roomData.room.roomNumber} - ${this.checkIn()} au ${this.checkOut()}`
+        }).subscribe({
+          next: (session) => {
+            window.location.href = session.url;
+          },
+          error: () => {
+            this.bookingError.set('Réservation créée mais erreur lors de l\'initialisation du paiement.');
+            this.isSubmitting.set(false);
+          }
+        });
       },
       error: () => {
         this.bookingError.set('Erreur lors de la confirmation de réservation.');

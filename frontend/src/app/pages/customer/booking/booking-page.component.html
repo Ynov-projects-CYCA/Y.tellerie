@@ -5,31 +5,46 @@
       <p class="page-subtitle">Découvrez notre sélection de chambres de luxe.</p>
     </header>
 
+    @if (searchError()) {
+      <div class="error-alert">
+        <p>{{ searchError() }}</p>
+      </div>
+    }
+
     <app-card class="search-panel">
       <div class="search-fields">
         <div class="field-group">
-          <label class="field-label"><svg lucideCalendar class="icon-xs"></svg> Arrivée</label>
-          <input type="date" class="field-input" [min]="today" [(ngModel)]="checkIn" />
+          <label class="field-label">
+            <svg lucideCalendar class="icon-xs"></svg>
+            Arrivée</label>
+          <input type="date" class="field-input" [min]="today" [(ngModel)]="checkIn"/>
         </div>
 
         <div class="field-group">
-          <label class="field-label"><svg lucideCalendar class="icon-xs"></svg> Départ</label>
-          <input type="date" class="field-input" [min]="checkIn() || today" [(ngModel)]="checkOut" />
+          <label class="field-label">
+            <svg lucideCalendar class="icon-xs"></svg>
+            Départ</label>
+          <input type="date" class="field-input" [min]="checkIn() || today" [(ngModel)]="checkOut"/>
         </div>
 
         <div class="field-group">
-          <label class="field-label"><svg lucideUsers class="icon-xs"></svg> Personnes</label>
-          <input type="number" class="field-input" min="1" max="10" [(ngModel)]="guests" />
+          <label class="field-label">
+            <svg lucideUsers class="icon-xs"></svg>
+            Personnes</label>
+          <input type="number" class="field-input" min="1" max="10" [(ngModel)]="guests"/>
         </div>
 
         <div class="field-group action">
           <div class="search-actions">
-            <button appButton variant="primary" size="full" [disabled]="isLoading()" (click)="handleSearch()" class="search-btn">
-              <svg lucideSearch class="icon-sm"></svg> {{ isLoading() ? '...' : 'Rechercher' }}
+            <button appButton variant="primary" size="full" [disabled]="isLoading()" (click)="handleSearch()"
+                    class="search-btn">
+              <svg lucideSearch class="icon-sm"></svg>
+              {{ isLoading() ? '...' : 'Rechercher' }}
             </button>
-            @if (hasSearched()) {
-              <button (click)="resetSearch()" class="refined-reset-btn" title="Réinitialiser la recherche">
-                <svg lucideRotateCcw style="width: 20px; height: 20px; stroke: white; stroke-width: 2.5px; fill: none;"></svg>
+            @if (hasSearched() || checkIn() || checkOut()) {
+              <button appButton variant="outline" (click)="resetSearch()" class="reset-btn"
+                      title="Réinitialiser les filtres">
+                <svg lucideRotateCcw class="icon-sm"></svg>
               </button>
             }
           </div>
@@ -42,10 +57,12 @@
         @for (item of displayRooms(); track item.room.id) {
           <app-card class="room-card">
             <div class="room-image">
-              <img [src]="item.room.image || 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&q=80&w=800'" [alt]="item.room.type" />
+              <img
+                [src]="item.room.image || 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&q=80&w=800'"
+                [alt]="item.room.type"/>
               <app-badge variant="success" class="room-badge">Disponible</app-badge>
               <div class="room-price">
-                {{ item.totalPrice }}€ 
+                {{ item.totalPrice }}€
                 @if (item.isSearch) {
                   <span>total</span>
                 } @else {
@@ -56,7 +73,10 @@
 
             <div class="room-body">
               <h3>{{ item.room.type }} n°{{ item.room.roomNumber }}</h3>
-              <p class="room-meta"><svg lucideUsers class="icon-xs"></svg> {{ item.room.capacity }} personnes</p>
+              <p class="room-meta">
+                <svg lucideUsers class="icon-xs"></svg>
+                {{ item.room.capacity }} personnes
+              </p>
 
               <button appButton variant="primary" size="full" (click)="openDialog(item)">Réserver</button>
             </div>
@@ -86,12 +106,12 @@
         <div class="form-body">
           <div class="field-group">
             <label class="field-label">Nom complet</label>
-            <input type="text" class="field-input" [(ngModel)]="guestName" placeholder="Jean Dupont" />
+            <input type="text" class="field-input" [(ngModel)]="guestName" placeholder="Jean Dupont"/>
           </div>
 
           <div class="field-group">
             <label class="field-label">Email</label>
-            <input type="email" class="field-input" [(ngModel)]="guestEmail" placeholder="jean@exemple.com" />
+            <input type="email" class="field-input" [(ngModel)]="guestEmail" placeholder="jean@exemple.com"/>
           </div>
 
           <div class="field-group">
@@ -101,7 +121,8 @@
         </div>
 
         <div class="form-footer">
-          <button appButton variant="primary" size="full" [disabled]="!canConfirm() || isSubmitting()" (click)="confirmBooking()">
+          <button appButton variant="primary" size="full" [disabled]="!canConfirm() || isSubmitting()"
+                  (click)="confirmBooking()">
             {{ isSubmitting() ? 'Traitement...' : 'Confirmer' }}
           </button>
         </div>

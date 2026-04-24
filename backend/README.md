@@ -85,13 +85,19 @@ L'intégration Stripe sécurise les transactions bancaires et permet la confirma
 1. **Création de compte** : Créez un compte sur le [Tableau de bord Stripe](https://stripe.com).
 2. **Identifiants API** : Naviguez vers **Développeurs** > **Clés API**.
 3. **Clé secrète** : Récupérez la **Clé secrète** (commençant par `sk_test_`).
-4. **Webhook (optionnel)** : Configurez un webhook pour suivre les événements d'email si nécessaire. Pour la synchronisation locale, utilisez la CLI Stripe pour obtenir votre secret de signature (whsec_...).
+4. **Webhooks en Local (Docker)** : 
+   Le projet inclut un container `ytellerie-stripe` qui redirige les événements Stripe vers votre backend local.
+   * Lancez les containers : `docker compose up -d`.
+   * Récupérez le secret de signature local : `docker logs ytellerie-stripe`.
+   * Cherchez la ligne `Your webhook signing secret is whsec_...`.
+   * Copiez ce secret dans votre fichier `.env` (`STRIPE_WEBHOOK_SECRET`).
+   * Redémarrez le backend : `docker compose restart backend`.
 5. **Configuration** : Renseignez les variables suivantes dans le `.env` :
    ```bash
    STRIPE_SECRET_KEY=sk_test_votre_cle_secrete
-   STRIPE_WEBHOOK_SECRET=whsec_votre_cle_webhook
-   STRIPE_CURRENCY=eur
-    ```
+   STRIPE_WEBHOOK_SECRET=whsec_votre_secret_local
+   STRIPE_DEFAULT_CURRENCY=eur
+   ```
    
 #### Emails (Mailjet)
 Mailjet est utilisé pour l'envoi automatisé des confirmations de séjour et des alertes de gestion des chambres.

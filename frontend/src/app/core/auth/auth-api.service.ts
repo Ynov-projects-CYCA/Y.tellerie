@@ -19,6 +19,12 @@ export class AuthApiService {
     return this.apiClient.post<AuthResponse, LoginPayload>('/auth/login', payload);
   }
 
+  refresh(refreshToken: string): Observable<AuthResponse> {
+    return this.apiClient.post<AuthResponse, { refreshToken: string }>('/auth/refresh', {
+      refreshToken,
+    });
+  }
+
   register(payload: RegisterPayload): Observable<RegisterResponse> {
     return this.apiClient.post<RegisterResponse, RegisterPayload>(
       '/auth/register',

@@ -7,7 +7,6 @@ async function seed() {
   try {
     console.log('Starting database seeding (24 rooms)...');
     await AppDataSource.initialize();
-    console.log('Data Source has been initialized.');
 
     const roomRepository = AppDataSource.getRepository(RoomEntity);
     const roomsData: any[] = [];
@@ -54,13 +53,9 @@ async function seed() {
           currency: 'EUR',
         });
         await roomRepository.save(room);
-        console.log(`Room ${data.roomNumber} created (${data.type})`);
-      } else {
-        console.log(`Room ${data.roomNumber} already exists, skipping`);
       }
     }
 
-    console.log('Seeding completed successfully.');
     await AppDataSource.destroy();
   } catch (error) {
     console.error('Error during seeding:', error);

@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, clientGuard, personnelGuard } from './core/auth/auth.guard';
+import { authGuard, clientGuard, guestGuard, personnelGuard } from './core/auth/auth.guard';
 import { AppShellComponent } from './layout/app-shell.component';
 import { ApiContractPageComponent } from './pages/api-contract/api-contract-page.component';
 import { HomePageComponent } from './pages/home/home-page.component';
@@ -11,6 +11,8 @@ import { VerifyEmailPageComponent } from './pages/auth/verify-email/verify-email
 import { StaffDashboardPageComponent } from './pages/staff/staff-dashbord-page.component';
 import { BookingPageComponent } from './pages/customer/booking/booking-page.component';
 import { HistoryPageComponent } from './pages/customer/history/history-page.component';
+import { PaymentSuccessPageComponent } from './pages/customer/payment/success/payment-success-page.component';
+import { PaymentCancelPageComponent } from './pages/customer/payment/cancel/payment-cancel-page.component';
 import { ProfilePageComponent } from './pages/profile/profile-page.component';
 
 export const routes: Routes = [
@@ -23,6 +25,7 @@ export const routes: Routes = [
         pathMatch: 'full',
         title: 'Accueil',
         component: HomePageComponent,
+        canActivate: [guestGuard],
       },
       {
         path: 'integration',
@@ -42,10 +45,22 @@ export const routes: Routes = [
         canActivate: [authGuard, clientGuard],
       },
       {
+        path: 'client/paiement/success',
+        title: 'Paiement réussi',
+        component: PaymentSuccessPageComponent,
+        canActivate: [authGuard, clientGuard],
+      },
+      {
+        path: 'client/paiement/cancel',
+        title: 'Paiement annulé',
+        component: PaymentCancelPageComponent,
+        canActivate: [authGuard, clientGuard],
+      },
+      {
         path: 'profile',
         title: 'Mon compte',
         component: ProfilePageComponent,
-        canActivate: [authGuard, clientGuard],
+        canActivate: [authGuard],
       },
       {
         path: 'staff',
@@ -57,21 +72,25 @@ export const routes: Routes = [
         path: 'connexion',
         title: 'Connexion',
         component: LoginPageComponent,
+        canActivate: [guestGuard],
       },
       {
         path: 'inscription',
         title: 'Inscription',
         component: RegisterPageComponent,
+        canActivate: [guestGuard],
       },
       {
         path: 'reinitialiser-mot-de-passe',
         title: 'Reinitialiser le mot de passe',
         component: ResetPasswordPageComponent,
+        canActivate: [guestGuard],
       },
       {
         path: 'verify-email',
         title: 'Verification email',
         component: VerifyEmailPageComponent,
+        canActivate: [guestGuard],
       },
       {
         path: '**',
