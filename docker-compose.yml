@@ -77,6 +77,14 @@ services:
     volumes:
       - pgadmin_data:/var/lib/pgadmin
 
+  stripe:
+    image: stripe/stripe-cli:latest
+    container_name: ytellerie-stripe
+    restart: unless-stopped
+    command: listen --forward-to backend:3000/stripe/webhook --api-key ${STRIPE_SECRET_KEY}
+    depends_on:
+      - backend
+
 volumes:
   postgres_data:
   pgadmin_data:

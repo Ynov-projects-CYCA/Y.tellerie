@@ -9,7 +9,7 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 import * as express from 'express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   const configService = app.get(ConfigService);
   const allowedOrigins = configService.get<string[]>('app.corsOrigins') ?? [];
 
@@ -27,9 +27,6 @@ async function bootstrap() {
       transform: true,
     }),
   );
-
-  // Keep raw body for Stripe webhook signature verification
-  app.use('/stripe/webhook', express.raw({ type: 'application/json' }));
 
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalInterceptors(

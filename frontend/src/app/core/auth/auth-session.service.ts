@@ -34,6 +34,10 @@ export class AuthSessionService {
     return this.sessionState()?.accessToken ?? null;
   }
 
+  getRefreshToken(): string | null {
+    return this.sessionState()?.refreshToken ?? null;
+  }
+
   startSession(
     response: AuthResponse,
     persistence: SessionPersistence,

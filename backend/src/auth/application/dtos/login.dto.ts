@@ -1,5 +1,6 @@
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, IsEnum } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Role } from '@/shared/model';
 
 export class LoginDto {
   @ApiProperty({
@@ -17,4 +18,12 @@ export class LoginDto {
   @IsString()
   @IsNotEmpty()
   password: string;
+
+  @ApiPropertyOptional({
+    description: 'Le rôle requis pour se connecter (restreint l\'accès au bon portail)',
+    enum: Role,
+  })
+  @IsEnum(Role)
+  @IsOptional()
+  requiredRole?: Role;
 }

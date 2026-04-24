@@ -11,6 +11,8 @@ import {
   IPasswordHasher as IPasswordHasherSymbol,
   IPasswordResetTokenRepository,
   IPasswordResetTokenRepository as IPasswordResetTokenRepositorySymbol,
+  IRefreshTokenRepository,
+  IRefreshTokenRepository as IRefreshTokenRepositorySymbol,
   ITokenGenerator,
   ITokenGenerator as ITokenGeneratorSymbol,
   IUserRepository,
@@ -18,6 +20,7 @@ import {
   JwtStrategy,
   LocalStrategy,
   LoginUseCase,
+  RefreshTokenUseCase,
   RegisterUseCase,
   ResetPasswordUseCase,
   VerifyEmailUseCase,
@@ -26,11 +29,13 @@ import {
   BcryptPasswordHasher,
   JwtTokenGenerator,
   TypeOrmPasswordResetTokenRepository,
+  TypeOrmRefreshTokenRepositoryAdapter,
   TypeOrmUserRepository,
 } from './infrastructure/adapters';
 import { AuthController } from './infrastructure/auth.controller';
 import { PasswordResetTokenSchema } from './infrastructure/persistence/typeorm/password-reset-token.schema';
 import { UserSchema } from './infrastructure/persistence/typeorm/user.schema';
+import { RefreshTokenSchema } from './infrastructure/persistence/typeorm/refresh-token.schema';
 import { AuthenticationDomainService } from './domain';
 
 @Module({
@@ -48,11 +53,16 @@ import { AuthenticationDomainService } from './domain';
         signOptions: { expiresIn: '15m' },
       }),
     }),
-    TypeOrmModule.forFeature([UserSchema, PasswordResetTokenSchema]),
+    TypeOrmModule.forFeature([
+      UserSchema,
+      PasswordResetTokenSchema,
+      RefreshTokenSchema,
+    ]),
   ],
   providers: [
     RegisterUseCase,
     LoginUseCase,
+    RefreshTokenUseCase,
     ChangePasswordUseCase,
     VerifyEmailUseCase,
     ForgotPasswordUseCase,
@@ -69,6 +79,10 @@ import { AuthenticationDomainService } from './domain';
       useClass: TypeOrmPasswordResetTokenRepository,
     },
     {
+      provide: IRefreshTokenRepositorySymbol,
+      useClass: TypeOrmRefreshTokenRepositoryAdapter,
+    },
+    {
       provide: ITokenGeneratorSymbol,
       useClass: JwtTokenGenerator,
     },
@@ -81,6 +95,7 @@ import { AuthenticationDomainService } from './domain';
   exports: [
     IPasswordHasherSymbol,
     IPasswordResetTokenRepositorySymbol,
+    IRefreshTokenRepositorySymbol,
     ITokenGeneratorSymbol,
     IUserRepositorySymbol,
   ],

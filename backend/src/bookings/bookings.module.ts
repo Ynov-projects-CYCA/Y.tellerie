@@ -11,6 +11,7 @@ import { GetBookingSummaryUseCase } from './application/use-cases/get-booking-su
 import { ConfirmBookingUseCase } from './application/use-cases/confirm-booking.use-case';
 import { GetBookingUseCase } from './application/use-cases/get-booking.use-case';
 import { ListBookingsUseCase } from './application/use-cases/list-bookings.use-case';
+import { CancelBookingUseCase } from './application/use-cases/cancel-booking.use-case';
 
 @Module({
   imports: [TypeOrmModule.forFeature([BookingEntity]), RoomsModule],
@@ -26,6 +27,7 @@ import { ListBookingsUseCase } from './application/use-cases/list-bookings.use-c
     ConfirmBookingUseCase,
     GetBookingUseCase,
     ListBookingsUseCase,
+    CancelBookingUseCase,
   ],
   exports: [BOOKING_REPOSITORY],
 })

@@ -100,7 +100,11 @@ export class LoginPageComponent {
     const { email, password, rememberMe } = this.loginForm.getRawValue();
 
     this.authApiService
-      .login({ email, password })
+      .login({ 
+        email, 
+        password, 
+        requiredRole: this.selectedRole() === 'personnel' ? 'personnel' : 'client' 
+      })
       .pipe(finalize(() => this.isSubmitting.set(false)))
       .subscribe({
         next: (response) => {

@@ -46,10 +46,12 @@ import {
   RegisterUseCase,
   UserAlreadyExistsError,
   UserCannotLoginError,
+  UnauthorizedRoleError,
   InvalidPasswordResetTokenError,
   ResetPasswordUseCase,
   VerifyEmailUseCase,
   InvalidOldPasswordError,
+  RefreshTokenUseCase,
 } from '@/auth/application/use-cases';
 import { Email, Password, UserAggregate } from '@/auth/domain';
 import { Role } from '@/shared/model';
@@ -62,6 +64,7 @@ export class AuthController {
   constructor(
     private readonly registerUseCase: RegisterUseCase,
     private readonly loginUseCase: LoginUseCase,
+    private readonly refreshTokenUseCase: RefreshTokenUseCase,
     private readonly changePasswordUseCase: ChangePasswordUseCase,
     private readonly verifyEmailUseCase: VerifyEmailUseCase,
     private readonly forgotPasswordUseCase: ForgotPasswordUseCase,
@@ -81,6 +84,44 @@ export class AuthController {
   })
   getCurrentUser(@Request() req: { user: UserAggregate }): UserResponse {
     return this.mapUserResponse(req.user);
+  }
+
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refresh an access token' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { refreshToken: { type: 'string' } },
+      required: ['refreshToken'],
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Tokens rafraichis avec succes.',
+    type: AuthResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Le jeton de rafraichissement est invalide ou expire.',
+  })
+  async refresh(
+    @Body('refreshToken') refreshToken: string,
+  ): Promise<AuthResponseDto> {
+    try {
+      const { user, accessToken, refreshToken: newRefreshToken } = await this.refreshTokenUseCase.execute(refreshToken);
+      
+      return {
+        accessToken,
+        refreshToken: newRefreshToken,
+        user: this.mapUserResponse(user),
+      };
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException('Refresh failed');
+    }
   }
 
   @Post('register')
@@ -147,13 +188,15 @@ export class AuthController {
     @Body() loginDto: LoginDto,
   ): Promise<AuthResponseDto> {
     try {
-      const { user, accessToken } = await this.loginUseCase.execute({
+      const { user, accessToken, refreshToken } = await this.loginUseCase.execute({
         email: req.user.getProperties().email,
         password: Password.from(loginDto.password),
+        requiredRole: loginDto.requiredRole,
       });
 
       return {
         accessToken,
+        refreshToken,
         user: this.mapUserResponse(user),
       };
     } catch (error) {
@@ -165,6 +208,10 @@ export class AuthController {
         throw new ForbiddenException(
           "Le compte n'est pas actif. Verifiez votre adresse e-mail avant de vous connecter.",
         );
+      }
+
+      if (error instanceof UnauthorizedRoleError) {
+        throw new ForbiddenException(error.message);
       }
 
       throw error;

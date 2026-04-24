@@ -25,6 +25,7 @@ import {
 import {
   ListBookingsUseCase,
 } from '@/bookings/application/use-cases/list-bookings.use-case';
+import { CancelBookingUseCase } from '@/bookings/application/use-cases/cancel-booking.use-case';
 import { ListBookingsResult } from "@/shared/model";
 import { JwtAuthGuard } from '@/auth/infrastructure/guards/jwt-auth.guard';
 import { CurrentUser } from '@/auth/infrastructure/decorators/current-user.decorator';
@@ -43,6 +44,7 @@ export class BookingsController {
     private readonly confirmBookingUseCase: ConfirmBookingUseCase,
     private readonly getBookingUseCase: GetBookingUseCase,
     private readonly listBookingsUseCase: ListBookingsUseCase,
+    private readonly cancelBookingUseCase: CancelBookingUseCase,
   ) {}
 
   /**
@@ -84,6 +86,13 @@ export class BookingsController {
   async findOne(@Param('id') id: string): Promise<BookingResponseDto> {
     const result = await this.getBookingUseCase.execute(id);
     return this.toBookingDetailResponse(result);
+  }
+
+  @Post(':id/cancel')
+  async cancel(@Param('id') id: string): Promise<BookingResponseDto> {
+    const booking = await this.cancelBookingUseCase.execute(id);
+    const detail = await this.getBookingUseCase.execute(id);
+    return this.toBookingDetailResponse(detail);
   }
 
   private toAvailabilityResponse(

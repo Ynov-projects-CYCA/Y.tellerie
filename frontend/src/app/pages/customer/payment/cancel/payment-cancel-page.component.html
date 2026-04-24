@@ -1,0 +1,16 @@
+<div class="payment-container">
+  <app-card class="payment-card">
+    <div class="content">
+      <svg lucideXCircle class="cancel-icon"></svg>
+      <h1>Paiement annulé</h1>
+      <p>Le processus de paiement a été interrompu. Votre réservation n'a pas été confirmée.</p>
+      
+      <div class="actions">
+        <button appButton variant="primary" [routerLink]="['/client']" size="full">
+          Réessayer la réservation
+          <svg lucideRefreshCw class="btn-icon"></svg>
+        </button>
+      </div>
+    </div>
+  </app-card>
+</div>

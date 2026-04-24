@@ -48,6 +48,12 @@ export class AuthResponseDto {
   })
   accessToken: string;
 
+  @ApiProperty({
+    description: 'The refresh token for authentication',
+    example: 'a1b2c3d4-e5f6-7890-1234-567890abcdef',
+  })
+  refreshToken: string;
+
   @ApiProperty({ type: UserResponse })
   user: UserResponse;
 }

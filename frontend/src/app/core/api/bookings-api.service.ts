@@ -35,4 +35,8 @@ export class BookingsApiService {
   findAll(): Observable<Booking[]> {
     return this.apiClient.get<Booking[]>('/bookings');
   }
+
+  cancel(id: string): Observable<Booking> {
+    return this.apiClient.post<Booking, Record<string, never>>(`/bookings/${id}/cancel`, {});
+  }
 }

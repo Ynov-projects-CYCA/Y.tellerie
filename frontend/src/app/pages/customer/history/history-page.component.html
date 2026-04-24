@@ -12,11 +12,21 @@
             <div class="card-header">
               <app-badge [variant]="getStatusVariant(booking.status)">
                 @switch (booking.status) {
-                  @case ('CONFIRMED') { <svg lucideCheckCircle class="icon-sm"></svg> }
-                  @case ('PENDING_PAYMENT') { <svg lucideClock class="icon-sm"></svg> }
-                  @case ('PAYMENT_FAILED') { <svg lucideXCircle class="icon-sm"></svg> }
-                  @case ('CANCELED') { <svg lucideXCircle class="icon-sm"></svg> }
-                  @default { <svg lucideInfo class="icon-sm"></svg> }
+                  @case ('CONFIRMED') {
+                    <svg lucideCheckCircle class="icon-sm"></svg>
+                  }
+                  @case ('PENDING_PAYMENT') {
+                    <svg lucideClock class="icon-sm"></svg>
+                  }
+                  @case ('PAYMENT_FAILED') {
+                    <svg lucideXCircle class="icon-sm"></svg>
+                  }
+                  @case ('CANCELED') {
+                    <svg lucideXCircle class="icon-sm"></svg>
+                  }
+                  @default {
+                    <svg lucideInfo class="icon-sm"></svg>
+                  }
                 }
                 {{ getStatusLabel(booking.status) }}
               </app-badge>
@@ -28,7 +38,8 @@
                 <h3>Chambre {{ booking.room.roomNumber }} - {{ booking.room.type }}</h3>
                 <div class="info-item">
                   <svg lucideCalendar class="icon-sm"></svg>
-                  <span>Du {{ booking.checkInDate | date:'dd/MM/yyyy' }} au {{ booking.checkOutDate | date:'dd/MM/yyyy' }}</span>
+                  <span>Du {{ booking.checkInDate | date:'dd/MM/yyyy' }}
+                    au {{ booking.checkOutDate | date:'dd/MM/yyyy' }}</span>
                 </div>
               </div>
 
@@ -37,10 +48,22 @@
                   <span class="label">Total</span>
                   <span class="amount">{{ booking.totalPrice | currency:booking.currency }}</span>
                 </div>
-                <button appButton variant="outline" size="sm" (click)="openDetails(booking)">
-                  Détails
-                  <svg lucideChevronRight class="icon-sm"></svg>
-                </button>
+                <div class="actions">
+                  @if (booking.status === 'PENDING_PAYMENT' || booking.status === 'PAYMENT_FAILED') {
+                    <button appButton variant="primary" size="sm" (click)="retryPayment(booking)"
+                            [disabled]="isPaying() || isCancelling()">
+                      {{ isPaying() ? '...' : 'Payer' }}
+                    </button>
+                    <button appButton variant="outline" size="sm" (click)="openCancelModal(booking.id)"
+                            [disabled]="isPaying() || isCancelling()">
+                      {{ isCancelling() === booking.id ? '...' : 'Annuler' }}
+                    </button>
+                  }
+                  <button appButton variant="outline" size="sm" (click)="openDetails(booking)">
+                    Détails
+                    <svg lucideChevronRight class="icon-sm"></svg>
+                  </button>
+                </div>
               </div>
             </div>
           </app-card>
@@ -79,12 +102,21 @@
     <div class="invoice-body">
       <div class="invoice-grid">
         <div class="grid-item">
-          <h4 class="section-title"><svg lucideUser class="icon-xs"></svg> Client</h4>
+          <h4 class="section-title">
+            <svg lucideUser class="icon-xs"></svg>
+            Client
+          </h4>
           <p>{{ booking.guestFirstName }} {{ booking.guestLastName }}</p>
-          <p><svg lucideMail class="icon-xs"></svg> {{ booking.guestEmail }}</p>
+          <p>
+            <svg lucideMail class="icon-xs"></svg>
+            {{ booking.guestEmail }}
+          </p>
         </div>
         <div class="grid-item">
-          <h4 class="section-title"><svg lucideMapPin class="icon-xs"></svg> Hôtel</h4>
+          <h4 class="section-title">
+            <svg lucideMapPin class="icon-xs"></svg>
+            Hôtel
+          </h4>
           <p>Y.tellerie Paris</p>
           <p>75008 Paris</p>
         </div>
@@ -114,9 +146,35 @@
 
     <div class="invoice-actions">
       <button appButton variant="outline" size="sm" (click)="printInvoice()">
-        <svg lucideDownload class="icon-sm"></svg> Imprimer
+        <svg lucideDownload class="icon-sm"></svg>
+        Imprimer
       </button>
       <button appButton variant="primary" size="sm" (click)="closeDetails()">Fermer</button>
+    </div>
+  </div>
+</app-dialog>
+
+<!-- Modal Confirmation Annulation -->
+<app-dialog *ngIf="showCancelConfirm()" (close)="closeCancelModal()" size="sm">
+  <div class="dialog-content">
+    <svg lucideAlertTriangle class="dialog-icon warning"></svg>
+    <h2>Confirmer l'annulation</h2>
+    <p>Êtes-vous sûr de vouloir annuler cette réservation ? Cette action libérera immédiatement la chambre.</p>
+    <div class="dialog-actions">
+      <button appButton variant="outline" (click)="closeCancelModal()">Retour</button>
+      <button appButton variant="primary" (click)="confirmCancel()">Confirmer</button>
+    </div>
+  </div>
+</app-dialog>
+
+<!-- Modal Erreur -->
+<app-dialog *ngIf="errorMessage()" (close)="closeErrorModal()" size="sm">
+  <div class="dialog-content">
+    <svg lucideXCircle class="dialog-icon danger"></svg>
+    <h2>Une erreur est survenue</h2>
+    <p>{{ errorMessage() }}</p>
+    <div class="dialog-actions">
+      <button appButton variant="primary" (click)="closeErrorModal()">Fermer</button>
     </div>
   </div>
 </app-dialog>
