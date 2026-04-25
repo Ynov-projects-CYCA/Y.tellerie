@@ -35,6 +35,10 @@ export class AuthSessionService {
     return this.currentSession()?.accessToken ?? null;
   }
 
+  getRefreshToken(): string | null {
+    return this.sessionState()?.refreshToken ?? null;
+  }
+
   startSession(
     response: AuthResponse,
     persistence: SessionPersistence,
@@ -56,6 +60,38 @@ export class AuthSessionService {
     this.getStorage('local')?.removeItem(this.storageKey);
     this.getStorage('session')?.removeItem(this.storageKey);
     this.sessionState.set(null);
+  }
+
+  updateUser(user: AuthenticatedUser): void {
+    const current = this.sessionState();
+    if (!current) return;
+
+    const updatedSession: AuthSession = {
+      ...current,
+      user,
+    };
+
+    this.getStorage(updatedSession.persistence)?.setItem(
+      this.storageKey,
+      JSON.stringify(updatedSession),
+    );
+    this.sessionState.set(updatedSession);
+  }
+
+  updateSession(response: AuthResponse): void {
+    const current = this.sessionState();
+    if (!current) return;
+
+    const updatedSession: AuthSession = {
+      ...current,
+      ...response,
+    };
+
+    this.getStorage(updatedSession.persistence)?.setItem(
+      this.storageKey,
+      JSON.stringify(updatedSession),
+    );
+    this.sessionState.set(updatedSession);
   }
 
   private restoreSession(): AuthSession | null {
@@ -95,6 +131,7 @@ export class AuthSessionService {
     const candidate = value as Partial<AuthSession>;
     return (
       typeof candidate.accessToken === 'string' &&
+      typeof candidate.refreshToken === 'string' &&
       candidate.user !== undefined &&
       candidate.user !== null &&
       typeof candidate.user === 'object'

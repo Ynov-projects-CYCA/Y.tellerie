@@ -78,6 +78,7 @@ describe('ApiClient', () => {
     authSessionService.startSession(
       {
         accessToken: createJwtToken(),
+        refreshToken: 'dummy_refresh_token',
         user: {
           id: 'user-1',
           firstname: 'John',

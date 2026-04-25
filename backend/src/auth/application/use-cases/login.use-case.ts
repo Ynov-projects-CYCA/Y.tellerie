@@ -1,5 +1,5 @@
 import { ForbiddenException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { AuthenticationDomainService, Email, Password, UserAggregate } from '@/auth/domain';
+import { AuthenticationDomainService, Email, Password, UserAggregate, Role } from '@/auth/domain';
 import {
   IUserRepository,
   IUserRepository as IUserRepositorySymbol,
@@ -7,7 +7,10 @@ import {
   IPasswordHasher as IPasswordHasherSymbol,
   ITokenGenerator,
   ITokenGenerator as ITokenGeneratorSymbol,
+  IRefreshTokenRepository,
+  IRefreshTokenRepository as IRefreshTokenRepositorySymbol,
 } from '@/auth/application/ports';
+import { RefreshToken } from '../../domain/refresh-token.entity';
 
 export class InvalidCredentialsError extends UnauthorizedException {
   constructor() {
@@ -23,6 +26,12 @@ export class UserCannotLoginError extends ForbiddenException {
   }
 }
 
+export class UnauthorizedRoleError extends ForbiddenException {
+  constructor() {
+    super("Vous n'avez pas les droits nécessaires pour accéder à ce portail.");
+  }
+}
+
 @Injectable()
 export class LoginUseCase {
   constructor(
@@ -32,12 +41,15 @@ export class LoginUseCase {
     private readonly passwordHasher: IPasswordHasher,
     @Inject(ITokenGeneratorSymbol)
     private readonly tokenGenerator: ITokenGenerator,
+    @Inject(IRefreshTokenRepositorySymbol)
+    private readonly refreshTokenRepository: IRefreshTokenRepository,
     private readonly authDomainService: AuthenticationDomainService,
   ) {}
 
-  async execute(command: { email: Email; password: Password }): Promise<{
+  async execute(command: { email: Email; password: Password; requiredRole?: Role }): Promise<{
     user: UserAggregate;
     accessToken: string;
+    refreshToken: string;
   }> {
     const user = await this.userRepository.findByEmail(command.email);
     if (!user) {
@@ -59,9 +71,19 @@ export class LoginUseCase {
       throw new UserCannotLoginError();
     }
 
-    // Le token n'est emis qu'apres verification des credentials et du statut
-    // du compte afin d'eviter toute session exploitable pour un compte bloque.
+    if (command.requiredRole && !user.getProperties().roles.includes(command.requiredRole)) {
+      throw new UnauthorizedRoleError();
+    }
+
+    // On supprime les anciens tokens pour l'utilisateur (optionnel, mais propre)
+    await this.refreshTokenRepository.deleteByUserId(userProps.id);
+
     const accessToken = await this.tokenGenerator.generateAccessToken(user);
-    return { user, accessToken };
+    const refreshTokenValue = this.tokenGenerator.generateRefreshToken();
+
+    const refreshToken = RefreshToken.create(userProps.id, refreshTokenValue, 7); // 7 jours
+    await this.refreshTokenRepository.save(refreshToken);
+
+    return { user, accessToken, refreshToken: refreshTokenValue };
   }
 }

@@ -51,6 +51,7 @@ export class TypeOrmPaymentRepositoryAdapter implements PaymentRepositoryPort {
     entity.currency = props.amount.getCurrency();
     entity.customerEmail = props.customerEmail;
     entity.checkoutSessionId = props.checkoutSessionId;
+    entity.paymentIntentId = props.paymentIntentId;
     entity.failureReason = props.failureReason;
     entity.createdAt = props.createdAt;
     entity.updatedAt = props.updatedAt;
@@ -66,6 +67,7 @@ export class TypeOrmPaymentRepositoryAdapter implements PaymentRepositoryPort {
       amount: Money.create(entity.amount, entity.currency),
       customerEmail: entity.customerEmail,
       checkoutSessionId: entity.checkoutSessionId,
+      paymentIntentId: entity.paymentIntentId,
       failureReason: entity.failureReason,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,

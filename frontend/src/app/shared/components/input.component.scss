@@ -1,0 +1,38 @@
+.field-group {
+  display: grid;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.field-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #57534e;
+}
+
+.field-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: #fafaf9;
+  border: 1px solid #e7e5e4;
+  border-radius: 0.625rem;
+  font-size: 1rem;
+  transition: all 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #d97706;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.1);
+  }
+
+  &--error {
+    border-color: #dc2626;
+  }
+}
+
+.field-error {
+  font-size: 0.75rem;
+  color: #dc2626;
+  font-weight: 500;
+}

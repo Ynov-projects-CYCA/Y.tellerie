@@ -9,6 +9,7 @@ export interface PaymentProperties {
   amount: Money;
   customerEmail?: string;
   checkoutSessionId?: string;
+  paymentIntentId?: string;
   failureReason?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -22,6 +23,7 @@ export class Payment {
   private readonly amount: Money;
   private readonly customerEmail?: string;
   private checkoutSessionId?: string;
+  private paymentIntentId?: string;
   private failureReason?: string;
   private readonly createdAt: Date;
   private updatedAt: Date;
@@ -34,6 +36,7 @@ export class Payment {
     this.amount = properties.amount;
     this.customerEmail = properties.customerEmail;
     this.checkoutSessionId = properties.checkoutSessionId;
+    this.paymentIntentId = properties.paymentIntentId;
     this.failureReason = properties.failureReason;
     this.createdAt = properties.createdAt;
     this.updatedAt = properties.updatedAt;
@@ -65,8 +68,18 @@ export class Payment {
     this.updatedAt = new Date();
   }
 
+  markRefunded() {
+    this.status = 'refunded';
+    this.updatedAt = new Date();
+  }
+
   attachCheckoutSession(sessionId: string) {
     this.checkoutSessionId = sessionId;
+    this.updatedAt = new Date();
+  }
+
+  setPaymentIntentId(paymentIntentId: string) {
+    this.paymentIntentId = paymentIntentId;
     this.updatedAt = new Date();
   }
 
@@ -79,6 +92,7 @@ export class Payment {
       amount: this.amount,
       customerEmail: this.customerEmail,
       checkoutSessionId: this.checkoutSessionId,
+      paymentIntentId: this.paymentIntentId,
       failureReason: this.failureReason,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,

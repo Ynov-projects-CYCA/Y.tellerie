@@ -5,6 +5,7 @@ import { environment } from '../environments/environment';
 import { APP_ENVIRONMENT } from './core/config/app-environment';
 import { apiBaseUrlInterceptor } from './core/http/interceptors/api-base-url.interceptor';
 import { apiErrorInterceptor } from './core/http/interceptors/api-error.interceptor';
+import { authRefreshInterceptor } from './core/http/interceptors/auth-refresh.interceptor';
 import { authTokenInterceptor } from './core/http/interceptors/auth-token.interceptor';
 import { backendEnvelopeInterceptor } from './core/http/interceptors/backend-envelope.interceptor';
 import { routes } from './app.routes';
@@ -17,6 +18,7 @@ export const appConfig: ApplicationConfig = {
       withInterceptors([
         apiBaseUrlInterceptor,
         authTokenInterceptor,
+        authRefreshInterceptor,
         backendEnvelopeInterceptor,
         apiErrorInterceptor,
       ]),

@@ -1,9 +1,18 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-
+import {
+  LucideCalendar,
+  LucideHotel,
+  LucideUsers,
+  LucideChartBar,
+  LucideShieldCheck,
+  LucideClock,
+} from '@lucide/angular';
+import {ButtonComponent} from '../../shared/components/button.component';
+import {CardComponent} from '../../shared/components/card.component';
 interface Feature {
-  icon: string;
+  icon: any;
   title: string;
   description: string;
 }
@@ -20,43 +29,45 @@ interface Benefit {
   imports: [
     CommonModule,
     RouterModule,
+    ButtonComponent,
+    CardComponent,
   ],
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss'],
+  templateUrl: './home-page.component.html',
+  styleUrls: ['./home-page.component.scss'],
 })
-export class HomeComponent {
+export class HomePageComponent {
   features: Feature[] = [
     {
-      icon: '📅',
+      icon: LucideCalendar,
       title: 'Réservations en ligne',
       description: 'Système de réservation intuitif pour vos clients avec confirmation instantanée.',
     },
     {
-      icon: '🏨',
+      icon: LucideHotel,
       title: 'Gestion des chambres',
       description:
         "Gérez facilement la disponibilité, les tarifs et l'état de vos chambres.",
     },
     {
-      icon: '👥',
+      icon: LucideUsers,
       title: 'Gestion du personnel',
       description:
         'Organisez les équipes, horaires et tâches de votre personnel efficacement.',
     },
     {
-      icon: '📊',
+      icon: LucideChartBar,
       title: 'Statistiques en temps réel',
       description:
         'Suivez vos performances avec des tableaux de bord détaillés.',
     },
     {
-      icon: '🛡️',
+      icon: LucideShieldCheck,
       title: 'Sécurisé et fiable',
       description:
         'Vos données sont protégées avec les dernières technologies de sécurité.',
     },
     {
-      icon: '⏰',
+      icon: LucideClock,
       title: 'Support 24/7',
       description:
         'Une équipe dédiée disponible pour vous accompagner à tout moment.',

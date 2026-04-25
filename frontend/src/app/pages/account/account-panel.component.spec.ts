@@ -45,6 +45,7 @@ describe('AccountPanelComponent', () => {
     authSessionService.startSession(
       {
         accessToken: createJwtToken(),
+        refreshToken: 'refresh-token',
         user: {
           id: 'user-1',
           firstname: 'John',

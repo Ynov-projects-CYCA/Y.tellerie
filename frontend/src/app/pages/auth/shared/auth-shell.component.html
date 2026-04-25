@@ -1,33 +1,19 @@
 <section class="auth-view">
   <div class="auth-layout">
-    <header class="auth-layout__header">
-      <a class="auth-layout__brand" routerLink="/">
-        <span class="auth-layout__logo" aria-hidden="true">⌂</span>
-        <strong class="auth-layout__title">Ytellerie</strong>
-      </a>
-
-      <nav class="auth-layout__nav" aria-label="Navigation authentification">
-        <a class="auth-layout__link" routerLink="/">Accueil</a>
-        <a class="auth-layout__back" [routerLink]="topActionLink()">
-          <span>{{ topActionLabel() }}</span>
-        </a>
-      </nav>
-    </header>
-
-    <div class="auth-layout__frame">
-      <main class="auth-layout__main">
-        <section class="auth-card" [class.auth-card--compact]="compact()">
-          <div class="auth-card__hero">
-            <div class="auth-card__badge">{{ badgeText() }}</div>
-            <h1>{{ title() }}</h1>
-            <p>{{ subtitle() }}</p>
+    <main class="auth-layout__frame">
+      <section class="auth-card" [class.auth-card--compact]="compact()">
+        <div class="auth-card__hero">
+          <div class="auth-card__badge">
+            <ng-content select="[badgeIcon]" />
           </div>
+          <h1>{{ title() }}</h1>
+          <p>{{ subtitle() }}</p>
+        </div>
 
-          <div class="auth-card__body">
-            <ng-content />
-          </div>
-        </section>
-      </main>
-    </div>
+        <div class="auth-card__body">
+          <ng-content />
+        </div>
+      </section>
+    </main>
   </div>
 </section>

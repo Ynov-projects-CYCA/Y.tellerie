@@ -1,17 +1,26 @@
 import { Component, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
-import { AuthApiService } from '../../../core/auth/auth-api.service';
-import { AuthRedirectService } from '../../../core/auth/auth-redirect.service';
-import { AuthSessionService } from '../../../core/auth/auth-session.service';
-import { AuthRole } from '../../../core/auth/models/auth-session.model';
-import { AppHttpError } from '../../../core/http/models/app-http-error.model';
 import { AuthShellComponent } from '../shared/auth-shell.component';
+import { LucideLogIn } from '@lucide/angular';
+import {AuthApiService} from '../../../core/auth/auth-api.service';
+import {AuthSessionService} from '../../../core/auth/auth-session.service';
+import {AuthRedirectService} from '../../../core/auth/auth-redirect.service';
+import {AuthRole} from '../../../core/auth/models/auth-session.model';
+import {AppHttpError} from '../../../core/http/models/app-http-error.model';
 
 @Component({
   selector: 'app-login-page',
-  imports: [ReactiveFormsModule, RouterLink, AuthShellComponent],
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    AuthShellComponent,
+    RouterLink,
+    LucideLogIn
+  ],
   templateUrl: './login-page.component.html',
 })
 export class LoginPageComponent {
@@ -91,7 +100,11 @@ export class LoginPageComponent {
     const { email, password, rememberMe } = this.loginForm.getRawValue();
 
     this.authApiService
-      .login({ email, password })
+      .login({ 
+        email, 
+        password, 
+        requiredRole: this.selectedRole() === 'personnel' ? 'personnel' : 'client' 
+      })
       .pipe(finalize(() => this.isSubmitting.set(false)))
       .subscribe({
         next: (response) => {

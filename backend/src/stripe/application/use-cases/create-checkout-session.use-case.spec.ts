@@ -9,6 +9,7 @@ describe('CreateCheckoutSessionUseCase', () => {
   const paymentProviderMock: jest.Mocked<IPaymentProvider> = {
     createCheckoutSession: jest.fn(),
     retrieveEvent: jest.fn(),
+    refund: jest.fn(),
   };
   const paymentRepositoryMock: jest.Mocked<PaymentRepositoryPort> = {
     save: jest.fn(),

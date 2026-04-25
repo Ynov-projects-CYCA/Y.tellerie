@@ -13,6 +13,7 @@ export interface AuthenticatedUser {
 
 export interface AuthResponse {
   accessToken: string;
+  refreshToken: string;
   user: AuthenticatedUser;
 }
 
@@ -24,6 +25,7 @@ export interface ChangePasswordPayload {
 export interface LoginPayload {
   email: string;
   password: string;
+  requiredRole?: AuthRole;
 }
 
 export interface RegisterPayload {

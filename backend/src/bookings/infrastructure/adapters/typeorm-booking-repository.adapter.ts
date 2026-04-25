@@ -38,6 +38,9 @@ export class TypeOrmBookingRepositoryAdapter implements BookingRepositoryPort {
       .andWhere('booking.checkOutDate > :checkInDate', {
         checkInDate: this.toDateColumn(checkInDate),
       })
+      .andWhere('booking.status NOT IN (:...excludedStatuses)', {
+        excludedStatuses: ['CANCELED', 'REFUNDED'],
+      })
       .getMany();
 
     return entities.map((entity) => this.toDomain(entity));
@@ -57,10 +60,23 @@ export class TypeOrmBookingRepositoryAdapter implements BookingRepositoryPort {
       .andWhere('booking.checkOutDate > :checkInDate', {
         checkInDate: this.toDateColumn(checkInDate),
       })
+      .andWhere('booking.status NOT IN (:...excludedStatuses)', {
+        excludedStatuses: ['CANCELED', 'REFUNDED'],
+      })
       .getMany();
 
     return entities.map((entity) => this.toDomain(entity));
   }
+
+  async findByGuestEmail(email: string): Promise<Booking[]> {
+    const entities = await this.repository.find({
+      where: { guestEmail: email },
+      order: { createdAt: 'DESC' },
+    });
+
+    return entities.map((entity) => this.toDomain(entity));
+  }
+
 
   private toEntity(booking: Booking): BookingEntity {
     const entity = new BookingEntity();

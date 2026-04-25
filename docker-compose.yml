@@ -41,7 +41,7 @@ services:
       MAILJET_SANDBOX: ${MAILJET_SANDBOX:-true}
       MAILJET_SENDER_EMAIL: ${MAILJET_SENDER_EMAIL:-}
       MAILJET_SENDER_NAME: ${MAILJET_SENDER_NAME:-Archi Hotel}
-    command: sh -c "npm run migration:run:prod && node dist/main"
+    command: sh -c "npm run migration:run:prod && npm run seed:prod && node dist/main"
     ports:
       - '${BACKEND_PORT:-3000}:3000'
 
@@ -76,6 +76,14 @@ services:
       - '${PGADMIN_PORT:-5050}:80'
     volumes:
       - pgadmin_data:/var/lib/pgadmin
+
+  stripe:
+    image: stripe/stripe-cli:latest
+    container_name: ytellerie-stripe
+    restart: unless-stopped
+    command: listen --forward-to backend:3000/stripe/webhook --api-key ${STRIPE_SECRET_KEY}
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:

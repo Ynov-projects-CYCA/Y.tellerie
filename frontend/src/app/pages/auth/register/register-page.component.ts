@@ -3,13 +3,14 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
-import { AuthApiService } from '../../../core/auth/auth-api.service';
-import { AppHttpError } from '../../../core/http/models/app-http-error.model';
+import { LucideUserPlus } from '@lucide/angular';
 import { AuthShellComponent } from '../shared/auth-shell.component';
+import {AuthApiService} from '../../../core/auth/auth-api.service';
+import {AppHttpError} from '../../../core/http/models/app-http-error.model';
 
 @Component({
   selector: 'app-register-page',
-  imports: [ReactiveFormsModule, RouterLink, AuthShellComponent],
+  imports: [ReactiveFormsModule, RouterLink, AuthShellComponent, LucideUserPlus],
   templateUrl: './register-page.component.html',
 })
 export class RegisterPageComponent {
