@@ -34,8 +34,8 @@ services:
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
       STRIPE_DEFAULT_CURRENCY: ${STRIPE_DEFAULT_CURRENCY:-usd}
-      STRIPE_SUCCESS_URL: ${STRIPE_SUCCESS_URL:-http://localhost:4200/success}
-      STRIPE_CANCEL_URL: ${STRIPE_CANCEL_URL:-http://localhost:4200/cancel}
+      STRIPE_SUCCESS_URL: ${STRIPE_SUCCESS_URL:-http://localhost:4200/client/paiement/success}
+      STRIPE_CANCEL_URL: ${STRIPE_CANCEL_URL:-http://localhost:4200/client/paiement/cancel}
       MAILJET_API_KEY: ${MAILJET_API_KEY:-}
       MAILJET_API_SECRET: ${MAILJET_API_SECRET:-}
       MAILJET_SANDBOX: ${MAILJET_SANDBOX:-true}

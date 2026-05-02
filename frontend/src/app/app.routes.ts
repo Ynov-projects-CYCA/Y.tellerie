@@ -12,6 +12,7 @@ import {
   PaymentSuccessPageComponent,
   ProfilePageComponent,
   RegisterPageComponent,
+  RoomDetailsPageComponent,
   ResetPasswordPageComponent,
   StaffDashboardPageComponent,
   VerifyEmailPageComponent,
@@ -47,6 +48,12 @@ export const routes: Routes = [
         canActivate: [authGuard, clientGuard],
       },
       {
+        path: 'client/chambres/:id',
+        title: 'Detail de la chambre',
+        component: RoomDetailsPageComponent,
+        canActivate: [authGuard, clientGuard],
+      },
+      {
         path: 'client/paiement/success',
         title: 'Paiement réussi',
         component: PaymentSuccessPageComponent,
@@ -54,6 +61,18 @@ export const routes: Routes = [
       },
       {
         path: 'client/paiement/cancel',
+        title: 'Paiement annulé',
+        component: PaymentCancelPageComponent,
+        canActivate: [authGuard, clientGuard],
+      },
+      {
+        path: 'success',
+        title: 'Paiement réussi',
+        component: PaymentSuccessPageComponent,
+        canActivate: [authGuard, clientGuard],
+      },
+      {
+        path: 'cancel',
         title: 'Paiement annulé',
         component: PaymentCancelPageComponent,
         canActivate: [authGuard, clientGuard],
