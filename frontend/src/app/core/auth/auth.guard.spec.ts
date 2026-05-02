@@ -1,9 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
-import { AuthRedirectService } from './auth-redirect.service';
-import { authGuard, clientGuard, personnelGuard } from './auth.guard';
-import { AuthSessionService } from './auth-session.service';
-import { createJwtToken } from '../../../testing/jwt-test.utils';
+import { AuthRedirectService, authGuard, clientGuard, personnelGuard, AuthSessionService } from '@core';
+import { createJwtToken } from '@testing';
 
 describe('auth guards', () => {
   let authSessionService: AuthSessionService;

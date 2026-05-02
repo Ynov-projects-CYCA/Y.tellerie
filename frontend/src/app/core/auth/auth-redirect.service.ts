@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AuthenticatedUser } from './models/auth-session.model';
+import { AuthenticatedUser } from '@core/auth/models';
 
 @Injectable({ providedIn: 'root' })
 export class AuthRedirectService {

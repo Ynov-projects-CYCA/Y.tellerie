@@ -9,8 +9,7 @@ import {
   LucideShieldCheck,
   LucideClock,
 } from '@lucide/angular';
-import {ButtonComponent} from '../../shared/components/button.component';
-import {CardComponent} from '../../shared/components/card.component';
+import { ButtonComponent, CardComponent } from '@shared';
 interface Feature {
   icon: any;
   title: string;

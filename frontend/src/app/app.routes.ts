@@ -1,19 +1,21 @@
 import { Routes } from '@angular/router';
-import { authGuard, clientGuard, guestGuard, personnelGuard } from './core/auth/auth.guard';
-import { AppShellComponent } from './layout/app-shell.component';
-import { ApiContractPageComponent } from './pages/api-contract/api-contract-page.component';
-import { HomePageComponent } from './pages/home/home-page.component';
-import { NotFoundPageComponent } from './pages/not-found/not-found-page.component';
-import { LoginPageComponent } from './pages/auth/login/login-page.component';
-import { RegisterPageComponent } from './pages/auth/register/register-page.component';
-import { ResetPasswordPageComponent } from './pages/auth/reset-password/reset-password-page.component';
-import { VerifyEmailPageComponent } from './pages/auth/verify-email/verify-email-page.component';
-import { StaffDashboardPageComponent } from './pages/staff/staff-dashbord-page.component';
-import { BookingPageComponent } from './pages/customer/booking/booking-page.component';
-import { HistoryPageComponent } from './pages/customer/history/history-page.component';
-import { PaymentSuccessPageComponent } from './pages/customer/payment/success/payment-success-page.component';
-import { PaymentCancelPageComponent } from './pages/customer/payment/cancel/payment-cancel-page.component';
-import { ProfilePageComponent } from './pages/profile/profile-page.component';
+import { authGuard, clientGuard, guestGuard, personnelGuard } from '@core';
+import { AppShellComponent } from '@layout';
+import {
+  ApiContractPageComponent,
+  BookingPageComponent,
+  HistoryPageComponent,
+  HomePageComponent,
+  LoginPageComponent,
+  NotFoundPageComponent,
+  PaymentCancelPageComponent,
+  PaymentSuccessPageComponent,
+  ProfilePageComponent,
+  RegisterPageComponent,
+  ResetPasswordPageComponent,
+  StaffDashboardPageComponent,
+  VerifyEmailPageComponent,
+} from '@pages';
 
 export const routes: Routes = [
   {

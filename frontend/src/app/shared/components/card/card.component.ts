@@ -3,7 +3,7 @@ import { Component, Input, booleanAttribute } from '@angular/core';
 @Component({
   selector: 'app-card',
   standalone: true,
-  template: `<ng-content></ng-content>`,
+  templateUrl: `./card.component.html`,
   styleUrl: './card.component.scss',
   host: {
     '[class.is-hoverable]': 'hoverable'

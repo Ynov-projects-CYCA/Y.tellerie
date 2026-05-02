@@ -9,11 +9,8 @@ import {
   LucideSave,
   LucideLoader2
 } from '@lucide/angular';
-import {ButtonComponent} from '../../shared/components/button.component';
-import {CardComponent, CardContentComponent, CardDescriptionComponent, CardHeaderComponent, CardTitleComponent} from '../../shared/components/card.component';
-import {AuthSessionService} from '../../core/auth/auth-session.service';
-import {AuthApiService} from '../../core/auth/auth-api.service';
-import {AppHttpError} from '../../core/http/models/app-http-error.model';
+import { AppHttpError, AuthApiService, AuthSessionService } from '@core';
+import { ButtonComponent, CardComponent, CardContentComponent, CardDescriptionComponent, CardHeaderComponent, CardTitleComponent } from '@shared';
 
 @Component({
   selector: 'app-profile-page',

@@ -8,15 +8,8 @@ import {
   LucideCheckCircle,
   LucideRotateCcw
 } from '@lucide/angular';
-import {CardComponent} from '../../../shared/components/card.component';
-import {ButtonComponent} from '../../../shared/components/button.component';
-import {BadgeComponent} from '../../../shared/components/badge.component';
-import {DialogComponent} from '../../../shared/components/dialog.component';
-import {BookingsApiService} from '../../../core/api/bookings-api.service';
-import {RoomsApiService} from '../../../core/api/rooms-api.service';
-import {StripeApiService} from '../../../core/api/stripe-api.service';
-import {AvailabilityResponse} from '../../../core/api/models/booking.model';
-import {Room} from '../../../core/api/models/room.model';
+import { AvailabilityResponse, BookingsApiService, Room, RoomsApiService, StripeApiService } from '@core';
+import { BadgeComponent, ButtonComponent, CardComponent, DialogComponent } from '@shared';
 
 @Component({
   selector: 'app-booking-page',
