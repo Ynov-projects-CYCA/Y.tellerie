@@ -1,11 +1,10 @@
 import { Component, inject, signal } from '@angular/core';
 import { finalize } from 'rxjs';
-import { SystemApiService } from '../../core/api/system-api.service';
-import { APP_ENVIRONMENT } from '../../core/config/app-environment';
-import { AppHttpError } from '../../core/http/models/app-http-error.model';
+import { APP_ENVIRONMENT, AppHttpError, SystemApiService } from '@core';
 
 @Component({
   selector: 'app-api-contract-page',
+  standalone: true,
   templateUrl: './api-contract-page.component.html',
   styleUrl: './api-contract-page.component.scss',
 })

@@ -5,7 +5,7 @@ import {
   AuthSession,
   AuthenticatedUser,
   SessionPersistence,
-} from './models/auth-session.model';
+} from '@core/auth/models';
 
 @Injectable({ providedIn: 'root' })
 export class AuthSessionService {

@@ -15,13 +15,8 @@ import {
   LucideAlertTriangle
 } from '@lucide/angular';
 import { Observable } from 'rxjs';
-import {CardComponent} from '../../../shared/components/card.component';
-import {BadgeComponent} from '../../../shared/components/badge.component';
-import {DialogComponent} from '../../../shared/components/dialog.component';
-import {ButtonComponent} from '../../../shared/components/button.component';
-import {BookingsApiService} from '../../../core/api/bookings-api.service';
-import {StripeApiService} from '../../../core/api/stripe-api.service';
-import {Booking, BookingStatus} from '../../../core/api/models/booking.model';
+import { Booking, BookingsApiService, BookingStatus, StripeApiService } from '@core';
+import { BadgeComponent, ButtonComponent, CardComponent, DialogComponent } from '@shared';
 
 @Component({
   selector: 'app-history-page',

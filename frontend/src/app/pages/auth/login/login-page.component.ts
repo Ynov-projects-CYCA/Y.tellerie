@@ -3,13 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
-import { AuthShellComponent } from '../shared/auth-shell.component';
 import { LucideLogIn } from '@lucide/angular';
-import {AuthApiService} from '../../../core/auth/auth-api.service';
-import {AuthSessionService} from '../../../core/auth/auth-session.service';
-import {AuthRedirectService} from '../../../core/auth/auth-redirect.service';
-import {AuthRole} from '../../../core/auth/models/auth-session.model';
-import {AppHttpError} from '../../../core/http/models/app-http-error.model';
+import { AppHttpError, AuthApiService, AuthRedirectService, AuthRole, AuthSessionService } from '@core';
+import { AuthShellComponent } from '@pages/auth/shared/auth-shell.component';
 
 @Component({
   selector: 'app-login-page',

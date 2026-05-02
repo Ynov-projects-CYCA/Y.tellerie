@@ -1,9 +1,8 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
-import { AuthApiService } from '../../core/auth/auth-api.service';
-import { AuthSessionService } from '../../core/auth/auth-session.service';
-import { AccountPanelComponent } from '../account/account-panel.component';
+import { AuthApiService, AuthSessionService } from '@core';
+import { AccountPanelComponent } from '@pages/account/account-panel.component';
 
 @Component({
   selector: 'app-staff-page',

@@ -3,7 +3,7 @@ import { Component, input } from '@angular/core';
 @Component({
   selector: 'button[appButton], a[appButton]',
   standalone: true,
-  template: `<ng-content></ng-content>`,
+  templateUrl: `./button.component.html`,
   styleUrl: './button.component.scss',
   host: {
     '[attr.variant]': 'variant()',
