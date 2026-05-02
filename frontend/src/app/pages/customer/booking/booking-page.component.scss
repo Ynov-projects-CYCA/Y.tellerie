@@ -133,6 +133,11 @@
       font-size: 0.875rem;
       margin-bottom: var(--spacing-6);
     }
+
+    .room-actions {
+      display: grid;
+      gap: var(--spacing-3);
+    }
   }
 }
 
