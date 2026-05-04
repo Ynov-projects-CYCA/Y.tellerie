@@ -72,21 +72,40 @@
             </td>
 
             <td *ngIf="config.actions && config.actions.length > 0" class="actions-cell">
-              <ng-container *ngFor="let action of config.actions">
-                <button
-                  *ngIf="!action.condition || action.condition(item)"
-                  class="button button--small"
-                  [ngClass]="{
-                    'button--primary': action.color === 'primary',
-                    'button--secondary': action.color === 'secondary',
-                    'button--danger': action.color === 'danger',
-                    'button--success': action.color === 'success'
-                  }"
-                  (click)="handleAction(action.action, item); $event.stopPropagation()"
+              <ng-container *ngIf="config.useDropdownForActions; else buttonActions">
+                <select
+                  class="action-dropdown"
+                  (change)="handleDropdownAction($event, item)"
+                  (click)="$event.stopPropagation()"
                 >
-                  {{ action.label }}
-                </button>
+                  <option value="">Actions</option>
+                  <option
+                    *ngFor="let action of config.actions"
+                    [value]="action.action"
+                    [disabled]="action.condition && !action.condition(item)"
+                  >
+                    {{ action.label }}
+                  </option>
+                </select>
               </ng-container>
+
+              <ng-template #buttonActions>
+                <ng-container *ngFor="let action of config.actions">
+                  <button
+                    *ngIf="!action.condition || action.condition(item)"
+                    class="button button--small"
+                    [ngClass]="{
+                      'button--primary': action.color === 'primary',
+                      'button--secondary': action.color === 'secondary',
+                      'button--danger': action.color === 'danger',
+                      'button--success': action.color === 'success'
+                    }"
+                    (click)="handleAction(action.action, item); $event.stopPropagation()"
+                  >
+                    {{ action.label }}
+                  </button>
+                </ng-container>
+              </ng-template>
             </td>
           </tr>
         </tbody>

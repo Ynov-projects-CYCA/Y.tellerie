@@ -24,6 +24,7 @@ export interface TableModalConfig {
   actions?: TableAction[];
   loading?: boolean;
   emptyMessage?: string;
+  useDropdownForActions?: boolean;
 }
 
 export type TableConfig = TableModalConfig;
@@ -76,6 +77,15 @@ export class DataTableModalComponent {
 
   handleAction(action: string, item: any): void {
     this.actionEvent.emit({ action, item });
+  }
+
+  handleDropdownAction(event: any, item: any): void {
+    const action = event.target.value;
+    if (action) {
+      this.actionEvent.emit({ action, item });
+      // Reset the dropdown
+      event.target.value = '';
+    }
   }
 
   handleSort(column: TableColumn): void {
