@@ -27,52 +27,20 @@
     </div>
   </div>
 
-  <div class="card">
+  <div class="card card--toolbar">
     <div class="card__header">
       <h2 class="card__title">Liste des chambres</h2>
+      <button class="button button--primary" (click)="openRoomsModal()">Ouvrir le tableau</button>
     </div>
-
-    <div class="table-wrapper">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Numéro affiché</th>
-            <th>Statut</th>
-            <th class="data-table__align-right">Actions</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr *ngFor="let room of rooms">
-            <td class="data-table__strong">#{{ room.id }}</td>
-            <td>{{ getRoomNumber(room.id) }}</td>
-            <td>
-              <div class="status-cell">
-                <span [class]="getStatusClass(room.status)">
-                  {{ getStatusLabel(room.status) }}
-                </span>
-
-                <select
-                  class="select-field select-field--small"
-                  [ngModel]="room.status"
-                  (ngModelChange)="updateRoomStatus(room.id, $event)"
-                >
-                  <option value="available">Disponible</option>
-                  <option value="occupied">Occupée</option>
-                </select>
-              </div>
-            </td>
-            <td class="data-table__align-right">
-              <button class="button button--danger-outline button--small" (click)="deleteRoom(room.id)">
-                Supprimer
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <p class="card__text">Le tableau des chambres s’affiche dans une modal dédiée.</p>
   </div>
+
+  <app-data-table-modal
+    *ngIf="isModalOpen"
+    [config]="modalConfig"
+    (close)="closeModal()"
+    (actionEvent)="onActionClick($event)"
+  ></app-data-table-modal>
 
   <div class="modal-backdrop" *ngIf="isAddDialogOpen"></div>
 

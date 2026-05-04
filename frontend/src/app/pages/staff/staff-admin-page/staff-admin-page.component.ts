@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DataTableModalComponent, TableConfig, TableColumn, TableAction } from '../../../shared/components/data-table-modal/data-table-modal.component';
 import { currentUser, Employee, EmployeeStatus, mockEmployees } from '../../../data/mockData';
 
 @Component({
   selector: 'app-staff-admin-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DataTableModalComponent],
   templateUrl: './staff-admin-page.component.html',
   styleUrls: ['./staff-admin-page.component.scss']
 })
@@ -14,6 +15,8 @@ export class StaffAdminPageComponent {
   currentUser = currentUser;
   employees: Employee[] = [...mockEmployees];
   searchTerm = '';
+  isModalOpen = false;
+  modalConfig!: TableConfig;
 
   isAddDialogOpen = false;
   isEditDialogOpen = false;
@@ -108,6 +111,80 @@ export class StaffAdminPageComponent {
         ? { ...emp, status: emp.status === 'active' ? 'inactive' : 'active' }
         : emp
     );
+  }
+
+  initializeModalConfig() {
+    const columns: TableColumn[] = [
+      { key: 'id', label: 'ID', width: '80px', sortable: true },
+      { key: 'name', label: 'Nom', sortable: true },
+      { key: 'role', label: 'Rôle', sortable: true },
+      { key: 'shift', label: 'Shift', sortable: true },
+      { key: 'status', label: 'Statut', type: 'status', sortable: true }
+    ];
+
+    const actions: TableAction[] = [
+      {
+        label: 'Activer',
+        action: 'activate',
+        color: 'success',
+        condition: item => item.status === 'inactive'
+      },
+      {
+        label: 'Désactiver',
+        action: 'deactivate',
+        color: 'secondary',
+        condition: item => item.status === 'active'
+      },
+      {
+        label: 'Modifier',
+        action: 'edit',
+        color: 'primary'
+      },
+      {
+        label: 'Supprimer',
+        action: 'delete',
+        color: 'danger'
+      }
+    ];
+
+    this.modalConfig = {
+      title: 'Tableau du personnel',
+      subtitle: 'Gère le personnel via cette modal',
+      columns,
+      actions,
+      data: this.filteredEmployees,
+      emptyMessage: 'Aucun employé trouvé'
+    };
+  }
+
+  openEmployeesModal(): void {
+    this.initializeModalConfig();
+    this.isModalOpen = true;
+  }
+
+  closeModal(): void {
+    this.isModalOpen = false;
+  }
+
+  onActionClick(event: { action: string; item: any }): void {
+    const { action, item } = event;
+
+    switch (action) {
+      case 'activate':
+        this.toggleEmployeeStatus(item.id);
+        break;
+      case 'deactivate':
+        this.toggleEmployeeStatus(item.id);
+        break;
+      case 'edit':
+        this.openEditDialog(item);
+        break;
+      case 'delete':
+        this.deleteEmployee(item.id);
+        break;
+    }
+
+    this.initializeModalConfig();
   }
 
   getStatusLabel(status: EmployeeStatus): string {
