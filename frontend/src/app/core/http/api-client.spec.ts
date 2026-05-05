@@ -5,15 +5,8 @@ import {
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { AuthSessionService } from '../auth/auth-session.service';
-import { APP_ENVIRONMENT, AppEnvironment } from '../config/app-environment';
-import { ApiClient } from './api-client.service';
-import { apiBaseUrlInterceptor } from './interceptors/api-base-url.interceptor';
-import { apiErrorInterceptor } from './interceptors/api-error.interceptor';
-import { authTokenInterceptor } from './interceptors/auth-token.interceptor';
-import { backendEnvelopeInterceptor } from './interceptors/backend-envelope.interceptor';
-import { AppHttpError } from './models/app-http-error.model';
-import { createJwtToken } from '../../../testing/jwt-test.utils';
+import { APP_ENVIRONMENT, ApiClient, apiBaseUrlInterceptor, apiErrorInterceptor, AppEnvironment, AppHttpError, AuthSessionService, authTokenInterceptor, backendEnvelopeInterceptor } from '@core';
+import { createJwtToken } from '@testing';
 
 describe('ApiClient', () => {
   const environment: AppEnvironment = {

@@ -3,11 +3,8 @@ import { Component } from '@angular/core';
 import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
-import { AuthApiService } from '../../../core/auth/auth-api.service';
-import { AuthRedirectService } from '../../../core/auth/auth-redirect.service';
-import { AuthSessionService } from '../../../core/auth/auth-session.service';
-import { AppHttpError } from '../../../core/http/models/app-http-error.model';
-import { createJwtToken } from '../../../../testing/jwt-test.utils';
+import { AppHttpError, AuthApiService, AuthRedirectService, AuthSessionService } from '@core';
+import { createJwtToken } from '@testing';
 import { LoginPageComponent } from './login-page.component';
 
 @Component({ standalone: true, template: '' })

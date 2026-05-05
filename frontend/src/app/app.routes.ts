@@ -1,19 +1,28 @@
 import { Routes } from '@angular/router';
-import { authGuard, clientGuard, guestGuard, personnelGuard } from './core/auth/auth.guard';
-import { AppShellComponent } from './layout/app-shell.component';
-import { ApiContractPageComponent } from './pages/api-contract/api-contract-page.component';
-import { HomePageComponent } from './pages/home/home-page.component';
-import { NotFoundPageComponent } from './pages/not-found/not-found-page.component';
-import { LoginPageComponent } from './pages/auth/login/login-page.component';
-import { RegisterPageComponent } from './pages/auth/register/register-page.component';
-import { ResetPasswordPageComponent } from './pages/auth/reset-password/reset-password-page.component';
-import { VerifyEmailPageComponent } from './pages/auth/verify-email/verify-email-page.component';
-import { StaffDashboardPageComponent } from './pages/staff/staff-dashbord-page.component';
-import { BookingPageComponent } from './pages/customer/booking/booking-page.component';
-import { HistoryPageComponent } from './pages/customer/history/history-page.component';
-import { PaymentSuccessPageComponent } from './pages/customer/payment/success/payment-success-page.component';
-import { PaymentCancelPageComponent } from './pages/customer/payment/cancel/payment-cancel-page.component';
-import { ProfilePageComponent } from './pages/profile/profile-page.component';
+
+
+import { authGuard, clientGuard, guestGuard, personnelGuard } from '@core';
+import { AppShellComponent } from '@layout';
+import {
+  ApiContractPageComponent,
+  BookingPageComponent,
+  HistoryPageComponent,
+  HomePageComponent,
+  LoginPageComponent,
+  NotFoundPageComponent,
+  PaymentCancelPageComponent,
+  PaymentSuccessPageComponent,
+  ProfilePageComponent,
+  RegisterPageComponent,
+  RoomDetailsPageComponent,
+  ResetPasswordPageComponent,
+  StaffDashboardPageComponent,
+  VerifyEmailPageComponent,
+} from '@pages';
+
+import { StaffReservationsPageComponent } from './pages/staff/staff-reservations-page/staff-reservations-page.component';
+import { StaffRoomsPageComponent } from './pages/staff/staff-rooms-page/staff-rooms-page.component';
+import { StaffAdminPageComponent } from './pages/staff/staff-admin-page/staff-admin-page.component';
 
 export const routes: Routes = [
   {
@@ -33,6 +42,32 @@ export const routes: Routes = [
         component: ApiContractPageComponent,
       },
       {
+        path: 'staff',
+        canActivate: [authGuard, personnelGuard],
+        children: [
+          {
+            path: '',
+            title: 'Dashboard staff',
+            component: StaffDashboardPageComponent,
+          },
+          {
+            path: 'reservations',
+            title: 'Réservations',
+            component: StaffReservationsPageComponent,
+          },
+          {
+            path: 'rooms',
+            title: 'Chambres',
+            component: StaffRoomsPageComponent,
+          },
+          {
+            path: 'admin',
+            title: 'Administration',
+            component: StaffAdminPageComponent,
+          },
+        ],
+      },
+      {
         path: 'client',
         title: 'Espace client',
         component: BookingPageComponent,
@@ -42,6 +77,12 @@ export const routes: Routes = [
         path: 'client/historique',
         title: 'Historique',
         component: HistoryPageComponent,
+        canActivate: [authGuard, clientGuard],
+      },
+      {
+        path: 'client/chambres/:id',
+        title: 'Detail de la chambre',
+        component: RoomDetailsPageComponent,
         canActivate: [authGuard, clientGuard],
       },
       {
@@ -57,16 +98,22 @@ export const routes: Routes = [
         canActivate: [authGuard, clientGuard],
       },
       {
+        path: 'success',
+        title: 'Paiement réussi',
+        component: PaymentSuccessPageComponent,
+        canActivate: [authGuard, clientGuard],
+      },
+      {
+        path: 'cancel',
+        title: 'Paiement annulé',
+        component: PaymentCancelPageComponent,
+        canActivate: [authGuard, clientGuard],
+      },
+      {
         path: 'profile',
         title: 'Mon compte',
         component: ProfilePageComponent,
         canActivate: [authGuard],
-      },
-      {
-        path: 'staff',
-        title: 'Espace personnel',
-        component: StaffDashboardPageComponent,
-        canActivate: [authGuard, personnelGuard],
       },
       {
         path: 'connexion',
@@ -94,7 +141,7 @@ export const routes: Routes = [
       },
       {
         path: '**',
-        title: 'Introuvable',
+        title: 'Page introuvable',
         component: NotFoundPageComponent,
       },
     ],

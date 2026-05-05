@@ -1,7 +1,6 @@
-import { FooterComponent } from '../pages/templates/footer/footer.component';
-import { NavbarComponent } from '../pages/templates/navbar/navbar.component';
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { FooterComponent, NavbarComponent } from '@pages/templates';
 
 @Component({
   selector: 'app-shell',

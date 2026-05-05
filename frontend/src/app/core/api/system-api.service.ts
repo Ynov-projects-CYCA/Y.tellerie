@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiClient } from '../http/api-client.service';
+import { ApiClient } from '@core/http';
 
 @Injectable({ providedIn: 'root' })
 export class SystemApiService {

@@ -3,8 +3,7 @@ import { Component } from '@angular/core';
 import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
-import { AuthApiService } from '../../../core/auth/auth-api.service';
-import { AppHttpError } from '../../../core/http/models/app-http-error.model';
+import { AppHttpError, AuthApiService } from '@core';
 import { ResetPasswordPageComponent } from './reset-password-page.component';
 
 @Component({ standalone: true, template: '' })

@@ -2,10 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
-import { AuthAccountService } from '../../core/auth/auth-account.service';
-import { AuthApiService } from '../../core/auth/auth-api.service';
-import { AuthSessionService } from '../../core/auth/auth-session.service';
-import { AppHttpError } from '../../core/http/models/app-http-error.model';
+import { AppHttpError, AuthAccountService, AuthApiService, AuthSessionService } from '@core';
 
 @Component({
   selector: 'app-account-panel',

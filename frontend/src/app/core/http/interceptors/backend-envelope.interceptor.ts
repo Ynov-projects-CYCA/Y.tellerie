@@ -1,6 +1,6 @@
 import { HttpEventType, HttpInterceptorFn, HttpResponse } from '@angular/common/http';
 import { map } from 'rxjs';
-import { BackendResponse } from '../models/backend-response.model';
+import { BackendResponse } from '@core/http/models';
 
 export const backendEnvelopeInterceptor: HttpInterceptorFn = (request, next) =>
   next(request).pipe(

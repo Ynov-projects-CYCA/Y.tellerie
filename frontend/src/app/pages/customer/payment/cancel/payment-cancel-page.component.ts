@@ -2,9 +2,8 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { LucideXCircle, LucideRefreshCw, LucideHistory } from '@lucide/angular';
-import { CardComponent } from '../../../../shared/components/card.component';
-import { ButtonComponent } from '../../../../shared/components/button.component';
-import { StripeApiService } from '../../../../core/api/stripe-api.service';
+import { StripeApiService } from '@core';
+import { ButtonComponent, CardComponent } from '@shared';
 
 @Component({
   selector: 'app-payment-cancel',

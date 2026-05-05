@@ -2,12 +2,12 @@ import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { LucideMailCheck } from '@lucide/angular';
-import { AuthShellComponent } from '../shared/auth-shell.component';
-import {AuthApiService} from '../../../core/auth/auth-api.service';
-import {AppHttpError} from '../../../core/http/models/app-http-error.model';
+import { AppHttpError, AuthApiService } from '@core';
+import { AuthShellComponent } from '@pages/auth/shared/auth-shell.component';
 
 @Component({
   selector: 'app-verify-email-page',
+  standalone: true,
   imports: [RouterLink, AuthShellComponent, LucideMailCheck],
   templateUrl: './verify-email-page.component.html',
 })

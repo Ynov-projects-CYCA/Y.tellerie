@@ -1,5 +1,5 @@
-import { AuthSessionService } from './auth-session.service';
-import { createJwtToken } from '../../../testing/jwt-test.utils';
+import { AuthSessionService } from '@core';
+import { createJwtToken } from '@testing';
 
 describe('AuthSessionService', () => {
   beforeEach(() => {

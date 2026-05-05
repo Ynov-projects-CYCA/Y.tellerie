@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiClient } from '../http/api-client.service';
+import { ApiClient } from '@core/http';
 import {
   AuthenticatedUser,
   AuthResponse,
@@ -10,7 +10,7 @@ import {
   RegisterPayload,
   RegisterResponse,
   ResetPasswordPayload,
-} from './models/auth-session.model';
+} from '@core/auth/models';
 
 @Injectable({ providedIn: 'root' })
 export class AuthApiService {

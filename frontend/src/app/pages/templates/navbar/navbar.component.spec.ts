@@ -2,9 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
-import { AuthApiService } from '../../../core/auth/auth-api.service';
-import { AuthSessionService } from '../../../core/auth/auth-session.service';
-import { createJwtToken } from '../../../../testing/jwt-test.utils';
+import { AuthApiService, AuthSessionService } from '@core';
+import { createJwtToken } from '@testing';
 import { NavbarComponent } from './navbar.component';
 
 describe('NavbarComponent', () => {
