@@ -8,7 +8,7 @@ services:
       backend:
         condition: service_started
     ports:
-      - '${FRONTEND_PORT:-4200}:80'
+      - "${FRONTEND_PORT:-4200}:80"
 
   backend:
     build:
@@ -57,7 +57,7 @@ services:
       MAILJET_SENDER_EMAIL: ${MAILJET_SENDER_EMAIL:-}
       MAILJET_SENDER_NAME: ${MAILJET_SENDER_NAME:-Archi Hotel}
     ports:
-      - '${BACKEND_PORT:-3000}:3000'
+      - "${BACKEND_PORT:-3000}:3000"
 
   postgres:
     image: postgres:15-alpine
@@ -69,7 +69,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U hotel_user -d hotel_db']
+      test: ["CMD-SHELL", "pg_isready -U hotel_user -d hotel_db"]
       interval: 10s
       timeout: 5s
       retries: 5

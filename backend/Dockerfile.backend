@@ -11,6 +11,8 @@ COPY backend/ .
 
 RUN npm run build
 
+RUN echo "=== DIST BUILDER ===" && find /app/dist -maxdepth 5 -type f
+
 RUN npx tsc src/seed.ts \
   --outDir dist \
   --esModuleInterop \
@@ -21,8 +23,6 @@ RUN npx tsc src/seed.ts \
   --target es2021 \
   --module commonjs \
   --rootDir src
-
-RUN echo "=== DIST CONTENT ===" && find dist -maxdepth 5 -type f
 
 RUN npm prune --omit=dev
 
@@ -39,7 +39,7 @@ COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 
-RUN echo "=== RUNNER DIST CONTENT ===" && find /app/dist -maxdepth 5 -type f
+RUN echo "=== DIST RUNNER ===" && find /app/dist -maxdepth 5 -type f
 
 EXPOSE 3000
 
