@@ -22,6 +22,8 @@ RUN npx tsc src/seed.ts \
   --module commonjs \
   --rootDir src
 
+RUN echo "=== DIST CONTENT ===" && find dist -maxdepth 5 -type f
+
 RUN npm prune --omit=dev
 
 FROM node:20-alpine AS runner
@@ -36,6 +38,8 @@ ENV APP_PORT=3000
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
+
+RUN echo "=== RUNNER DIST CONTENT ===" && find /app/dist -maxdepth 5 -type f
 
 EXPOSE 3000
 
