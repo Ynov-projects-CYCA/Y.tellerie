@@ -1,8 +1,8 @@
 services:
   frontend:
     build:
-      context: .
-      dockerfile: frontend/Dockerfile.frontend
+      context: ./frontend
+      dockerfile: Dockerfile.frontend
     restart: unless-stopped
     depends_on:
       backend:
