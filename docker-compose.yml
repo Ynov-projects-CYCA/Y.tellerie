@@ -23,19 +23,30 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: 3000
+
       POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
-      POSTGRES_PORT: 5432
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
       POSTGRES_DB: ${POSTGRES_DB:-hotel_db}
       POSTGRES_USER: ${POSTGRES_USER:-hotel_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hotel_pass}
+
+      DATABASE_HOST: ${POSTGRES_HOST:-postgres}
+      DATABASE_PORT: ${POSTGRES_PORT:-5432}
+      DATABASE_NAME: ${POSTGRES_DB:-hotel_db}
+      DATABASE_USER: ${POSTGRES_USER:-hotel_user}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-hotel_pass}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-hotel_user}:${POSTGRES_PASSWORD:-hotel_pass}@postgres:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-hotel_db}
+
       JWT_SECRET: ${JWT_SECRET}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:4200}
+
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
       STRIPE_DEFAULT_CURRENCY: ${STRIPE_DEFAULT_CURRENCY:-usd}
       STRIPE_SUCCESS_URL: ${STRIPE_SUCCESS_URL:-http://localhost:4200/client/paiement/success}
       STRIPE_CANCEL_URL: ${STRIPE_CANCEL_URL:-http://localhost:4200/client/paiement/cancel}
+
       MAILJET_API_KEY: ${MAILJET_API_KEY:-}
       MAILJET_API_SECRET: ${MAILJET_API_SECRET:-}
       MAILJET_SANDBOX: ${MAILJET_SANDBOX:-true}
