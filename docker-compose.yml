@@ -1,8 +1,8 @@
 services:
-frontend:
-  build:
-    context: .
-    dockerfile: frontend/Dockerfile.frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile.frontend
     restart: unless-stopped
     depends_on:
       backend:
@@ -10,10 +10,10 @@ frontend:
     ports:
       - '${FRONTEND_PORT:-4200}:80'
 
-backend:
-  build:
-    context: .
-    dockerfile: backend/Dockerfile.backend
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile.backend
     restart: unless-stopped
     depends_on:
       postgres:
@@ -45,16 +45,16 @@ backend:
       JWT_SECRET: ${JWT_SECRET}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
 
-      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
-      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
       STRIPE_DEFAULT_CURRENCY: ${STRIPE_DEFAULT_CURRENCY:-usd}
       STRIPE_SUCCESS_URL: ${STRIPE_SUCCESS_URL}
       STRIPE_CANCEL_URL: ${STRIPE_CANCEL_URL}
 
-      MAILJET_API_KEY: ${MAILJET_API_KEY}
-      MAILJET_API_SECRET: ${MAILJET_API_SECRET}
+      MAILJET_API_KEY: ${MAILJET_API_KEY:-}
+      MAILJET_API_SECRET: ${MAILJET_API_SECRET:-}
       MAILJET_SANDBOX: ${MAILJET_SANDBOX:-true}
-      MAILJET_SENDER_EMAIL: ${MAILJET_SENDER_EMAIL}
+      MAILJET_SENDER_EMAIL: ${MAILJET_SENDER_EMAIL:-}
       MAILJET_SENDER_NAME: ${MAILJET_SENDER_NAME:-Archi Hotel}
 
     command: sh -c "npm run migration:run:prod && npm run seed:prod && node dist/main"
@@ -76,29 +76,5 @@ backend:
       timeout: 5s
       retries: 5
 
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    restart: unless-stopped
-    profiles: ['tools']
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
-    ports:
-      - '${PGADMIN_PORT:-5050}:80'
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-
-  stripe:
-    image: stripe/stripe-cli:latest
-    restart: unless-stopped
-    profiles: ['tools']
-    command: listen --forward-to backend:3000/stripe/webhook --api-key ${STRIPE_SECRET_KEY}
-    depends_on:
-      - backend
-
 volumes:
   postgres_data:
-  pgadmin_data:
