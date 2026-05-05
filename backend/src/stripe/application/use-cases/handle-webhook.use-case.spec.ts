@@ -32,6 +32,7 @@ describe('HandleWebhookUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    process.env.FRONTEND_BASE_URL = 'http://frontend.test';
     bookingFactory = new BookingFactory();
     useCase = new HandleWebhookUseCase(
       paymentProviderMock,

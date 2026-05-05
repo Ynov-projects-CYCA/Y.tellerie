@@ -6,6 +6,7 @@ import {
 import { Booking } from '@/bookings/domain/booking.entity';
 import { SendTransactionalEmailUseCase } from '@/mailjet/application/use-cases/send-transactional-email.use-case';
 import { buildActionEmailHtml, buildActionEmailText } from '@/mailjet/application/templates/action-email.template';
+import { buildFrontendUrl } from '@/config/frontend-url';
 
 @Injectable()
 export class CancelBookingUseCase {
@@ -35,7 +36,7 @@ export class CancelBookingUseCase {
           intro: `Nous avons bien reçu votre demande d'annulation et de remboursement pour votre réservation n° ${booking.getId().substring(0, 8).toUpperCase()}.`,
           body: `Notre équipe administrative va traiter votre demande dans les plus brefs délais. Vous recevrez un e-mail de confirmation une fois le remboursement effectué.`,
           ctaLabel: 'Suivre ma demande',
-          actionUrl: `${process.env['FRONTEND_URL'] || 'http://localhost:4200'}/client/historique`,
+          actionUrl: buildFrontendUrl('/client/historique'),
           footerNote: 'Merci de votre patience.',
         };
 

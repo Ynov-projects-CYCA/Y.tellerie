@@ -14,6 +14,7 @@ import {
 } from '@/stripe/application/ports/payment-repository.port';
 import { SendTransactionalEmailUseCase } from '@/mailjet/application/use-cases/send-transactional-email.use-case';
 import { buildActionEmailHtml, buildActionEmailText } from '@/mailjet/application/templates/action-email.template';
+import { buildFrontendUrl } from '@/config/frontend-url';
 
 @Injectable()
 export class HandleWebhookUseCase {
@@ -83,7 +84,7 @@ export class HandleWebhookUseCase {
         intro: `Nous avons bien reçu votre paiement pour votre séjour du ${booking.getCheckInDate().toLocaleDateString('fr-FR')} au ${booking.getCheckOutDate().toLocaleDateString('fr-FR')}.`,
         body: `Votre réservation n° ${booking.getId().substring(0, 8).toUpperCase()} est désormais confirmée. Nous avons hâte de vous accueillir dans notre établissement.`,
         ctaLabel: 'Voir ma réservation',
-        actionUrl: `${process.env['FRONTEND_URL'] || 'http://localhost:4200'}/client/historique`,
+        actionUrl: buildFrontendUrl('/client/historique'),
         footerNote: 'Merci de votre confiance.',
       };
 

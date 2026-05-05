@@ -28,12 +28,21 @@ export class StripePaymentProvider implements IPaymentProvider {
       this.configService.get<string>('stripe.currency') ??
       'usd';
 
+    const configuredSuccessUrl = this.configService.get<string>('stripe.successUrl');
+    const configuredCancelUrl = this.configService.get<string>('stripe.cancelUrl');
+
+    if (!configuredSuccessUrl || !configuredCancelUrl) {
+      throw new Error(
+        'Missing STRIPE_SUCCESS_URL/STRIPE_CANCEL_URL or FRONTEND_BASE_URL',
+      );
+    }
+
     const successUrl = this.addBookingIdToUrl(
-      this.configService.get<string>('stripe.successUrl')!,
+      configuredSuccessUrl,
       props.bookingId,
     );
     const cancelUrl = this.addBookingIdToUrl(
-      this.configService.get<string>('stripe.cancelUrl')!,
+      configuredCancelUrl,
       props.bookingId,
     );
 
