@@ -1,4 +1,8 @@
-import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
@@ -200,6 +204,22 @@ describe('AuthController', () => {
           role: Role.CLIENT,
         }),
       ).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    it('should reject public admin registration', async () => {
+      await expect(
+        authController.register({
+          firstname: 'Admin',
+          lastname: 'User',
+          phoneNumber: '+33612345678',
+          email: 'admin@example.com',
+          phone: '+33123456789',
+          password: 'password123',
+          role: Role.ADMIN,
+        }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+
+      expect(registerUseCase.execute).not.toHaveBeenCalled();
     });
   });
 

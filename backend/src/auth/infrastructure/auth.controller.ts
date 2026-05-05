@@ -150,6 +150,10 @@ export class AuthController {
     @Body() registerDto: RegisterDto,
   ): Promise<RegisterResponseDto> {
     try {
+      if (registerDto.role === Role.ADMIN) {
+        throw new ForbiddenException("Le role admin ne peut pas etre attribue a l'inscription.");
+      }
+
       const user = await this.registerUseCase.execute({
         firstname: registerDto.firstname,
         lastname: registerDto.lastname,
