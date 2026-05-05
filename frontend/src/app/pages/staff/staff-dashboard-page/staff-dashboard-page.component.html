@@ -11,7 +11,7 @@
       </div>
       <div class="stat-card__value">{{ availableRooms }}</div>
       <p class="stat-card__meta">
-        sur {{ mockRooms.length }} chambres totales
+        sur {{ rooms.length }} chambres totales
       </p>
     </div>
 
@@ -67,7 +67,7 @@
 
       <div class="panel__list">
         <div
-          *ngFor="let reservation of mockReservations.slice(0, 3); let last = last"
+          *ngFor="let reservation of reservations.slice(0, 3); let last = last"
           class="list-item"
           [ngClass]="{ 'list-item--with-border': !last }"
         >
@@ -87,11 +87,9 @@
         </div>
       </div>
 
-      <a routerLink="/staff/reservations" class="panel__link">
-        <button class="button button--secondary button--full">
-          Voir toutes les réservations
-        </button>
-      </a>
+      <button class="button button--secondary button--full" (click)="openReservationsModal()">
+        Voir toutes les réservations
+      </button>
     </div>
 
     <!-- Personnel actif -->
@@ -117,12 +115,10 @@
       </div>
 
       <ng-container *ngIf="currentUser.isAdmin">
-        <a routerLink="/staff/admin" class="panel__link">
-          <button class="button button--secondary button--full button--icon">
-            <span>🛡️</span>
-            Gérer le personnel
-          </button>
-        </a>
+        <button class="button button--secondary button--full button--icon" (click)="openAdminModal()">
+          <span>🛡️</span>
+          Gérer le personnel
+        </button>
       </ng-container>
 
       <ng-container *ngIf="!currentUser.isAdmin">
@@ -140,26 +136,27 @@
     <h2 class="panel__title">Actions rapides</h2>
 
     <div class="quick-actions">
-      <a routerLink="/staff/rooms" class="quick-actions__link">
-        <button class="quick-actions__button">
-          <span>🛏️</span>
-          Gérer les chambres
-        </button>
-      </a>
+      <button class="quick-actions__button" (click)="openRoomsModal()">
+        <span>🛏️</span>
+        Gérer les chambres
+      </button>
 
-      <a routerLink="/staff/reservations" class="quick-actions__link">
-        <button class="quick-actions__button">
-          <span>📅</span>
-          Nouvelle réservation
-        </button>
-      </a>
+      <button class="quick-actions__button" (click)="openReservationsModal()">
+        <span>📅</span>
+        Nouvelle réservation
+      </button>
 
-      <a *ngIf="currentUser.isAdmin" routerLink="/staff/admin" class="quick-actions__link">
-        <button class="quick-actions__button">
-          <span>🛡️</span>
-          Administration
-        </button>
-      </a>
+      <button *ngIf="currentUser.isAdmin" class="quick-actions__button" (click)="openAdminModal()">
+        <span>🛡️</span>
+        Administration
+      </button>
     </div>
   </div>
+
+  <app-data-table-modal
+    *ngIf="isModalOpen"
+    [config]="modalConfig"
+    (close)="closeModal()"
+    (actionEvent)="onModalAction($event)"
+  ></app-data-table-modal>
 </div>

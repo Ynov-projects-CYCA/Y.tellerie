@@ -19,7 +19,7 @@ import { ProfilePageComponent } from './pages/profile/profile-page.component';
 import { StaffDashboardPageComponent } from './pages/staff/staff-dashboard-page/staff-dashboard-page.component';
 import { StaffReservationsPageComponent } from './pages/staff/staff-reservations-page/staff-reservations-page.component';
 import { StaffRoomsPageComponent } from './pages/staff/staff-rooms-page/staff-rooms-page.component';
-import { StaffAdminPageComponent } from './pages/staff/staff-admin-page/taff-admin-page.component';
+import { StaffAdminPageComponent } from './pages/staff/staff-admin-page/staff-admin-page.component';
 
 export const routes: Routes = [
   {

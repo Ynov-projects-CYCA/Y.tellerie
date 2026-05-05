@@ -38,50 +38,18 @@
     </div>
   </div>
 
-  <div class="card">
+  <div class="card card--toolbar">
     <div class="card__header">
       <h2 class="card__title">Liste des réservations ({{ filteredReservations.length }})</h2>
+      <button class="button button--primary" (click)="openReservationsModal()">Ouvrir le tableau</button>
     </div>
-
-    <div class="table-wrapper">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Client</th>
-            <th>Chambre</th>
-            <th>Arrivée</th>
-            <th>Prix total</th>
-            <th>Statut</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let reservation of filteredReservations">
-            <td class="data-table__strong">#{{ reservation.id }}</td>
-            <td>{{ reservation.guestName }}</td>
-            <td><span class="outline-badge">N° {{ reservation.roomNumber }}</span></td>
-            <td>{{ reservation.checkIn | date:'dd/MM/yyyy' }}</td>
-            <td class="data-table__strong">{{ reservation.totalPrice }}€</td>
-            <td>
-              <div class="status-cell">
-                <span [class]="getStatusClass(reservation.status)">
-                  {{ getStatusLabel(reservation.status) }}
-                </span>
-
-                <select
-                  class="select-field select-field--small"
-                  [ngModel]="reservation.status"
-                  (ngModelChange)="updateStatus(reservation.id, $event)"
-                >
-                  <option value="confirmed">Confirmée</option>
-                  <option value="pending">En attente</option>
-                  <option value="completed">Terminée</option>
-                </select>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <p class="card__text">Le tableau complet des réservations s’ouvre dans une modal.</p>
   </div>
+
+  <app-data-table-modal
+    *ngIf="isModalOpen"
+    [config]="modalConfig"
+    (close)="closeModal()"
+    (actionEvent)="onActionClick($event)"
+  ></app-data-table-modal>
 </div>
