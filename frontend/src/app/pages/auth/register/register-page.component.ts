@@ -4,12 +4,12 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { LucideUserPlus } from '@lucide/angular';
-import { AuthShellComponent } from '../shared/auth-shell.component';
-import {AuthApiService} from '../../../core/auth/auth-api.service';
-import {AppHttpError} from '../../../core/http/models/app-http-error.model';
+import { AppHttpError, AuthApiService } from '@core';
+import { AuthShellComponent } from '@pages/auth/shared/auth-shell.component';
 
 @Component({
   selector: 'app-register-page',
+  standalone: true,
   imports: [ReactiveFormsModule, RouterLink, AuthShellComponent, LucideUserPlus],
   templateUrl: './register-page.component.html',
 })

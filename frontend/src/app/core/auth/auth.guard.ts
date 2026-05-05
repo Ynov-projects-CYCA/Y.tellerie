@@ -1,8 +1,8 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthRole } from './models/auth-session.model';
-import { AuthSessionService } from './auth-session.service';
+import { AuthRole } from '@core/auth/models';
 import { AuthRedirectService } from './auth-redirect.service';
+import { AuthSessionService } from './auth-session.service';
 
 /**
  * Protège les routes réservées aux utilisateurs connectés.

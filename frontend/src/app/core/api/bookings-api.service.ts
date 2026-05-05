@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import {ApiClient} from '../http/api-client.service';
-import {AvailabilityResponse, Booking, BookingSummaryRequest, BookingSummaryResponse} from './models/booking.model';
+import { AvailabilityResponse, Booking, BookingSummaryRequest, BookingSummaryResponse } from '@core/api/models';
+import { ApiClient } from '@core/http';
 
 @Injectable({ providedIn: 'root' })
 export class BookingsApiService {

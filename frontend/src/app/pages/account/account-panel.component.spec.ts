@@ -1,11 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
-import { AuthAccountService } from '../../core/auth/auth-account.service';
-import { AuthApiService } from '../../core/auth/auth-api.service';
-import { AuthSessionService } from '../../core/auth/auth-session.service';
-import { AppHttpError } from '../../core/http/models/app-http-error.model';
-import { createJwtToken } from '../../../testing/jwt-test.utils';
+import { AppHttpError, AuthAccountService, AuthApiService, AuthSessionService } from '@core';
+import { createJwtToken } from '@testing';
 import { AccountPanelComponent } from './account-panel.component';
 
 describe('AccountPanelComponent', () => {

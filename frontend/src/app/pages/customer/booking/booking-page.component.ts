@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import {
   LucideSearch,
   LucideCalendar,
@@ -8,15 +9,8 @@ import {
   LucideCheckCircle,
   LucideRotateCcw
 } from '@lucide/angular';
-import {CardComponent} from '../../../shared/components/card.component';
-import {ButtonComponent} from '../../../shared/components/button.component';
-import {BadgeComponent} from '../../../shared/components/badge.component';
-import {DialogComponent} from '../../../shared/components/dialog.component';
-import {BookingsApiService} from '../../../core/api/bookings-api.service';
-import {RoomsApiService} from '../../../core/api/rooms-api.service';
-import {StripeApiService} from '../../../core/api/stripe-api.service';
-import {AvailabilityResponse} from '../../../core/api/models/booking.model';
-import {Room} from '../../../core/api/models/room.model';
+import { AvailabilityResponse, BookingsApiService, Room, RoomsApiService, StripeApiService } from '@core';
+import { BadgeComponent, ButtonComponent, CardComponent, DialogComponent } from '@shared';
 
 @Component({
   selector: 'app-booking-page',
@@ -24,6 +18,7 @@ import {Room} from '../../../core/api/models/room.model';
   imports: [
     CommonModule,
     FormsModule,
+    RouterLink,
     CardComponent,
     ButtonComponent,
     BadgeComponent,
@@ -218,5 +213,40 @@ export class BookingPageComponent implements OnInit {
    */
   canConfirm(): boolean {
     return !!this.guestName() && !!this.guestEmail() && this.guestEmail().includes('@');
+  }
+
+  protected getRoomLabel(room: Room): string {
+    const labels = {
+      SIMPLE: 'Chambre Simple',
+      DOUBLE: 'Chambre Double',
+      SUITE: 'Suite Signature',
+    } as const;
+
+    return labels[room.type] ?? room.type;
+  }
+
+  protected getRoomImage(room: Room): string {
+    if (room.image) {
+      return room.image;
+    }
+
+    const fallbackByType = {
+      SIMPLE:
+        'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&q=80&w=800',
+      DOUBLE:
+        'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=800',
+      SUITE:
+        'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&q=80&w=800',
+    } as const;
+
+    return fallbackByType[room.type] ?? fallbackByType.SUITE;
+  }
+
+  protected roomDetailsQueryParams(): { checkIn?: string; checkOut?: string; guests?: number } {
+    return {
+      checkIn: this.checkIn() || undefined,
+      checkOut: this.checkOut() || undefined,
+      guests: this.guests() || undefined,
+    };
   }
 }

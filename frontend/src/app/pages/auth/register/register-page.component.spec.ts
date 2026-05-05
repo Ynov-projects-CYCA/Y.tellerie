@@ -3,8 +3,7 @@ import { Component } from '@angular/core';
 import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
-import { AuthApiService } from '../../../core/auth/auth-api.service';
-import { AppHttpError } from '../../../core/http/models/app-http-error.model';
+import { AppHttpError, AuthApiService } from '@core';
 import { RegisterPageComponent } from './register-page.component';
 
 @Component({ standalone: true, template: '' })

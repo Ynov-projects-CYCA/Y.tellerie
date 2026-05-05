@@ -14,9 +14,8 @@ import {
   LucideBed,
   LucideHouse,
 } from '@lucide/angular';
-import {ButtonComponent} from '../../../shared/components/button.component';
-import {AuthApiService} from '../../../core/auth/auth-api.service';
-import {AuthSessionService} from '../../../core/auth/auth-session.service';
+import { AuthApiService, AuthSessionService } from '@core';
+import { ButtonComponent } from '@shared';
 
 @Component({
   selector: 'app-navbar',

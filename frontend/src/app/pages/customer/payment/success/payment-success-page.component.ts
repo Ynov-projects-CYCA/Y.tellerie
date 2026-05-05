@@ -2,8 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { LucideCheckCircle, LucideArrowRight } from '@lucide/angular';
-import { CardComponent } from '../../../../shared/components/card.component';
-import { ButtonComponent } from '../../../../shared/components/button.component';
+import { ButtonComponent, CardComponent } from '@shared';
 
 @Component({
   selector: 'app-payment-success',

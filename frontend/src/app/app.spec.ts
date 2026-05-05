@@ -1,7 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { appConfig } from './app.config';
-import { App } from './app';
+import { App, appConfig } from '@app';
 
 describe('App', () => {
   beforeEach(async () => {

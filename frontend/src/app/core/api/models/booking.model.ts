@@ -1,4 +1,4 @@
-import { Room } from './room.model';
+import type { Room } from './room.model';
 
 export enum BookingStatus {
   PENDING_PAYMENT = 'PENDING_PAYMENT',

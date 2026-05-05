@@ -2,8 +2,8 @@ import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
-import { AuthSessionService } from '../../auth/auth-session.service';
-import { AppHttpError } from '../models/app-http-error.model';
+import { AuthSessionService } from '@core/auth';
+import { AppHttpError } from '@core/http/models';
 
 interface BackendErrorPayload {
   statusCode?: number;

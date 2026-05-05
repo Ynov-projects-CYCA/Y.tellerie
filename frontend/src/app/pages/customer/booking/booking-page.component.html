@@ -58,8 +58,8 @@
           <app-card class="room-card">
             <div class="room-image">
               <img
-                [src]="item.room.image || 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&q=80&w=800'"
-                [alt]="item.room.type"/>
+                [src]="getRoomImage(item.room)"
+                [alt]="getRoomLabel(item.room)"/>
               <app-badge variant="success" class="room-badge">Disponible</app-badge>
               <div class="room-price">
                 {{ item.totalPrice }}€
@@ -72,13 +72,24 @@
             </div>
 
             <div class="room-body">
-              <h3>{{ item.room.type }} n°{{ item.room.roomNumber }}</h3>
+              <h3>{{ getRoomLabel(item.room) }} n°{{ item.room.roomNumber }}</h3>
               <p class="room-meta">
                 <svg lucideUsers class="icon-xs"></svg>
                 {{ item.room.capacity }} personnes
               </p>
 
-              <button appButton variant="primary" size="full" (click)="openDialog(item)">Réserver</button>
+              <div class="room-actions">
+                <a
+                  [routerLink]="['/client/chambres', item.room.id]"
+                  [queryParams]="roomDetailsQueryParams()"
+                  appButton
+                  variant="outline"
+                  size="full"
+                >
+                  Voir les details
+                </a>
+                <button appButton variant="primary" size="full" (click)="openDialog(item)">Reserver</button>
+              </div>
             </div>
           </app-card>
         }
