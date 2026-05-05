@@ -1,4 +1,4 @@
-import { AppDataSource } from './config/typeorm.config';
+import AppDataSource from './config/typeorm.config';
 import { RoomEntity } from './rooms/infrastructure/persistence/room.entity';
 import { RoomType } from './rooms/domain/room-type.vo';
 import { RoomStatus } from './rooms/domain/room-status.vo';

@@ -1,9 +1,9 @@
 import 'dotenv/config';
-import { DataSource, DataSourceOptions } from 'typeorm';
+import { DataSourceOptions } from 'typeorm';
 
 const isTsRuntime = __filename.endsWith('.ts');
 
-const dataSourceOptions: DataSourceOptions = {
+export const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
 
   host:
@@ -44,5 +44,3 @@ const dataSourceOptions: DataSourceOptions = {
   synchronize: false,
   logging: false,
 };
-
-export default new DataSource(dataSourceOptions);
