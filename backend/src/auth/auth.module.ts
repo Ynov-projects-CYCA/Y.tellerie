@@ -34,6 +34,7 @@ import {
   TypeOrmUserRepository,
 } from './infrastructure/adapters';
 import { AuthController } from './infrastructure/auth.controller';
+import { UsersController } from './infrastructure/users.controller';
 import { PasswordResetTokenSchema } from './infrastructure/persistence/typeorm/password-reset-token.schema';
 import { UserSchema } from './infrastructure/persistence/typeorm/user.schema';
 import { RefreshTokenSchema } from './infrastructure/persistence/typeorm/refresh-token.schema';
@@ -93,7 +94,7 @@ import { AuthenticationDomainService } from './domain';
       useClass: TypeOrmUserRepository,
     },
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, UsersController],
   exports: [
     IPasswordHasherSymbol,
     IPasswordResetTokenRepositorySymbol,

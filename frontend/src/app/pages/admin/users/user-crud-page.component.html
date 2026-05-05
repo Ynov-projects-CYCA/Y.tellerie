@@ -1,0 +1,135 @@
+<section class="admin-users">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Administration</p>
+      <h1>Utilisateurs</h1>
+    </div>
+
+    <div class="header-actions">
+      <button type="button" class="icon-button" (click)="loadUsers()" [disabled]="isLoading()">
+        <svg lucideRefreshCw></svg>
+      </button>
+      <button type="button" class="primary-button" (click)="startCreate()">
+        <svg lucidePlus></svg>
+        Nouvel utilisateur
+      </button>
+    </div>
+  </header>
+
+  <div class="messages">
+    <p class="message message--error" *ngIf="errorMessage()">{{ errorMessage() }}</p>
+    <p class="message message--success" *ngIf="successMessage()">{{ successMessage() }}</p>
+  </div>
+
+  <div class="layout">
+    <section class="users-panel">
+      <div class="panel-title">
+        <svg lucideUsers></svg>
+        <span>{{ users().length }} utilisateur(s)</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Statut</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let user of users()"
+              [class.is-selected]="selectedUser()?.id === user.id"
+            >
+              <td>
+                <button type="button" class="user-link" (click)="selectUser(user)">
+                  {{ user.firstname }} {{ user.lastname }}
+                </button>
+              </td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.roles.join(', ') }}</td>
+              <td>
+                <span class="status" [class.status--active]="user.isActive">
+                  {{ user.isActive ? 'Actif' : 'Inactif' }}
+                </span>
+              </td>
+              <td class="row-actions">
+                <button type="button" class="icon-button" (click)="selectUser(user)">
+                  <svg lucidePencil></svg>
+                </button>
+                <button type="button" class="icon-button danger" (click)="deleteUser(user)">
+                  <svg lucideTrash2></svg>
+                </button>
+              </td>
+            </tr>
+
+            <tr *ngIf="!isLoading() && users().length === 0">
+              <td colspan="5" class="empty-state">Aucun utilisateur.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <aside class="form-panel">
+      <div class="form-heading">
+        <h2>{{ isEditing() ? 'Modifier' : 'Creer' }}</h2>
+        <button type="button" class="icon-button" *ngIf="isEditing()" (click)="startCreate()">
+          <svg lucideX></svg>
+        </button>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <label>
+          Prenom
+          <input type="text" formControlName="firstname" />
+        </label>
+
+        <label>
+          Nom
+          <input type="text" formControlName="lastname" />
+        </label>
+
+        <label>
+          Email
+          <input type="email" formControlName="email" />
+        </label>
+
+        <label>
+          Telephone
+          <input type="tel" formControlName="phone" />
+        </label>
+
+        <label>
+          Telephone secondaire
+          <input type="tel" formControlName="phoneNumber" />
+        </label>
+
+        <label *ngIf="!isEditing()">
+          Mot de passe
+          <input type="password" formControlName="password" />
+        </label>
+
+        <label>
+          Role
+          <select formControlName="role">
+            <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+          </select>
+        </label>
+
+        <label class="checkbox-row">
+          <input type="checkbox" formControlName="isActive" />
+          Compte actif
+        </label>
+
+        <button type="submit" class="primary-button" [disabled]="isSaving()">
+          <svg lucideSave></svg>
+          {{ isSaving() ? 'Enregistrement...' : 'Enregistrer' }}
+        </button>
+      </form>
+    </aside>
+  </div>
+</section>

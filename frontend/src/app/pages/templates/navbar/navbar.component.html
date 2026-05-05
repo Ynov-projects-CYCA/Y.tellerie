@@ -1,7 +1,7 @@
 <nav class="nav"
      [class.nav--scrolled]="isScrolled"
      [class.nav--customer]="currentMode() === 'client'"
-     [class.nav--staff]="currentMode() === 'staff'">
+     [class.nav--staff]="currentMode() === 'staff' || currentMode() === 'admin'">
 
   <div class="nav-container">
 
@@ -12,19 +12,22 @@
       <div class="nav-brand-group">
         <a [routerLink]="
             currentMode() === 'staff' ? '/staff' :
+            currentMode() === 'admin' ? '/admin/users' :
             currentMode() === 'client' ? '/client' : '/'
           "
            class="nav-brand">
 
           <div class="brand-icon-wrapper">
+            <svg lucideShield class="brand-icon" *ngIf="currentMode() === 'admin'"></svg>
             <svg lucideHouse class="brand-icon" *ngIf="currentMode() === 'staff'"></svg>
-            <svg lucideHotel class="brand-icon" *ngIf="currentMode() !== 'staff'"></svg>
+            <svg lucideHotel class="brand-icon" *ngIf="currentMode() !== 'staff' && currentMode() !== 'admin'"></svg>
           </div>
 
           <div class="brand-text">
             <span class="brand-name">Ytellerie</span>
             <span class="brand-subtitle" *ngIf="currentMode() === 'client'">Espace Client</span>
             <span class="brand-subtitle" *ngIf="currentMode() === 'staff'">Espace Personnel</span>
+            <span class="brand-subtitle" *ngIf="currentMode() === 'admin'">Administration</span>
           </div>
         </a>
       </div>
@@ -67,8 +70,15 @@
           Réservations</a></li>
       </ul>
 
+      <!-- Admin Menu -->
+      <ul class="nav-menu" *ngIf="currentMode() === 'admin'">
+        <li><a routerLink="/admin/users" routerLinkActive="active" class="nav-link">
+          <svg lucideShield class="link-icon"></svg>
+          Utilisateurs</a></li>
+      </ul>
+
       <!-- Divider for Staff and Customer -->
-      <div class="nav-divider" *ngIf="currentMode() === 'staff' || currentMode() === 'client'"></div>
+      <div class="nav-divider" *ngIf="currentMode() === 'staff' || currentMode() === 'client' || currentMode() === 'admin'"></div>
 
       <!-- Admin Link (Staff only) -->
 <!--      <ul class="nav-menu" *ngIf="currentMode() === 'staff' && isAdmin()">-->

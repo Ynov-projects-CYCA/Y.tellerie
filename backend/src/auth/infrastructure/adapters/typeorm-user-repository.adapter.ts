@@ -56,6 +56,14 @@ export class TypeOrmUserRepository implements IUserRepository {
     });
   }
 
+  async findAll(): Promise<UserAggregate[]> {
+    const users = await this.userRepository.find({
+      order: { createdAt: 'DESC' },
+    });
+
+    return users.map((userOrmEntity) => this.toDomain(userOrmEntity));
+  }
+
   async findByEmail(email: Email): Promise<UserAggregate | null> {
     const userOrmEntity = await this.userRepository.findOne({
       where: { email: email.toString() },
@@ -63,21 +71,7 @@ export class TypeOrmUserRepository implements IUserRepository {
     if (!userOrmEntity) {
       return null;
     }
-    return UserFactory.reconstitute({
-      id: UserId.from(userOrmEntity.id),
-      firstname: userOrmEntity.firstname,
-      lastname: userOrmEntity.lastname,
-      phoneNumber: userOrmEntity.phoneNumber,
-      isActive: userOrmEntity.isActive,
-      verifyEmailToken: userOrmEntity.verifyEmailToken,
-      resetPasswordToken: userOrmEntity.resetPasswordToken,
-      email: Email.from(userOrmEntity.email),
-      phone: userOrmEntity.phone,
-      passwordHash: userOrmEntity.passwordHash,
-      roles: userOrmEntity.roles,
-      createdAt: userOrmEntity.createdAt,
-      updatedAt: userOrmEntity.updatedAt,
-    });
+    return this.toDomain(userOrmEntity);
   }
 
   async findByVerifyEmailToken(token: string): Promise<UserAggregate | null> {
@@ -87,6 +81,14 @@ export class TypeOrmUserRepository implements IUserRepository {
     if (!userOrmEntity) {
       return null;
     }
+    return this.toDomain(userOrmEntity);
+  }
+
+  async delete(id: UserId): Promise<void> {
+    await this.userRepository.delete(id.toString());
+  }
+
+  private toDomain(userOrmEntity: UserOrmEntity): UserAggregate {
     return UserFactory.reconstitute({
       id: UserId.from(userOrmEntity.id),
       firstname: userOrmEntity.firstname,

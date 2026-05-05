@@ -1,4 +1,5 @@
 export * from './account/account-panel.component';
+export * from './admin';
 export * from './api-contract/api-contract-page.component';
 export * from './auth';
 export * from './customer';

@@ -18,9 +18,11 @@ describe('ForgotPasswordUseCase', () => {
   beforeEach(() => {
     userRepository = {
       save: jest.fn(),
+      findAll: jest.fn(),
       findById: jest.fn(),
       findByEmail: jest.fn(),
       findByVerifyEmailToken: jest.fn(),
+      delete: jest.fn(),
     };
     tokenRepository = {
       save: jest.fn(),

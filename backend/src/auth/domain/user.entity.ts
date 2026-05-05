@@ -66,4 +66,24 @@ export class User {
     if (data.email !== undefined) this.email = data.email;
     this.updatedAt = new Date();
   }
+
+  updateByAdmin(data: {
+    firstname?: string;
+    lastname?: string;
+    phoneNumber?: string;
+    phone?: string;
+    email?: Email;
+    roles?: Role[];
+    isActive?: boolean;
+  }) {
+    this.updateProfile(data);
+    if (data.roles !== undefined) this.roles = data.roles;
+    if (data.isActive !== undefined) {
+      this.isActive = data.isActive;
+      if (data.isActive) {
+        this.verifyEmailToken = null;
+      }
+    }
+    this.updatedAt = new Date();
+  }
 }

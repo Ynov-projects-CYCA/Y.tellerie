@@ -4,6 +4,10 @@ import { AuthenticatedUser } from '@core/auth/models';
 @Injectable({ providedIn: 'root' })
 export class AuthRedirectService {
   getPostAuthUrl(user: AuthenticatedUser): string {
+    if (user.roles.includes('admin')) {
+      return '/admin/users';
+    }
+
     return user.roles.includes('personnel') ? '/staff' : '/client';
   }
 }

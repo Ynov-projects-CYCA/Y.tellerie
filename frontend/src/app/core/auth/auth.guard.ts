@@ -45,6 +45,10 @@ export const personnelGuard: CanActivateFn = () => {
   return roleGuard('personnel');
 };
 
+export const adminGuard: CanActivateFn = () => {
+  return roleGuard('admin');
+};
+
 function roleGuard(role: AuthRole) {
   const authSessionService = inject(AuthSessionService);
   const authRedirectService = inject(AuthRedirectService);

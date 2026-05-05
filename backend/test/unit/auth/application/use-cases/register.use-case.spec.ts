@@ -19,8 +19,10 @@ describe('RegisterUseCase', () => {
     mockUserRepository = {
       findByEmail: jest.fn(),
       save: jest.fn(),
+      findAll: jest.fn(),
       findById: jest.fn(),
       findByVerifyEmailToken: jest.fn(),
+      delete: jest.fn(),
     };
     mockPasswordHasher = {
       hash: jest.fn().mockResolvedValue('hashed_password'),

@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, clientGuard, guestGuard, personnelGuard } from '@core';
+import { adminGuard, authGuard, clientGuard, guestGuard, personnelGuard } from '@core';
 import { AppShellComponent } from '@layout';
 import {
   ApiContractPageComponent,
@@ -15,6 +15,7 @@ import {
   RoomDetailsPageComponent,
   ResetPasswordPageComponent,
   StaffDashboardPageComponent,
+  UserCrudPageComponent,
   VerifyEmailPageComponent,
 } from '@pages';
 
@@ -88,6 +89,12 @@ export const routes: Routes = [
         title: 'Espace personnel',
         component: StaffDashboardPageComponent,
         canActivate: [authGuard, personnelGuard],
+      },
+      {
+        path: 'admin/users',
+        title: 'Gestion des utilisateurs',
+        component: UserCrudPageComponent,
+        canActivate: [authGuard, adminGuard],
       },
       {
         path: 'connexion',

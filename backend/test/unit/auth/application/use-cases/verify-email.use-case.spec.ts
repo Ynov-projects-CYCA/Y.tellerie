@@ -15,9 +15,11 @@ describe('VerifyEmailUseCase', () => {
   beforeEach(() => {
     mockUserRepository = {
       save: jest.fn(),
+      findAll: jest.fn(),
       findById: jest.fn(),
       findByEmail: jest.fn(),
       findByVerifyEmailToken: jest.fn(),
+      delete: jest.fn(),
     };
 
     useCase = new VerifyEmailUseCase(mockUserRepository);

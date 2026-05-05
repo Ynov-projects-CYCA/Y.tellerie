@@ -13,6 +13,7 @@ import {
   LucideCalendar,
   LucideBed,
   LucideHouse,
+  LucideShield,
 } from '@lucide/angular';
 import { AuthApiService, AuthSessionService } from '@core';
 import { ButtonComponent } from '@shared';
@@ -33,7 +34,8 @@ import { ButtonComponent } from '@shared';
     LucideHistory,
     LucideCalendar,
     LucideBed,
-    LucideHouse
+    LucideHouse,
+    LucideShield,
   ],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss'],
@@ -56,9 +58,10 @@ export class NavbarComponent implements OnInit {
   /**
    * Détermine le mode d'affichage de la navigation selon le rôle.
    */
-  protected readonly currentMode = computed<'public' | 'client' | 'staff'>(() => {
+  protected readonly currentMode = computed<'public' | 'client' | 'staff' | 'admin'>(() => {
     const user = this.currentUser();
     if (!user) return 'public';
+    if (user.roles.includes('admin')) return 'admin';
     return user.roles.includes('personnel') ? 'staff' : 'client';
   });
 
