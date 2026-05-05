@@ -3,7 +3,7 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 
 const isTsRuntime = __filename.endsWith('.ts');
 
-export const dataSourceOptions: DataSourceOptions = {
+const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
 
   host:
@@ -52,6 +52,4 @@ console.log('TypeORM config:', {
   database: dataSourceOptions.database,
 });
 
-export const AppDataSource = new DataSource(dataSourceOptions);
-
-export default AppDataSource;
+export default new DataSource(dataSourceOptions);
