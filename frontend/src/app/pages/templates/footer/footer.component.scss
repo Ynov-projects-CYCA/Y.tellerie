@@ -1,92 +1,72 @@
-@use 'styles/variables' as *;
-@use 'styles/mixins' as *;
-
 .footer {
-  background: $color-amber-100;
-  border-top: 1.5px solid $color-amber-300;
-  padding: $spacing-6 0;
+  background: var(--color-amber-100);
+  border-top: 1.5px solid var(--color-amber-300);
+  padding: var(--spacing-12) 0 var(--spacing-8);
+  color: var(--color-amber-900);
+}
 
-  &-container {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 $spacing-6;
-    display: flex;
-    align-items: center;
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-8);
+
+  @media (min-width: 768px) {
+    flex-direction: row;
     justify-content: space-between;
-    gap: $spacing-6;
-    flex-wrap: wrap;
-
-    @include mobile {
-      flex-direction: column;
-      text-align: center;
-      padding: 0 $spacing-4;
-      gap: $spacing-4;
-    }
   }
+}
 
-  &-brand {
-    display: flex;
-    align-items: center;
-    gap: $spacing-2;
-    text-decoration: none;
-    transition: opacity 0.2s;
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  text-decoration: none;
+  color: var(--color-amber-950);
+}
 
-    &:hover {
-      opacity: 0.8;
-    }
+.footer-brand-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--color-amber-800);
+  color: var(--color-amber-50);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .brand-icon {
+    width: 24px;
+    height: 24px;
   }
+}
 
-  &-brand-icon {
-    width: 28px;
-    height: 28px;
-    background: $color-amber-200;
-    border: 1px solid $color-amber-400;
-    border-radius: $radius-sm;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: $color-amber-800;
+.footer-brand-name {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
 
-    .brand-icon {
-      width: 16px;
-      height: 16px;
-    }
-  }
+.footer-copyright {
+  font-size: 0.875rem;
+  color: var(--color-amber-700);
+}
 
-  &-brand-name {
-    font-family: $font-serif;
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: $color-amber-950;
-  }
+.footer-nav {
+  display: flex;
+  gap: var(--spacing-6);
+}
 
+.footer-link {
+  font-size: 0.875rem;
+  color: var(--color-amber-800);
+  text-decoration: none;
+  transition: color 0.2s;
 
-  &-copyright {
-    font-size: 0.8rem;
-    color: $color-amber-700;
-    margin: 0;
-  }
-
-  &-nav {
-    display: flex;
-    align-items: center;
-    gap: $spacing-6;
-
-    @include mobile {
-      gap: $spacing-4;
-    }
-  }
-
-  &-nav-link {
-    font-size: 0.8rem;
-    color: $color-amber-800;
-    text-decoration: none;
-    transition: color 0.2s;
-    position: relative;
-
-    &:hover {
-      color: $color-amber-950;
-      text-decoration: underline;
-    }
+  &:hover {
+    color: var(--color-amber-600);
   }
 }

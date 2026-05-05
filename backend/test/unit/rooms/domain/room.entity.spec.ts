@@ -31,7 +31,7 @@ describe('Room Entity', () => {
 
       expect(() => {
         new Room('id', '', type, 1, price, status);
-      }).toThrow('Room number is required');
+      }).toThrow('Le numero de chambre est requis');
     });
 
     it('should throw error if capacity is less than 1', () => {
@@ -41,7 +41,7 @@ describe('Room Entity', () => {
 
       expect(() => {
         new Room('id', '101', type, 0, price, status);
-      }).toThrow('Capacity must be between 1 and 10');
+      }).toThrow('La capacite doit etre comprise entre 1 et 10');
     });
 
     it('should throw error if capacity is greater than 10', () => {
@@ -51,7 +51,7 @@ describe('Room Entity', () => {
 
       expect(() => {
         new Room('id', '101', type, 11, price, status);
-      }).toThrow('Capacity must be between 1 and 10');
+      }).toThrow('La capacite doit etre comprise entre 1 et 10');
     });
   });
 
@@ -84,7 +84,7 @@ describe('Room Entity', () => {
     it('should throw error if room is not occupied', () => {
       expect(() => {
         room.checkout();
-      }).toThrow('Only occupied rooms can be checked out');
+      }).toThrow('Seules les chambres occupees peuvent etre liberees');
     });
   });
 
@@ -104,7 +104,7 @@ describe('Room Entity', () => {
     it('should throw error if room is not dirty', () => {
       expect(() => {
         room.clean();
-      }).toThrow('Only dirty rooms can be cleaned');
+      }).toThrow('Seules les chambres sales peuvent etre nettoyees');
     });
   });
 
@@ -118,7 +118,7 @@ describe('Room Entity', () => {
       room.occupy();
       expect(() => {
         room.occupy();
-      }).toThrow('Only available rooms can be occupied');
+      }).toThrow('Seules les chambres disponibles peuvent etre occupees');
     });
   });
 

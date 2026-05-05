@@ -1,13 +1,7 @@
 import { EntitySchema } from 'typeorm';
+import { RefreshTokenProperties } from '@/shared/model';
 
-export class RefreshTokenOrmEntity {
-  id: string;
-  userId: string;
-  expiresAt: Date;
-  isRevoked: boolean;
-}
-
-export const RefreshTokenSchema = new EntitySchema<RefreshTokenOrmEntity>({
+export const RefreshTokenSchema = new EntitySchema<RefreshTokenProperties>({
   name: 'RefreshToken',
   tableName: 'refresh_tokens',
   columns: {
@@ -17,16 +11,27 @@ export const RefreshTokenSchema = new EntitySchema<RefreshTokenOrmEntity>({
     },
     userId: {
       type: 'uuid',
-      name: 'user_id',
+    },
+    token: {
+      type: 'varchar',
+      unique: true,
     },
     expiresAt: {
       type: 'timestamp with time zone',
-      name: 'expires_at',
     },
     isRevoked: {
       type: 'boolean',
-      name: 'is_revoked',
       default: false,
     },
+    createdAt: {
+      type: 'timestamp with time zone',
+      createDate: true,
+    },
   },
+  indices: [
+    {
+      name: 'IDX_REFRESH_TOKEN_USER',
+      columns: ['userId'],
+    },
+  ],
 });

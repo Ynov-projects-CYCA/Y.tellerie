@@ -1,28 +1,40 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { SearchAvailabilityQueryDto } from '../application/dtos/search-availability-query.dto';
+import { SearchAvailabilityQueryDto } from '@/bookings/application/dtos/search-availability-query.dto';
 import {
   AvailableRoomResult,
   SearchAvailabilityUseCase,
-} from '../application/use-cases/search-availability.use-case';
-import { AvailabilityResponseDto } from '../application/dtos/availability-response.dto';
-import { RoomResponseDto } from '../../rooms/application/dtos/room-response.dto';
-import { BookingSummaryDto } from '../application/dtos/booking-summary.dto';
+} from '@/bookings/application/use-cases/search-availability.use-case';
+import { AvailabilityResponseDto } from '@/bookings/application/dtos/availability-response.dto';
+import { RoomResponseDto } from '@/rooms/application/dtos/room-response.dto';
+import { BookingSummaryDto } from '@/bookings/application/dtos/booking-summary.dto';
 import {
   BookingSummaryResult,
   GetBookingSummaryUseCase,
-} from '../application/use-cases/get-booking-summary.use-case';
-import { BookingSummaryResponseDto } from '../application/dtos/booking-summary-response.dto';
+} from '@/bookings/application/use-cases/get-booking-summary.use-case';
+import { BookingSummaryResponseDto } from '@/bookings/application/dtos/booking-summary-response.dto';
 import {
   ConfirmBookingResult,
   ConfirmBookingUseCase,
-} from '../application/use-cases/confirm-booking.use-case';
-import { BookingResponseDto } from '../application/dtos/booking-response.dto';
+} from '@/bookings/application/use-cases/confirm-booking.use-case';
+import { BookingResponseDto } from '@/bookings/application/dtos/booking-response.dto';
 import {
   GetBookingResult,
   GetBookingUseCase,
-} from '../application/use-cases/get-booking.use-case';
+} from '@/bookings/application/use-cases/get-booking.use-case';
+import {
+  ListBookingsUseCase,
+} from '@/bookings/application/use-cases/list-bookings.use-case';
+import { CancelBookingUseCase } from '@/bookings/application/use-cases/cancel-booking.use-case';
+import { ListBookingsResult } from "@/shared/model";
+import { JwtAuthGuard } from '@/auth/infrastructure/guards/jwt-auth.guard';
+import { CurrentUser } from '@/auth/infrastructure/decorators/current-user.decorator';
+import { UserAggregate } from '@/auth/domain/user.aggregate';
 
+/**
+ * Gère les interactions liées aux réservations de chambres.
+ * Tous les endpoints sont préfixés par /bookings.
+ */
 @ApiTags('Bookings')
 @Controller('bookings')
 export class BookingsController {
@@ -31,8 +43,23 @@ export class BookingsController {
     private readonly getBookingSummaryUseCase: GetBookingSummaryUseCase,
     private readonly confirmBookingUseCase: ConfirmBookingUseCase,
     private readonly getBookingUseCase: GetBookingUseCase,
+    private readonly listBookingsUseCase: ListBookingsUseCase,
+    private readonly cancelBookingUseCase: CancelBookingUseCase,
   ) {}
 
+  /**
+   * Récupère l'historique complet des réservations de l'utilisateur authentifié.
+   */
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  async findAll(@CurrentUser() user: UserAggregate): Promise<BookingResponseDto[]> {
+    const results = await this.listBookingsUseCase.execute(user.getProperties().email.toString());
+    return results.map((result) => this.toBookingListResponse(result));
+  }
+
+  /**
+   * Recherche les chambres disponibles pour une période donnée.
+   */
   @Get('availability')
   async searchAvailability(
     @Query() query: SearchAvailabilityQueryDto,
@@ -59,6 +86,13 @@ export class BookingsController {
   async findOne(@Param('id') id: string): Promise<BookingResponseDto> {
     const result = await this.getBookingUseCase.execute(id);
     return this.toBookingDetailResponse(result);
+  }
+
+  @Post(':id/cancel')
+  async cancel(@Param('id') id: string): Promise<BookingResponseDto> {
+    const booking = await this.cancelBookingUseCase.execute(id);
+    const detail = await this.getBookingUseCase.execute(id);
+    return this.toBookingDetailResponse(detail);
   }
 
   private toAvailabilityResponse(
@@ -113,6 +147,25 @@ export class BookingsController {
   private toBookingDetailResponse(
     result: GetBookingResult,
   ): BookingResponseDto {
+    const dto = new BookingResponseDto();
+    dto.id = result.booking.getId();
+    dto.room = RoomResponseDto.fromDomain(result.room);
+    dto.guestFirstName = result.booking.getGuestFirstName();
+    dto.guestLastName = result.booking.getGuestLastName();
+    dto.guestEmail = result.booking.getGuestEmail();
+    dto.checkInDate = result.booking.getCheckInDate();
+    dto.checkOutDate = result.booking.getCheckOutDate();
+    dto.nights = result.booking.getNights();
+    dto.totalPrice = result.booking.getTotalPrice();
+    dto.currency = result.booking.getCurrency();
+    dto.status = result.booking.getStatus().getValue();
+    dto.specialRequests = result.booking.getSpecialRequests();
+    dto.createdAt = result.booking.getCreatedAt();
+    dto.updatedAt = result.booking.getUpdatedAt();
+    return dto;
+  }
+
+  private toBookingListResponse(result: ListBookingsResult): BookingResponseDto {
     const dto = new BookingResponseDto();
     dto.id = result.booking.getId();
     dto.room = RoomResponseDto.fromDomain(result.room);

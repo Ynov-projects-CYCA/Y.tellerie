@@ -1,0 +1,156 @@
+<app-auth-shell
+  [title]="'Bienvenue'"
+  [subtitle]="'Connectez-vous a votre espace'"
+  [compact]="true"
+>
+  <svg lucideLogIn badgeIcon></svg>
+  <div class="auth-tabs" aria-label="Choix du profil">
+    <button
+      type="button"
+      class="auth-tab"
+      [class.is-active]="selectedRole() === 'client'"
+      (click)="selectRole('client')"
+    >
+      Client
+    </button>
+    <button
+      type="button"
+      class="auth-tab"
+      [class.is-active]="selectedRole() === 'personnel'"
+      (click)="selectRole('personnel')"
+    >
+      Personnel
+    </button>
+  </div>
+
+  <form [formGroup]="loginForm" (ngSubmit)="submit()">
+    <div class="auth-field">
+      <label for="login-email">
+        {{ selectedRole() === 'personnel' ? 'Email professionnel' : 'Email' }}
+      </label>
+      <input
+        id="login-email"
+        type="email"
+        formControlName="email"
+        [placeholder]="selectedRole() === 'personnel' ? 'votre@hotel.com' : 'votre@email.com'"
+      />
+      @if (hasError('email')) {
+        <span class="auth-field__error">Un email valide est requis.</span>
+      }
+    </div>
+
+    <div class="auth-field">
+      <label for="login-password">Mot de passe</label>
+      <input
+        id="login-password"
+        type="password"
+        formControlName="password"
+        placeholder="••••••••"
+      />
+      @if (hasError('password')) {
+        <span class="auth-field__error">Le mot de passe est requis.</span>
+      }
+    </div>
+
+    <div class="auth-row">
+      <label class="auth-checkbox">
+        <input type="checkbox" formControlName="rememberMe" />
+        <span>Se souvenir de moi</span>
+      </label>
+
+      <button
+        type="button"
+        class="auth-link is-inline"
+        (click)="openForgotPasswordModal()"
+      >
+        Mot de passe oublie ?
+      </button>
+    </div>
+
+    @if (submitError(); as submitError) {
+      <p class="auth-feedback is-error">{{ submitError }}</p>
+    }
+
+    <button class="auth-submit" type="submit" [disabled]="isSubmitting()">
+      {{ isSubmitting() ? 'Connexion...' : 'Se connecter' }}
+    </button>
+  </form>
+
+  <p class="auth-footer">
+    @if (selectedRole() === 'personnel') {
+      Besoin d'un acces ?
+      <button
+        type="button"
+        class="auth-link is-inline"
+        (click)="openAdminContactModal()"
+      >
+        Contacter l'administrateur
+      </button>
+    } @else {
+      Pas encore de compte ?
+      <a class="auth-link" routerLink="/inscription">S'inscrire</a>
+    }
+  </p>
+</app-auth-shell>
+
+@if (isForgotPasswordOpen()) {
+  <div class="auth-modal-backdrop" (click)="closeForgotPasswordModal()">
+    <section class="auth-modal" (click)="$event.stopPropagation()">
+      <h2>Reinitialiser le mot de passe</h2>
+      <p>
+        Saisissez votre email. Si un compte existe, nous vous enverrons un lien
+        de reinitialisation.
+      </p>
+
+      <form [formGroup]="forgotPasswordForm" (ngSubmit)="submitForgotPassword()">
+        <div class="auth-field">
+          <label for="forgot-password-email">Adresse email</label>
+          <input
+            id="forgot-password-email"
+            type="email"
+            formControlName="email"
+            placeholder="jean.dupont@email.com"
+          />
+          @if (hasForgotPasswordError()) {
+            <span class="auth-field__error">Un email valide est requis.</span>
+          }
+        </div>
+
+        @if (forgotPasswordSuccess(); as forgotPasswordSuccess) {
+          <p class="auth-feedback is-success">{{ forgotPasswordSuccess }}</p>
+        }
+
+        @if (forgotPasswordError(); as forgotPasswordError) {
+          <p class="auth-feedback is-error">{{ forgotPasswordError }}</p>
+        }
+
+        <div class="auth-modal__actions">
+          <button type="button" (click)="closeForgotPasswordModal()">
+            Fermer
+          </button>
+          <button
+            type="submit"
+            [disabled]="isForgotPasswordSubmitting()"
+          >
+            {{ isForgotPasswordSubmitting() ? 'Envoi...' : 'Envoyer le lien' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+}
+
+@if (isAdminContactOpen()) {
+  <div class="auth-modal-backdrop" (click)="closeAdminContactModal()">
+    <section class="auth-modal" (click)="$event.stopPropagation()">
+      <h2>Contacter l'administrateur</h2>
+      <p>Appelez au 06 67 67 67 67 et dite le code MSEMEN.</p>
+
+      <div class="auth-modal__actions">
+        <button type="button" (click)="closeAdminContactModal()">
+          Fermer
+        </button>
+      </div>
+    </section>
+  </div>
+}

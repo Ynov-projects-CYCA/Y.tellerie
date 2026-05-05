@@ -1,15 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { BookingFactory } from '../../domain/booking.factory';
-import { BookingSummaryDto } from '../dtos/booking-summary.dto';
+import { BookingFactory } from '@/bookings/domain/booking.factory';
+import { BookingSummaryDto } from '@/bookings/application/dtos/booking-summary.dto';
 import {
   BOOKING_REPOSITORY,
   BookingRepositoryPort,
-} from '../ports/booking-repository.port';
+} from '@/bookings/application/ports/booking-repository.port';
 import {
   BookingSummaryResult,
   GetBookingSummaryUseCase,
 } from './get-booking-summary.use-case';
-import { Booking } from '../../domain/booking.entity';
+import { Booking } from '@/bookings/domain/booking.entity';
 
 export interface ConfirmBookingResult extends BookingSummaryResult {
   booking: Booking;

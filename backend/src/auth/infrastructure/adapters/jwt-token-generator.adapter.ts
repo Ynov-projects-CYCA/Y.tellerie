@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { ITokenGenerator } from '../../application/ports/token-generator.port';
-import { UserAggregate } from '../../domain/user.aggregate';
-import { JwtPayload } from '../../application/strategies/jwt.strategy';
+import { ITokenGenerator } from '@/auth/application/ports';
+import { UserAggregate } from '@/auth/domain';
+import { JwtPayload } from '@/shared/model';
+
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class JwtTokenGenerator implements ITokenGenerator {
@@ -15,5 +17,9 @@ export class JwtTokenGenerator implements ITokenGenerator {
       email: userProps.email.toString(),
     };
     return this.jwtService.signAsync(payload);
+  }
+
+  generateRefreshToken(): string {
+    return randomUUID();
   }
 }

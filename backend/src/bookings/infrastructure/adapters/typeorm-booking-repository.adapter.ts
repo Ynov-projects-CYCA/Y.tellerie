@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { BookingRepositoryPort } from '../../application/ports/booking-repository.port';
-import { Booking } from '../../domain/booking.entity';
-import { BookingEntity } from '../persistence/booking.entity';
-import { BookingFactory } from '../../domain/booking.factory';
-import { BookingStatusVO } from '../../domain/booking-status.vo';
+import { BookingRepositoryPort } from '@/bookings/application/ports/booking-repository.port';
+import { Booking } from '@/bookings/domain/booking.entity';
+import { BookingEntity } from '@/bookings/infrastructure/persistence/booking.entity';
+import { BookingFactory } from '@/bookings/domain/booking.factory';
+import { BookingStatusVO } from '@/bookings/domain/booking-status.vo';
 
 @Injectable()
 export class TypeOrmBookingRepositoryAdapter implements BookingRepositoryPort {
@@ -38,6 +38,9 @@ export class TypeOrmBookingRepositoryAdapter implements BookingRepositoryPort {
       .andWhere('booking.checkOutDate > :checkInDate', {
         checkInDate: this.toDateColumn(checkInDate),
       })
+      .andWhere('booking.status NOT IN (:...excludedStatuses)', {
+        excludedStatuses: ['CANCELED', 'REFUNDED'],
+      })
       .getMany();
 
     return entities.map((entity) => this.toDomain(entity));
@@ -57,10 +60,23 @@ export class TypeOrmBookingRepositoryAdapter implements BookingRepositoryPort {
       .andWhere('booking.checkOutDate > :checkInDate', {
         checkInDate: this.toDateColumn(checkInDate),
       })
+      .andWhere('booking.status NOT IN (:...excludedStatuses)', {
+        excludedStatuses: ['CANCELED', 'REFUNDED'],
+      })
       .getMany();
 
     return entities.map((entity) => this.toDomain(entity));
   }
+
+  async findByGuestEmail(email: string): Promise<Booking[]> {
+    const entities = await this.repository.find({
+      where: { guestEmail: email },
+      order: { createdAt: 'DESC' },
+    });
+
+    return entities.map((entity) => this.toDomain(entity));
+  }
+
 
   private toEntity(booking: Booking): BookingEntity {
     const entity = new BookingEntity();

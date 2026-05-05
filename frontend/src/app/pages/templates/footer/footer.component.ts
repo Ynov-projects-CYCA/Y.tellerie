@@ -11,8 +11,6 @@ import { LucideHotel } from '@lucide/angular';
   styleUrls: ['./footer.component.scss'],
 })
 export class FooterComponent {
-  currentYear = new Date().getFullYear();
-
   legalLinks = [
     { label: 'Confidentialité', href: '#' },
     { label: 'Conditions', href: '#' },

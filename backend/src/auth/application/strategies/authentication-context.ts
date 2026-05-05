@@ -1,5 +1,5 @@
-import { IAuthenticationStrategy } from './authentication.strategy';
-import { UserAggregate } from '../../domain/user.aggregate';
+import { UserAggregate } from '@/auth/domain';
+import { IAuthenticationStrategy } from '@/auth/application/strategies';
 
 /**
  * The AuthenticationContext allows for dynamically setting and using

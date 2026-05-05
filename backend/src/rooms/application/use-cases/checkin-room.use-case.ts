@@ -2,8 +2,8 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
   ROOM_REPOSITORY,
   RoomRepositoryPort,
-} from '../ports/room-repository.port';
-import { Room } from '../../domain/room.entity';
+} from '@/rooms/application/ports/room-repository.port';
+import { Room } from '@/rooms/domain/room.entity';
 
 @Injectable()
 export class CheckinRoomUseCase {
@@ -15,10 +15,10 @@ export class CheckinRoomUseCase {
   async execute(id: string): Promise<Room> {
     const room = await this.roomRepository.findById(id);
     if (!room) {
-      throw new NotFoundException(`Room with id ${id} not found`);
+      throw new NotFoundException(`Chambre introuvable pour l'identifiant ${id}`);
     }
     if (!room.isAvailable()) {
-      throw new Error(`Room with id ${id} is not available for check-in`);
+      throw new Error(`La chambre ${id} n'est pas disponible pour le check-in`);
     }
 
     // Mark room as occupied

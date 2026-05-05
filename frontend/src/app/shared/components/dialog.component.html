@@ -1,0 +1,10 @@
+<div class="dialog-overlay" (click)="onOverlayClick($event)">
+  <div class="dialog-content" [class.dialog-content--large]="size() === 'lg'" [class.dialog-content--small]="size() === 'sm'">
+    <button class="dialog-close" (click)="close.emit()" aria-label="Fermer">
+      <svg lucideX></svg>
+    </button>
+    <div class="dialog-inner">
+      <ng-content></ng-content>
+    </div>
+  </div>
+</div>

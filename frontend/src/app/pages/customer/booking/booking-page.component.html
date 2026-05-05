@@ -1,0 +1,139 @@
+<div class="booking-page">
+  <div class="container">
+    <header class="page-header">
+      <h1 class="page-title">Réserver une chambre</h1>
+      <p class="page-subtitle">Découvrez notre sélection de chambres de luxe.</p>
+    </header>
+
+    @if (searchError()) {
+      <div class="error-alert">
+        <p>{{ searchError() }}</p>
+      </div>
+    }
+
+    <app-card class="search-panel">
+      <div class="search-fields">
+        <div class="field-group">
+          <label class="field-label">
+            <svg lucideCalendar class="icon-xs"></svg>
+            Arrivée</label>
+          <input type="date" class="field-input" [min]="today" [(ngModel)]="checkIn"/>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">
+            <svg lucideCalendar class="icon-xs"></svg>
+            Départ</label>
+          <input type="date" class="field-input" [min]="checkIn() || today" [(ngModel)]="checkOut"/>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">
+            <svg lucideUsers class="icon-xs"></svg>
+            Personnes</label>
+          <input type="number" class="field-input" min="1" max="10" [(ngModel)]="guests"/>
+        </div>
+
+        <div class="field-group action">
+          <div class="search-actions">
+            <button appButton variant="primary" size="full" [disabled]="isLoading()" (click)="handleSearch()"
+                    class="search-btn">
+              <svg lucideSearch class="icon-sm"></svg>
+              {{ isLoading() ? '...' : 'Rechercher' }}
+            </button>
+            @if (hasSearched() || checkIn() || checkOut()) {
+              <button appButton variant="outline" (click)="resetSearch()" class="reset-btn"
+                      title="Réinitialiser les filtres">
+                <svg lucideRotateCcw class="icon-sm"></svg>
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    </app-card>
+
+    @if (!isLoading()) {
+      <div class="results-grid">
+        @for (item of displayRooms(); track item.room.id) {
+          <app-card class="room-card">
+            <div class="room-image">
+              <img
+                [src]="item.room.image || 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&q=80&w=800'"
+                [alt]="item.room.type"/>
+              <app-badge variant="success" class="room-badge">Disponible</app-badge>
+              <div class="room-price">
+                {{ item.totalPrice }}€
+                @if (item.isSearch) {
+                  <span>total</span>
+                } @else {
+                  <span>/ nuit</span>
+                }
+              </div>
+            </div>
+
+            <div class="room-body">
+              <h3>{{ item.room.type }} n°{{ item.room.roomNumber }}</h3>
+              <p class="room-meta">
+                <svg lucideUsers class="icon-xs"></svg>
+                {{ item.room.capacity }} personnes
+              </p>
+
+              <button appButton variant="primary" size="full" (click)="openDialog(item)">Réserver</button>
+            </div>
+          </app-card>
+        }
+
+        @if (displayRooms().length === 0) {
+          <div class="empty-results">
+            <svg lucideSearch class="icon-lg"></svg>
+            <p>Aucune chambre n'est disponible pour le moment.</p>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+@if (dialogOpen()) {
+  <app-dialog (close)="closeDialog()" size="md">
+    @if (!bookingSuccess()) {
+      <div class="booking-form">
+        <div class="form-header">
+          <h2>Confirmer la réservation</h2>
+          <p>{{ selectedRoom()?.room?.type }} n°{{ selectedRoom()?.room?.roomNumber }}</p>
+        </div>
+
+        <div class="form-body">
+          <div class="field-group">
+            <label class="field-label">Nom complet</label>
+            <input type="text" class="field-input" [(ngModel)]="guestName" placeholder="Jean Dupont"/>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Email</label>
+            <input type="email" class="field-input" [(ngModel)]="guestEmail" placeholder="jean@exemple.com"/>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Demandes spéciales</label>
+            <textarea class="field-input" [(ngModel)]="specialRequests" placeholder="Ex: Arrivée tardive..."></textarea>
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <button appButton variant="primary" size="full" [disabled]="!canConfirm() || isSubmitting()"
+                  (click)="confirmBooking()">
+            {{ isSubmitting() ? 'Traitement...' : 'Confirmer' }}
+          </button>
+        </div>
+      </div>
+    } @else {
+      <div class="success-state">
+        <svg lucideCheckCircle class="icon-lg success-color"></svg>
+        <h2>Réservation confirmée !</h2>
+        <p>Un email de confirmation a été envoyé à <strong>{{ guestEmail() }}</strong>.</p>
+        <button appButton variant="primary" size="full" (click)="closeDialog()">Fermer</button>
+      </div>
+    }
+  </app-dialog>
+}

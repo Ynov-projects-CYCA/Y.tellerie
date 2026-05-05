@@ -1,69 +1,59 @@
-import { Inject, Injectable } from '@nestjs/common';
-import {
-  ITokenGenerator,
-  ITokenGenerator as ITokenGeneratorSymbol,
-} from '../ports/token-generator.port';
-import { AuthenticationDomainService } from '../../domain/authentication.domain-service';
-import { UserAggregate } from '../../domain/user.aggregate';
-import { RefreshToken } from '../../domain/refresh-token.entity';
-import {
-  IRefreshTokenRepository,
-  IRefreshTokenRepository as IRefreshTokenRepositorySymbol,
-} from '../ports/refresh-token-repository.port';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import {
   IUserRepository,
   IUserRepository as IUserRepositorySymbol,
-} from '../ports/user-repository.port';
-
-export class InvalidRefreshTokenError extends Error {
-  constructor() {
-    super('Invalid or expired refresh token.');
-  }
-}
+  ITokenGenerator,
+  ITokenGenerator as ITokenGeneratorSymbol,
+  IRefreshTokenRepository,
+  IRefreshTokenRepository as IRefreshTokenRepositorySymbol,
+} from '@/auth/application/ports';
+import { RefreshToken } from '../../domain/refresh-token.entity';
+import { UserAggregate } from '@/auth/domain';
 
 @Injectable()
 export class RefreshTokenUseCase {
   constructor(
-    @Inject(IUserRepositorySymbol)
-    private readonly userRepository: IUserRepository,
     @Inject(IRefreshTokenRepositorySymbol)
     private readonly refreshTokenRepository: IRefreshTokenRepository,
+    @Inject(IUserRepositorySymbol)
+    private readonly userRepository: IUserRepository,
     @Inject(ITokenGeneratorSymbol)
     private readonly tokenGenerator: ITokenGenerator,
-    private readonly authDomainService: AuthenticationDomainService,
   ) {}
 
-  async execute(command: { refreshTokenId: string }): Promise<{
+  async execute(refreshTokenValue: string): Promise<{
     user: UserAggregate;
     accessToken: string;
-    refreshToken: RefreshToken;
+    refreshToken: string;
   }> {
-    const oldRefreshToken = await this.refreshTokenRepository.findByTokenId(
-      command.refreshTokenId,
-    );
-    if (!oldRefreshToken) {
-      throw new InvalidRefreshTokenError();
+    const refreshToken = await this.refreshTokenRepository.findByToken(refreshTokenValue);
+
+    if (!refreshToken || !refreshToken.isValid()) {
+      throw new UnauthorizedException('Token de rafraîchissement invalide ou expiré.');
     }
 
-    const user = await this.userRepository.findById(
-      oldRefreshToken.getProperties().userId,
-    );
+    const user = await this.userRepository.findById(refreshToken.getProperties().userId);
     if (!user) {
-      throw new InvalidRefreshTokenError();
+      throw new UnauthorizedException('Utilisateur introuvable.');
     }
 
-    if (!this.authDomainService.isRefreshTokenValid(oldRefreshToken, user)) {
-      throw new InvalidRefreshTokenError();
-    }
-
-    oldRefreshToken.revoke();
-    await this.refreshTokenRepository.save(oldRefreshToken);
+    // On révoque l'ancien token pour en générer un nouveau (rotation)
+    await this.refreshTokenRepository.deleteByUserId(refreshToken.getProperties().userId);
 
     const accessToken = await this.tokenGenerator.generateAccessToken(user);
-    const newRefreshToken = RefreshToken.create(user.getProperties().id, 7);
+    const newRefreshTokenValue = this.tokenGenerator.generateRefreshToken();
 
+    const newRefreshToken = RefreshToken.create(
+      refreshToken.getProperties().userId,
+      newRefreshTokenValue,
+      7,
+    );
     await this.refreshTokenRepository.save(newRefreshToken);
 
-    return { user, accessToken, refreshToken: newRefreshToken };
+    return {
+      user,
+      accessToken,
+      refreshToken: newRefreshTokenValue,
+    };
   }
 }

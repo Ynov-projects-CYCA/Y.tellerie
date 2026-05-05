@@ -1,4 +1,4 @@
-import { Booking } from '../../domain/booking.entity';
+import { Booking } from '@/bookings/domain/booking.entity';
 
 export interface BookingRepositoryPort {
   save(booking: Booking): Promise<Booking>;
@@ -9,6 +9,7 @@ export interface BookingRepositoryPort {
     checkInDate: Date,
     checkOutDate: Date,
   ): Promise<Booking[]>;
+  findByGuestEmail(email: string): Promise<Booking[]>;
 }
 
 export const BOOKING_REPOSITORY = Symbol('BOOKING_REPOSITORY');

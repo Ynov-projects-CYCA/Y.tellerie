@@ -1,50 +1,86 @@
 import {
-  Get,
-  Controller,
-  Post,
   Body,
-  UseGuards,
-  Request,
+  ConflictException,
+  Controller,
+  ForbiddenException,
+  Get,
   HttpCode,
   HttpStatus,
+  Inject,
+  Logger,
   Patch,
+  Post,
+  Request,
+  UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import {
-  ApiTags,
+  ApiBearerAuth,
+  ApiBody,
   ApiOperation,
   ApiResponse,
-  ApiBody,
-  ApiBearerAuth,
+  ApiTags,
 } from '@nestjs/swagger';
-import { RegisterClientUseCase } from '../application/use-cases/register-client.use-case';
-import { RegisterPersonnelUseCase } from '../application/use-cases/register-personnel.use-case';
-import { LoginUseCase } from '../application/use-cases/login.use-case';
-import { RefreshTokenUseCase } from '../application/use-cases/refresh-token.use-case';
-import { ChangePasswordUseCase } from '../application/use-cases/change-password.use-case';
-import { LogoutUseCase } from '../application/use-cases/logout.use-case';
-import { RegisterDto } from '../application/dtos/register.dto';
-import { LoginDto } from '../application/dtos/login.dto';
-import { ChangePasswordDto } from '../application/dtos/change-password.dto';
-import { Email } from '../domain/email.vo';
-import { Password } from '../domain/password.vo';
+import { SendTransactionalEmailUseCase } from '@/mailjet/application/use-cases/send-transactional-email.use-case';
+import {
+  buildActionEmailHtml,
+  buildActionEmailText,
+} from '@/mailjet/application/templates/action-email.template';
 import {
   AuthResponseDto,
+  ChangePasswordDto,
+  ForgotPasswordDto,
+  LoginDto,
+  RegisterDto,
+  RegisterResponseDto,
+  ResetPasswordDto,
   UserResponse,
-} from '../application/dtos/auth-response.dto';
-import { UserAggregate } from '../domain/user.aggregate';
-import { RefreshTokenDto } from '../application/dtos/refresh-token.dto';
+  VerifyEmailDto,
+} from '@/auth/application/dtos';
+import {
+  ChangePasswordUseCase,
+  ForgotPasswordUseCase,
+  InvalidCredentialsError,
+  LoginUseCase,
+  RegisterUseCase,
+  UserAlreadyExistsError,
+  UserCannotLoginError,
+  UnauthorizedRoleError,
+  InvalidPasswordResetTokenError,
+  ResetPasswordUseCase,
+  VerifyEmailUseCase,
+  InvalidOldPasswordError,
+  RefreshTokenUseCase,
+  UpdateProfileUseCase,
+} from '@/auth/application/use-cases';
+import { Email, Password, UserAggregate, RefreshToken } from '@/auth/domain';
+import { Role } from '@/shared/model';
+import { UpdateProfileDto } from '../application/dtos/update-profile.dto';
+import { ITokenGenerator, ITokenGenerator as ITokenGeneratorSymbol } from '../application/ports/token-generator.port';
+import { IRefreshTokenRepository, IRefreshTokenRepository as IRefreshTokenRepositorySymbol } from '../application/ports/refresh-token-repository.port';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
+
   constructor(
-    private readonly registerClientUseCase: RegisterClientUseCase,
-    private readonly registerPersonnelUseCase: RegisterPersonnelUseCase,
+    private readonly registerUseCase: RegisterUseCase,
     private readonly loginUseCase: LoginUseCase,
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
     private readonly changePasswordUseCase: ChangePasswordUseCase,
-    private readonly logoutUseCase: LogoutUseCase,
+    private readonly verifyEmailUseCase: VerifyEmailUseCase,
+    private readonly forgotPasswordUseCase: ForgotPasswordUseCase,
+    private readonly resetPasswordUseCase: ResetPasswordUseCase,
+    private readonly updateProfileUseCase: UpdateProfileUseCase,
+    @Inject(ITokenGeneratorSymbol)
+    private readonly tokenGenerator: ITokenGenerator,
+    @Inject(IRefreshTokenRepositorySymbol)
+    private readonly refreshTokenRepository: IRefreshTokenRepository,
+    private readonly sendTransactionalEmailUseCase: SendTransactionalEmailUseCase,
+    private readonly configService: ConfigService,
   ) {}
 
   @Get('me')
@@ -60,74 +96,83 @@ export class AuthController {
     return this.mapUserResponse(req.user);
   }
 
-  @Post('register/client')
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Register a new client and log them in' })
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refresh an access token' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { refreshToken: { type: 'string' } },
+      required: ['refreshToken'],
+    },
+  })
   @ApiResponse({
-    status: HttpStatus.CREATED,
-    description: 'Client successfully registered and logged in.',
+    status: HttpStatus.OK,
+    description: 'Tokens rafraichis avec succes.',
     type: AuthResponseDto,
   })
   @ApiResponse({
-    status: HttpStatus.CONFLICT,
-    description: 'User with this email already exists.',
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Le jeton de rafraichissement est invalide ou expire.',
   })
-  async registerClient(
-    @Body() registerDto: RegisterDto,
+  async refresh(
+    @Body('refreshToken') refreshToken: string,
   ): Promise<AuthResponseDto> {
-    const user = await this.registerClientUseCase.execute({
-      firstname: registerDto.firstname,
-      lastname: registerDto.lastname,
-      phoneNumber: registerDto.phoneNumber,
-      email: Email.from(registerDto.email),
-      rawPassword: registerDto.password,
-    });
+    try {
+      const { user, accessToken, refreshToken: newRefreshToken } = await this.refreshTokenUseCase.execute(refreshToken);
 
-    const { accessToken, refreshToken } = await this.loginUseCase.execute({
-      email: user.getProperties().email,
-      password: await Password.from(registerDto.password),
-    });
-
-    return {
-      accessToken,
-      refreshToken: refreshToken.getProperties().id,
-      user: this.mapUserResponse(user),
-    };
+      return {
+        accessToken,
+        refreshToken: newRefreshToken,
+        user: this.mapUserResponse(user),
+      };
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException('Refresh failed');
+    }
   }
 
-  @Post('register/personnel')
+  @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Register a new personnel and log them in' })
+  @ApiOperation({ summary: 'Register a new user' })
   @ApiResponse({
     status: HttpStatus.CREATED,
-    description: 'Personnel successfully registered and logged in.',
-    type: AuthResponseDto,
+    description: "Utilisateur inscrit avec succes. Verification de l'email requise.",
+    type: RegisterResponseDto,
   })
   @ApiResponse({
     status: HttpStatus.CONFLICT,
-    description: 'User with this email already exists.',
+    description: 'Un utilisateur avec cet email existe deja.',
   })
-  async registerPersonnel(
+  async register(
     @Body() registerDto: RegisterDto,
-  ): Promise<AuthResponseDto> {
-    const user = await this.registerPersonnelUseCase.execute({
-      firstname: registerDto.firstname,
-      lastname: registerDto.lastname,
-      phoneNumber: registerDto.phoneNumber,
-      email: Email.from(registerDto.email),
-      rawPassword: registerDto.password,
-    });
+  ): Promise<RegisterResponseDto> {
+    try {
+      const user = await this.registerUseCase.execute({
+        firstname: registerDto.firstname,
+        lastname: registerDto.lastname,
+        phoneNumber: registerDto.phoneNumber,
+        email: Email.from(registerDto.email),
+        phone: registerDto.phone,
+        rawPassword: registerDto.password,
+        role: registerDto.role ?? Role.CLIENT,
+      });
 
-    const { accessToken, refreshToken } = await this.loginUseCase.execute({
-      email: user.getProperties().email,
-      password: await Password.from(registerDto.password),
-    });
+      await this.sendVerificationEmail(user);
 
-    return {
-      accessToken,
-      refreshToken: refreshToken.getProperties().id,
-      user: this.mapUserResponse(user),
-    };
+      return {
+        message: 'Compte cree. Verifiez votre adresse e-mail avant de vous connecter.',
+        user: this.mapUserResponse(user),
+      };
+    } catch (error) {
+      if (error instanceof UserAlreadyExistsError) {
+        throw new ConflictException('Un utilisateur avec cet email existe deja.');
+      }
+
+      throw error;
+    }
   }
 
   @Post('login')
@@ -137,93 +182,211 @@ export class AuthController {
   @ApiBody({ type: LoginDto })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'User successfully logged in.',
+    description: 'Utilisateur connecte avec succes.',
     type: AuthResponseDto,
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
-    description: 'Invalid credentials.',
+    description: 'Identifiants invalides.',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: "Le compte n'est pas actif.",
   })
   async login(
     @Request() req: { user: UserAggregate },
-    @Body() _loginDto: LoginDto,
+    @Body() loginDto: LoginDto,
   ): Promise<AuthResponseDto> {
-    const { user, accessToken, refreshToken } = await this.loginUseCase.execute(
-      {
+    try {
+      const { user, accessToken, refreshToken } = await this.loginUseCase.execute({
         email: req.user.getProperties().email,
-        password: Password.from(_loginDto.password),
-      },
-    );
+        password: Password.from(loginDto.password),
+        requiredRole: loginDto.requiredRole,
+      });
 
-    return {
-      accessToken,
-      refreshToken: refreshToken.getProperties().id,
-      user: this.mapUserResponse(user),
-    };
+      return {
+        accessToken,
+        refreshToken,
+        user: this.mapUserResponse(user),
+      };
+    } catch (error) {
+      if (error instanceof InvalidCredentialsError) {
+        throw new UnauthorizedException('Email ou mot de passe invalide.');
+      }
+
+      if (error instanceof UserCannotLoginError) {
+        throw new ForbiddenException(
+          "Le compte n'est pas actif. Verifiez votre adresse e-mail avant de vous connecter.",
+        );
+      }
+
+      if (error instanceof UnauthorizedRoleError) {
+        throw new ForbiddenException(error.message);
+      }
+
+      throw error;
+    }
   }
 
-  @Post('logout')
+  @Post('verify-email')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Verify a user email address' })
+  @ApiBody({ type: VerifyEmailDto })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Adresse e-mail verifiee avec succes.',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Le jeton de verification est invalide ou manquant.',
+  })
+  async verifyEmail(
+    @Body() verifyEmailDto: VerifyEmailDto,
+  ): Promise<{ message: string }> {
+    await this.verifyEmailUseCase.execute(verifyEmailDto.token);
+
+    return { message: 'Adresse e-mail verifiee avec succes.' };
+  }
+
+  @Post('forgot-password')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Log out a user by revoking their refresh token' })
+  @ApiOperation({ summary: 'Request a password reset link' })
   @ApiResponse({
     status: HttpStatus.NO_CONTENT,
-    description: 'User successfully logged out.',
+    description: 'Demande de reinitialisation du mot de passe acceptee.',
   })
-  async logout(@Body() refreshTokenDto: RefreshTokenDto): Promise<void> {
-    await this.logoutUseCase.execute({
-      refreshTokenId: refreshTokenDto.refreshToken,
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto): Promise<void> {
+    await this.forgotPasswordUseCase.execute({
+      email: Email.from(forgotPasswordDto.email),
     });
   }
 
-  @Post('refresh')
+  @Post('reset-password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Reset a password using a token received by email' })
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'Mot de passe reinitialise avec succes.',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Le jeton de reinitialisation du mot de passe est invalide ou expire.',
+  })
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<void> {
+    try {
+      await this.resetPasswordUseCase.execute({
+        token: resetPasswordDto.token,
+        password: Password.from(resetPasswordDto.password),
+      });
+    } catch (error) {
+      if (error instanceof InvalidPasswordResetTokenError) {
+        throw new UnauthorizedException(
+          'Le jeton de reinitialisation du mot de passe est invalide ou expire.',
+        );
+      }
+
+      throw error;
+    }
+  }
+
+  @Patch('modify-password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({ summary: 'Modify the current user password' })
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'Mot de passe modifie avec succes.',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Utilisateur non authentifie.',
+  })
+  async modifyPassword(
+    @Request() req: { user: UserAggregate },
+    @Body() changePasswordDto: ChangePasswordDto,
+  ): Promise<void> {
+    try {
+      await this.changePasswordUseCase.execute({
+        userId: req.user.getProperties().id,
+        oldPassword: Password.from(changePasswordDto.oldPassword),
+        newPassword: Password.from(changePasswordDto.newPassword),
+      });
+    } catch (error) {
+      if (error instanceof InvalidOldPasswordError) {
+        throw new UnauthorizedException("L'ancien mot de passe ne correspond pas.");
+      }
+
+      throw error;
+    }
+  }
+
+  @Patch('profile')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Refresh access token' })
+  @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({ summary: 'Update the current user profile' })
+  @ApiBearerAuth()
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Tokens successfully refreshed.',
+    description: 'Profil mis a jour avec succes. Nouveaux jetons fournis.',
     type: AuthResponseDto,
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
-    description: 'Invalid refresh token.',
+    description: 'Utilisateur non authentifie.',
   })
-  async refresh(
-    @Body() refreshTokenDto: RefreshTokenDto,
+  async updateProfile(
+    @Request() req: { user: UserAggregate },
+    @Body() updateProfileDto: UpdateProfileDto,
   ): Promise<AuthResponseDto> {
-    const { user, accessToken, refreshToken } =
-      await this.refreshTokenUseCase.execute({
-        refreshTokenId: refreshTokenDto.refreshToken,
-      });
+    const updatedUser = await this.updateProfileUseCase.execute(
+      req.user.getProperties().id.toString(),
+      updateProfileDto,
+    );
+
+    // Suppression des anciens jetons pour garantir la sécurité et la cohérence (surtout si l'email a changé)
+    await this.refreshTokenRepository.deleteByUserId(updatedUser.getProperties().id);
+
+    // Génération des nouveaux jetons
+    const accessToken = await this.tokenGenerator.generateAccessToken(updatedUser);
+    const refreshTokenValue = this.tokenGenerator.generateRefreshToken();
+
+    // Persistance du nouveau jeton de rafraîchissement
+    const refreshToken = RefreshToken.create(
+      updatedUser.getProperties().id,
+      refreshTokenValue,
+      7, // Validité de 7 jours
+    );
+    await this.refreshTokenRepository.save(refreshToken);
 
     return {
       accessToken,
-      refreshToken: refreshToken.getProperties().id,
-      user: this.mapUserResponse(user),
+      refreshToken: refreshTokenValue,
+      user: this.mapUserResponse(updatedUser),
     };
   }
 
   @Patch('change-password')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AuthGuard('jwt'))
-  @ApiOperation({ summary: 'Change the current user password' })
+  @ApiOperation({ summary: 'Deprecated alias for modify-password' })
   @ApiBearerAuth()
-  @ApiResponse({
-    status: HttpStatus.NO_CONTENT,
-    description: 'Password successfully changed.',
-  })
-  @ApiResponse({
-    status: HttpStatus.UNAUTHORIZED,
-    description: 'User not authenticated.',
-  })
   async changePassword(
     @Request() req: { user: UserAggregate },
     @Body() changePasswordDto: ChangePasswordDto,
   ): Promise<void> {
-    await this.changePasswordUseCase.execute({
-      userId: req.user.getProperties().id,
-      oldPassword: Password.from(changePasswordDto.oldPassword),
-      newPassword: Password.from(changePasswordDto.newPassword),
-    });
+    return this.modifyPassword(req, changePasswordDto);
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Log out the current user' })
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'Utilisateur deconnecte avec succes.',
+  })
+  async logout(): Promise<void> {
+    return;
   }
 
   private mapUserResponse(user: UserAggregate): UserResponse {
@@ -234,8 +397,68 @@ export class AuthController {
       firstname: properties.firstname,
       lastname: properties.lastname,
       phoneNumber: properties.phoneNumber,
+      isActive: properties.isActive,
       email: properties.email.toString(),
+      phone: properties.phone,
       roles: properties.roles,
     };
+  }
+
+  private async sendVerificationEmail(user: UserAggregate): Promise<void> {
+    const properties = user.getProperties();
+    const token = properties.verifyEmailToken;
+
+    if (!token) {
+      return;
+    }
+
+    const verificationUrl = this.buildVerificationUrl(token);
+    const recipientName = `${properties.firstname} ${properties.lastname}`.trim();
+    const templateParams = {
+      recipientName,
+      preheader: 'Confirmation de compte',
+      title: 'Activez votre compte avec elegance',
+      intro: 'Bienvenue sur Ytellerie.',
+      body: 'Confirmez votre adresse email pour finaliser votre inscription et acceder a votre espace.',
+      ctaLabel: 'Confirmer mon adresse email',
+      actionUrl: verificationUrl,
+      footerNote:
+        "Si vous n'etes pas a l'origine de cette inscription, vous pouvez ignorer cet email.",
+    };
+
+    try {
+      await this.sendTransactionalEmailUseCase.execute({
+        to: {
+          email: properties.email.toString(),
+          name: recipientName,
+        },
+        subject: 'Confirmez votre adresse email Ytellerie',
+        text: buildActionEmailText(templateParams),
+        html: buildActionEmailHtml(templateParams),
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Verification email failed for ${properties.email.toString()}: ${
+          (error as Error).message
+        }`,
+      );
+    }
+  }
+
+  private buildVerificationUrl(token: string): string {
+    const configuredFrontendUrl =
+      this.configService.get<string>('app.frontendUrl')?.trim();
+    const frontendBaseUrl =
+      this.configService.get<string>('app.frontendBaseUrl')?.trim();
+    const corsOrigins = this.configService.get<string[]>('app.corsOrigins') ?? [];
+    const baseUrl =
+      configuredFrontendUrl ||
+      frontendBaseUrl ||
+      corsOrigins[0] ||
+      'http://localhost:4200';
+
+    return `${baseUrl.replace(/\/$/, '')}/verify-email?token=${encodeURIComponent(
+      token,
+    )}`;
   }
 }

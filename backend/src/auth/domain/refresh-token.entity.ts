@@ -1,52 +1,42 @@
-import { UserId } from './user-id.vo';
 import { randomUUID } from 'crypto';
-
-export interface RefreshTokenProperties {
-  id: string;
-  userId: UserId;
-  expiresAt: Date;
-  isRevoked: boolean;
-}
+import { UserId } from './user-id.vo';
+import { RefreshTokenProperties } from '@/shared/model';
 
 export class RefreshToken {
-  private readonly id: string;
-  private readonly userId: UserId;
-  private readonly expiresAt: Date;
-  private isRevoked: boolean;
+  constructor(private readonly properties: RefreshTokenProperties) {}
 
-  constructor(properties: RefreshTokenProperties) {
-    Object.assign(this, properties);
-  }
-
-  public static create(
+  static create(
     userId: UserId,
-    tokenLifetimeDays: number,
+    token: string,
+    lifetimeInDays: number,
   ): RefreshToken {
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + tokenLifetimeDays);
+    const createdAt = new Date();
+    const expiresAt = new Date(createdAt);
+    expiresAt.setDate(expiresAt.getDate() + lifetimeInDays);
 
     return new RefreshToken({
       id: randomUUID(),
       userId,
+      token,
       expiresAt,
       isRevoked: false,
+      createdAt,
     });
   }
 
-  public getProperties(): RefreshTokenProperties {
-    return {
-      id: this.id,
-      userId: this.userId,
-      expiresAt: this.expiresAt,
-      isRevoked: this.isRevoked,
-    };
+  getProperties(): RefreshTokenProperties {
+    return { ...this.properties };
   }
 
-  public revoke() {
-    this.isRevoked = true;
+  isExpired(referenceDate: Date = new Date()): boolean {
+    return this.properties.expiresAt.getTime() <= referenceDate.getTime();
   }
 
-  public isExpired(): boolean {
-    return new Date() > this.expiresAt;
+  isValid(referenceDate: Date = new Date()): boolean {
+    return !this.properties.isRevoked && !this.isExpired(referenceDate);
+  }
+
+  revoke(): void {
+    this.properties.isRevoked = true;
   }
 }

@@ -4,10 +4,10 @@ export class PriceVO {
     private readonly currency: string = 'EUR',
   ) {
     if (amount < 0) {
-      throw new Error('Price cannot be negative');
+      throw new Error('Le prix ne peut pas etre negatif');
     }
     if (amount > 1000000) {
-      throw new Error('Price is too high');
+      throw new Error('Le prix est trop eleve');
     }
   }
 

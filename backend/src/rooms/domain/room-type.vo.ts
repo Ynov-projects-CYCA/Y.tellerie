@@ -10,7 +10,7 @@ export class RoomTypeVO {
   static create(type: string): RoomTypeVO {
     const upperType = type.toUpperCase();
     if (!Object.values(RoomType).includes(upperType as RoomType)) {
-      throw new Error(`Invalid room type: ${type}`);
+      throw new Error(`Type de chambre invalide : ${type}`);
     }
     return new RoomTypeVO(upperType as RoomType);
   }

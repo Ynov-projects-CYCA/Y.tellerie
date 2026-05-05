@@ -1,0 +1,107 @@
+<main class="home-page">
+
+  <section class="hero-section">
+    <div class="hero-ornament" aria-hidden="true"></div>
+
+    <div class="container">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        Solution complète de gestion hôtelière
+      </div>
+
+      <h1 class="hero-title">
+        Gérez votre hôtel avec
+        <span class="hero-title-accent">élégance</span>
+      </h1>
+
+      <p class="hero-description">
+        Une plateforme raffinée et intuitive pour gérer vos réservations, chambres et personnel.
+        Optimisez vos opérations avec classe et tradition.
+      </p>
+
+      <div class="hero-actions">
+        <a routerLink="/connexion" appButton variant="primary" size="lg">
+          Essayer gratuitement
+        </a>
+        <button appButton variant="outline" size="lg" (click)="scrollTo('#features')">
+          Voir la démo
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section" id="features">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Fonctionnalités principales</h2>
+        <p class="section-subtitle">
+          Tout ce dont vous avez besoin pour gérer efficacement votre établissement
+        </p>
+      </div>
+
+      <div class="features-grid">
+        <app-card class="feature-card" *ngFor="let feature of features; let i = index" [style.--delay]="i * 80 + 'ms'">
+          <div class="feature-icon-wrapper">
+            <ng-container *ngComponentOutlet="feature.icon"></ng-container>
+          </div>
+          <h3 class="feature-title">{{ feature.title }}</h3>
+          <p class="feature-description">{{ feature.description }}</p>
+        </app-card>
+      </div>
+    </div>
+  </section>
+
+  <!-- Benefits Section -->
+  <section class="benefits-section" id="benefits">
+    <div class="container">
+      <div class="benefits-grid">
+
+        <div class="benefits-content">
+          <h2 class="benefits-title">Pourquoi choisir notre solution&nbsp;?</h2>
+
+          <ol class="benefits-list">
+            <li class="benefit-item" *ngFor="let b of benefits">
+              <div class="benefit-number">{{ b.number }}</div>
+              <div class="benefit-text">
+                <h4 class="benefit-item-title">{{ b.title }}</h4>
+                <p class="benefit-item-description">{{ b.description }}</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+
+        <app-card class="stats-card">
+          <div class="stats-headline">97<span>%</span></div>
+          <p class="stats-label">de satisfaction client</p>
+          <div class="stats-grid">
+            <div class="stat-item" *ngFor="let s of stats">
+              <div class="stat-value">{{ s.value }}</div>
+              <div class="stat-label">{{ s.label }}</div>
+            </div>
+          </div>
+        </app-card>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- CTA Section -->
+  <section class="cta-section" id="contact">
+    <div class="cta-texture" aria-hidden="true"></div>
+    <div class="container cta-container">
+      <h2 class="cta-title">
+        Prêt à transformer votre gestion hôtelière&nbsp;?
+      </h2>
+      <p class="cta-subtitle">
+        Rejoignez des centaines d'hôtels qui nous font confiance
+      </p>
+      <div class="cta-actions">
+        <a routerLink="/connexion" appButton variant="white" size="lg">Commencer gratuitement</a>
+        <a href="mailto:contact@ytellerie.com" appButton variant="white-outline" size="lg">Contactez-nous</a>
+      </div>
+    </div>
+  </section>
+
+</main>

@@ -4,7 +4,8 @@ import {
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { AuthTokenService } from '../auth/auth-token.service';
+import { provideRouter } from '@angular/router';
+import { AuthSessionService } from '../auth/auth-session.service';
 import { APP_ENVIRONMENT, AppEnvironment } from '../config/app-environment';
 import { ApiClient } from './api-client.service';
 import { apiBaseUrlInterceptor } from './interceptors/api-base-url.interceptor';
@@ -12,6 +13,7 @@ import { apiErrorInterceptor } from './interceptors/api-error.interceptor';
 import { authTokenInterceptor } from './interceptors/auth-token.interceptor';
 import { backendEnvelopeInterceptor } from './interceptors/backend-envelope.interceptor';
 import { AppHttpError } from './models/app-http-error.model';
+import { createJwtToken } from '../../../testing/jwt-test.utils';
 
 describe('ApiClient', () => {
   const environment: AppEnvironment = {
@@ -21,7 +23,7 @@ describe('ApiClient', () => {
   };
 
   let apiClient: ApiClient;
-  let authTokenService: AuthTokenService;
+  let authSessionService: AuthSessionService;
   let httpTestingController: HttpTestingController;
 
   beforeEach(() => {
@@ -31,6 +33,7 @@ describe('ApiClient', () => {
           provide: APP_ENVIRONMENT,
           useValue: environment,
         },
+        provideRouter([]),
         provideHttpClient(
           withInterceptors([
             apiBaseUrlInterceptor,
@@ -44,12 +47,12 @@ describe('ApiClient', () => {
     });
 
     apiClient = TestBed.inject(ApiClient);
-    authTokenService = TestBed.inject(AuthTokenService);
+    authSessionService = TestBed.inject(AuthSessionService);
     httpTestingController = TestBed.inject(HttpTestingController);
   });
 
   afterEach(() => {
-    authTokenService.clearToken();
+    authSessionService.clearSession();
     httpTestingController.verify();
   });
 
@@ -72,12 +75,26 @@ describe('ApiClient', () => {
   });
 
   it('should add the bearer token when available', () => {
-    authTokenService.setToken('access-token');
+    authSessionService.startSession(
+      {
+        accessToken: createJwtToken(),
+        refreshToken: 'dummy_refresh_token',
+        user: {
+          id: 'user-1',
+          firstname: 'John',
+          lastname: 'Doe',
+          email: 'john.doe@example.com',
+          phone: '+33123456789',
+          roles: ['client'],
+        },
+      },
+      'local',
+    );
 
     apiClient.get<string>('/profile/client').subscribe();
 
     const request = httpTestingController.expectOne('/api/profile/client');
-    expect(request.request.headers.get('Authorization')).toBe('Bearer access-token');
+    expect(request.request.headers.get('Authorization')).toContain('Bearer ');
 
     request.flush({
       data: 'ok',

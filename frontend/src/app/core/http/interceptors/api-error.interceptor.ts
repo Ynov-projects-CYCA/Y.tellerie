@@ -1,5 +1,8 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
+import { AuthSessionService } from '../../auth/auth-session.service';
 import { AppHttpError } from '../models/app-http-error.model';
 
 interface BackendErrorPayload {
@@ -10,14 +13,25 @@ interface BackendErrorPayload {
   message?: string | string[];
 }
 
-export const apiErrorInterceptor: HttpInterceptorFn = (request, next) =>
-  next(request).pipe(
+export const apiErrorInterceptor: HttpInterceptorFn = (request, next) => {
+  const authSessionService = inject(AuthSessionService);
+  const router = inject(Router, { optional: true });
+
+  return next(request).pipe(
     catchError((error: unknown) => {
       if (!(error instanceof HttpErrorResponse)) {
         return throwError(() => error);
       }
 
       const payload = isBackendErrorPayload(error.error) ? error.error : null;
+
+      // On invalide la session uniquement sur les routes qui supposent
+      // deja un utilisateur connecte, pour eviter de polluer les parcours
+      // publics avec une redirection vers la connexion.
+      if (error.status === 401 && shouldInvalidateSession(request.url)) {
+        authSessionService.clearSession();
+        void router?.navigateByUrl('/connexion');
+      }
 
       return throwError(
         () =>
@@ -30,6 +44,7 @@ export const apiErrorInterceptor: HttpInterceptorFn = (request, next) =>
       );
     }),
   );
+};
 
 function isBackendErrorPayload(value: unknown): value is BackendErrorPayload {
   return value !== null && typeof value === 'object';
@@ -101,4 +116,13 @@ function normalizeMessage(candidate: unknown): string | null {
   }
 
   return null;
+}
+
+function shouldInvalidateSession(url: string): boolean {
+  return ![
+    '/auth/login',
+    '/auth/register',
+    '/auth/forgot-password',
+    '/auth/reset-password',
+  ].some((path) => url.includes(path));
 }

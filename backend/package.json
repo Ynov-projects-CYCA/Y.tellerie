@@ -23,7 +23,9 @@
     "migration:generate": "typeorm-ts-node-commonjs migration:generate -d src/config/typeorm.config.ts src/migrations/auto-migration",
     "migration:run": "typeorm-ts-node-commonjs migration:run -d src/config/typeorm.config.ts",
     "migration:run:prod": "typeorm migration:run -d dist/config/typeorm.config.js",
-    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/config/typeorm.config.ts"
+    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/config/typeorm.config.ts",
+    "seed": "ts-node -r tsconfig-paths/register src/seed.ts",
+    "seed:prod": "node dist/seed.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -93,6 +95,9 @@
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/src/$1"
     },
     "collectCoverageFrom": [
       "src/**/*.(t|j)s",
