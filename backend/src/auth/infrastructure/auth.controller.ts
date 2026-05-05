@@ -60,6 +60,7 @@ import { Role } from '@/shared/model';
 import { UpdateProfileDto } from '../application/dtos/update-profile.dto';
 import { ITokenGenerator, ITokenGenerator as ITokenGeneratorSymbol } from '../application/ports/token-generator.port';
 import { IRefreshTokenRepository, IRefreshTokenRepository as IRefreshTokenRepositorySymbol } from '../application/ports/refresh-token-repository.port';
+import { buildFrontendUrl } from '@/config/frontend-url';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -446,19 +447,9 @@ export class AuthController {
   }
 
   private buildVerificationUrl(token: string): string {
-    const configuredFrontendUrl =
-      this.configService.get<string>('app.frontendUrl')?.trim();
-    const frontendBaseUrl =
-      this.configService.get<string>('app.frontendBaseUrl')?.trim();
-    const corsOrigins = this.configService.get<string[]>('app.corsOrigins') ?? [];
-    const baseUrl =
-      configuredFrontendUrl ||
-      frontendBaseUrl ||
-      corsOrigins[0] ||
-      'http://localhost:4200';
-
-    return `${baseUrl.replace(/\/$/, '')}/verify-email?token=${encodeURIComponent(
-      token,
-    )}`;
+    return buildFrontendUrl(
+      `/verify-email?token=${encodeURIComponent(token)}`,
+      this.configService,
+    );
   }
 }

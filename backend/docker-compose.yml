@@ -10,12 +10,21 @@ services:
     ports:
       - '${APP_PORT}:${APP_PORT}'
     environment:
+      - APP_ENV=${APP_ENV:-local}
       - NODE_ENV=${NODE_ENV}
+      - PORT=${PORT:-3000}
+      - APP_PORT=${APP_PORT:-3000}
+      - API_BASE_URL=${API_BASE_URL}
+      - FRONTEND_BASE_URL=${FRONTEND_BASE_URL}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
       - DATABASE_HOST=${POSTGRES_HOST}
       - DATABASE_PORT=${POSTGRES_PORT}
       - DATABASE_USER=${POSTGRES_USER}
       - DATABASE_PASSWORD=${POSTGRES_PASSWORD}
       - DATABASE_NAME=${POSTGRES_DB}
+      - STRIPE_SUCCESS_URL=${STRIPE_SUCCESS_URL}
+      - STRIPE_CANCEL_URL=${STRIPE_CANCEL_URL}
     depends_on:
       postgres:
         condition: service_healthy

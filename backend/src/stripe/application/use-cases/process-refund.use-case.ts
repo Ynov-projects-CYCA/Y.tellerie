@@ -13,6 +13,7 @@ import {
 } from '@/stripe/application/ports/payment-repository.port';
 import { SendTransactionalEmailUseCase } from '@/mailjet/application/use-cases/send-transactional-email.use-case';
 import { buildActionEmailHtml, buildActionEmailText } from '@/mailjet/application/templates/action-email.template';
+import { buildFrontendUrl } from '@/config/frontend-url';
 
 @Injectable()
 export class ProcessRefundUseCase {
@@ -69,7 +70,7 @@ export class ProcessRefundUseCase {
           intro: `Nous vous confirmons que le remboursement de votre réservation n° ${booking.getId().substring(0, 8).toUpperCase()} a été traité avec succès.`,
           body: `Le montant sera crédité sur votre compte bancaire dans un délai de 5 à 10 jours ouvrés, selon les délais de votre banque.`,
           ctaLabel: 'Voir mes réservations',
-          actionUrl: `${process.env['FRONTEND_URL'] || 'http://localhost:4200'}/client/historique`,
+          actionUrl: buildFrontendUrl('/client/historique'),
           footerNote: 'En espérant vous revoir bientôt chez Ytellerie.',
         };
 

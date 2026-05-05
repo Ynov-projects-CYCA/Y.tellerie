@@ -50,12 +50,21 @@ async function bootstrap() {
   SwaggerModule.setup('api/docs', app, document);
 
   const port = configService.get<number>('app.port') ?? 3000;
+  const apiBaseUrl = configService.get<string>('app.apiBaseUrl');
   await app.listen(port);
 
-  console.log(`Application is running on http://localhost:${port}`);
+  console.log(
+    apiBaseUrl
+      ? `Application is running on ${apiBaseUrl}`
+      : `Application is running on port ${port}`,
+  );
   console.log(`CORS allowed origins: ${allowedOrigins.join(', ')}`);
 
-  console.log(`Swagger UI available at http://localhost:${port}/api/docs`);
+  console.log(
+    apiBaseUrl
+      ? `Swagger UI available at ${apiBaseUrl.replace(/\/$/, '')}/api/docs`
+      : 'Swagger UI available at /api/docs',
+  );
 }
 
 void bootstrap();
