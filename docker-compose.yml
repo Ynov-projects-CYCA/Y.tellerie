@@ -56,8 +56,7 @@ services:
       MAILJET_SANDBOX: ${MAILJET_SANDBOX:-true}
       MAILJET_SENDER_EMAIL: ${MAILJET_SENDER_EMAIL:-}
       MAILJET_SENDER_NAME: ${MAILJET_SENDER_NAME:-Archi Hotel}
-
-    command: sh -c "npm run migration:run:prod && npm run seed:prod && node dist/main"
+    command: sh -c "node dist/main.js"
     ports:
       - '${BACKEND_PORT:-3000}:3000'
 
