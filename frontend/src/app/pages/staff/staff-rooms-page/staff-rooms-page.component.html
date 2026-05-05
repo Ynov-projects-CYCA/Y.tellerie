@@ -1,0 +1,70 @@
+<div class="staff-page">
+  <div class="staff-page__header">
+    <div>
+      <h1 class="staff-page__title">Gestion des Chambres</h1>
+      <p class="staff-page__subtitle">Gérez les chambres disponibles et occupées</p>
+    </div>
+
+    <button class="button button--primary" (click)="openAddDialog()">
+      Ajouter une chambre
+    </button>
+  </div>
+
+  <div class="stats-grid stats-grid--three">
+    <div class="card">
+      <div class="card__label">Total Chambres</div>
+      <div class="card__value">{{ rooms.length }}</div>
+    </div>
+
+    <div class="card">
+      <div class="card__label">Disponibles</div>
+      <div class="card__value card__value--success">{{ availableCount }}</div>
+    </div>
+
+    <div class="card">
+      <div class="card__label">Occupées</div>
+      <div class="card__value card__value--danger">{{ occupiedCount }}</div>
+    </div>
+  </div>
+
+  <div class="card card--toolbar">
+    <div class="card__header">
+      <h2 class="card__title">Liste des chambres</h2>
+      <button class="button button--primary" (click)="openRoomsModal()">Ouvrir le tableau</button>
+    </div>
+    <p class="card__text">Le tableau des chambres s’affiche dans une modal dédiée.</p>
+  </div>
+
+  <app-data-table-modal
+    *ngIf="isModalOpen"
+    [config]="modalConfig"
+    (close)="closeModal()"
+    (actionEvent)="onActionClick($event)"
+  ></app-data-table-modal>
+
+  <div class="modal-backdrop" *ngIf="isAddDialogOpen"></div>
+
+  <div class="modal" *ngIf="isAddDialogOpen">
+    <div class="modal__content">
+      <div class="modal__header">
+        <h2 class="modal__title">Ajouter une chambre</h2>
+        <p class="modal__subtitle">Création simplifiée avec ton modèle de données actuel</p>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-field">
+          <label class="form-label" for="room-status">Statut</label>
+          <select id="room-status" class="select-field" [(ngModel)]="newRoom.status">
+            <option value="available">Disponible</option>
+            <option value="occupied">Occupée</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal__footer">
+        <button class="button button--secondary" (click)="closeAddDialog()">Annuler</button>
+        <button class="button button--primary" (click)="addRoom()">Ajouter</button>
+      </div>
+    </div>
+  </div>
+</div>
