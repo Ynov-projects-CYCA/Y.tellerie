@@ -1,6 +1,11 @@
-import { registerAs } from '@nestjs/config';
+import 'dotenv/config';
+import { DataSourceOptions } from 'typeorm';
 
-export default registerAs('database', () => ({
+const isTsRuntime = __filename.endsWith('.ts');
+
+export const dataSourceOptions: DataSourceOptions = {
+  type: 'postgres',
+
   host:
     process.env.DATABASE_HOST ||
     process.env.POSTGRES_HOST ||
@@ -23,8 +28,19 @@ export default registerAs('database', () => ({
     process.env.POSTGRES_PASSWORD ||
     'hotel_pass',
 
-  name:
+  database:
     process.env.DATABASE_NAME ||
     process.env.POSTGRES_DB ||
     'hotel_db',
-}));
+
+  entities: isTsRuntime
+    ? ['src/**/*.entity.ts', 'src/**/*.schema.ts']
+    : ['dist/**/*.entity.js', 'dist/**/*.schema.js'],
+
+  migrations: isTsRuntime
+    ? ['src/migrations/*.ts']
+    : ['dist/migrations/*.js'],
+
+  synchronize: false,
+  logging: false,
+};

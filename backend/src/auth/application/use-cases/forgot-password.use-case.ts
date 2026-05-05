@@ -13,6 +13,7 @@ import {
   IUserRepository,
   IUserRepository as IUserRepositorySymbol,
 } from '@/auth/application/ports';
+import { buildFrontendUrl } from '@/config/frontend-url';
 
 @Injectable()
 export class ForgotPasswordUseCase {
@@ -41,10 +42,10 @@ export class ForgotPasswordUseCase {
 
     await this.passwordResetTokenRepository.save(resetToken);
 
-    const frontendBaseUrl =
-      this.configService.get<string>('app.frontendBaseUrl') ??
-      'http://localhost:4200';
-    const resetUrl = `${frontendBaseUrl}/reinitialiser-mot-de-passe?token=${encodeURIComponent(rawToken)}`;
+    const resetUrl = buildFrontendUrl(
+      `/reinitialiser-mot-de-passe?token=${encodeURIComponent(rawToken)}`,
+      this.configService,
+    );
     const userProps = user.getProperties();
     const recipientName = `${userProps.firstname} ${userProps.lastname}`.trim();
     const templateParams = {
