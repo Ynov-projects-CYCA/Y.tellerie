@@ -1,0 +1,217 @@
+import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+
+export type TableColumnType = 'text' | 'number' | 'date' | 'currency' | 'status' | 'toggle' | 'shortId';
+
+export interface GenericTableColumn<T = any> {
+  key: keyof T & string;
+  label: string;
+  type?: TableColumnType;
+  sortable?: boolean;
+  searchable?: boolean;
+  toggle?: {
+    action: string;
+    checkedValue: unknown;
+    checkedLabel: string;
+    uncheckedLabel: string;
+  };
+}
+
+export interface GenericTableAction<T = any> {
+  label: string;
+  action: string;
+  color?: 'primary' | 'secondary' | 'success' | 'danger';
+  condition?: (row: T) => boolean;
+}
+
+@Component({
+  selector: 'app-generic-data-table',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './generic-data-table.component.html',
+  styleUrls: ['./generic-data-table.component.scss']
+})
+export class GenericDataTableComponent<T extends Record<string, any>> {
+  @Input() title = '';
+  @Input() subtitle = '';
+  @Input() data: T[] = [];
+  @Input() columns: GenericTableColumn<T>[] = [];
+  @Input() actions: GenericTableAction<T>[] = [];
+  @Input() emptyMessage = 'Aucune donnée trouvée.';
+  @Input() addButtonLabel = '';
+
+  @Output() actionClick = new EventEmitter<{ action: string; row: T }>();
+  @Output() addClick = new EventEmitter<void>();
+
+  globalSearch = '';
+  fieldKey = '';
+  fieldSearch = '';
+  sortKey = '';
+  sortDirection: 'asc' | 'desc' = 'asc';
+
+  get searchableColumns(): GenericTableColumn<T>[] {
+    return this.columns.filter(column => column.searchable !== false);
+  }
+
+  get displayedData(): T[] {
+    let result = [...this.data];
+
+    const global = this.normalize(this.globalSearch);
+    if (global) {
+      result = result.filter(row =>
+        this.searchableColumns.some(column =>
+          this.normalize(row[column.key]).includes(global)
+        )
+      );
+    }
+
+    const fieldValue = this.normalize(this.fieldSearch);
+    if (this.fieldKey && fieldValue) {
+      result = result.filter(row =>
+        this.normalize(row[this.fieldKey]).includes(fieldValue)
+      );
+    }
+
+    if (this.sortKey) {
+      result.sort((a, b) => {
+        const valueA = a[this.sortKey];
+        const valueB = b[this.sortKey];
+
+        if (valueA == null) return 1;
+        if (valueB == null) return -1;
+
+        if (typeof valueA === 'number' && typeof valueB === 'number') {
+          return this.sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
+        }
+
+        const comparison = String(valueA).localeCompare(String(valueB), 'fr', {
+          numeric: true,
+          sensitivity: 'base'
+        });
+
+        return this.sortDirection === 'asc' ? comparison : -comparison;
+      });
+    }
+
+    return result;
+  }
+
+  setSort(column: GenericTableColumn<T>, direction: 'asc' | 'desc'): void {
+    if (column.sortable === false) return;
+
+    this.sortKey = column.key;
+    this.sortDirection = direction;
+  }
+
+  emitAdd(): void {
+    this.addClick.emit();
+  }
+
+  emitAction(action: string, row: T): void {
+    this.actionClick.emit({ action, row });
+  }
+
+  emitToggle(column: GenericTableColumn<T>, row: T): void {
+    if (!column.toggle) return;
+    this.emitAction(column.toggle.action, row);
+  }
+
+  clearFilters(): void {
+    this.globalSearch = '';
+    this.fieldKey = '';
+    this.fieldSearch = '';
+    this.sortKey = '';
+    this.sortDirection = 'asc';
+  }
+
+  formatValue(row: T, column: GenericTableColumn<T>): string {
+    const value = row[column.key];
+
+    if (value == null || value === '') return '-';
+
+    if (column.type === 'date') {
+      return new Date(value).toLocaleDateString('fr-FR');
+    }
+
+    if (column.type === 'currency') {
+      return `${value}€`;
+    }
+
+    if (column.type === 'shortId') {
+      return String(value).slice(0, 8);
+    }
+
+    if (column.type === 'status' && typeof value === 'boolean') {
+      return value ? 'Actif' : 'Inactif';
+    }
+
+    if (column.type === 'status') {
+      return this.formatStatus(value);
+    }
+
+    if (Array.isArray(value)) {
+      return value.join(', ');
+    }
+
+    return String(value);
+  }
+
+  getStatusClass(value: unknown): string {
+    if (value === true) {
+      return 'status-badge status-badge--success';
+    }
+
+    if (value === false) {
+      return 'status-badge status-badge--danger';
+    }
+
+    const status = String(value);
+
+    if (['active', 'available', 'confirmed', 'completed'].includes(status)) {
+      return 'status-badge status-badge--success';
+    }
+
+    if (['pending'].includes(status)) {
+      return 'status-badge status-badge--warning';
+    }
+
+    if (['inactive', 'occupied', 'cancelled'].includes(status)) {
+      return 'status-badge status-badge--danger';
+    }
+
+    return 'status-badge status-badge--neutral';
+  }
+
+  isToggleChecked(row: T, column: GenericTableColumn<T>): boolean {
+    return row[column.key] === column.toggle?.checkedValue;
+  }
+
+  getToggleLabel(row: T, column: GenericTableColumn<T>): string {
+    if (!column.toggle) return '';
+    return this.isToggleChecked(row, column)
+      ? column.toggle.checkedLabel
+      : column.toggle.uncheckedLabel;
+  }
+
+  private formatStatus(value: unknown): string {
+    const labels: Record<string, string> = {
+      AVAILABLE: 'Disponible',
+      OCCUPIED: 'Occupée',
+      DIRTY: 'À nettoyer',
+      MAINTENANCE: 'Maintenance',
+      PENDING_PAYMENT: 'En attente',
+      CONFIRMED: 'Confirmée',
+      PAYMENT_FAILED: 'Échec paiement',
+      CANCELED: 'Annulée',
+      REFUND_REQUESTED: 'Remboursement',
+      REFUNDED: 'Remboursée',
+    };
+
+    return labels[String(value)] ?? String(value);
+  }
+
+  private normalize(value: unknown): string {
+    return String(value ?? '').toLowerCase().trim();
+  }
+}

@@ -67,10 +67,12 @@
           formControlName="password"
           placeholder="••••••••"
         />
-        <span class="auth-field__hint">Minimum 8 caracteres</span>
+        <span class="auth-field__hint">
+          8 caracteres minimum, une majuscule, un chiffre et un caractere special
+        </span>
         @if (hasError('password')) {
           <span class="auth-field__error">
-            Le mot de passe doit contenir au moins 8 caracteres.
+            {{ passwordPolicyMessage }}
           </span>
         }
       </div>

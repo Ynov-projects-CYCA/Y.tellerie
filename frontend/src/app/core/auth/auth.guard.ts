@@ -51,7 +51,10 @@ function roleGuard(role: AuthRole) {
   const router = inject(Router);
   const user = authSessionService.currentUser();
 
-  if (user?.roles.includes(role)) {
+  if (
+    user?.roles.includes(role) ||
+    (role === 'personnel' && user?.roles.includes('admin'))
+  ) {
     return true;
   }
 

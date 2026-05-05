@@ -70,7 +70,7 @@ describe('LoginPageComponent', () => {
 
     component['loginForm'].setValue({
       email: 'john.doe@example.com',
-      password: 'password123',
+      password: 'Password1!',
       rememberMe: true,
     });
 

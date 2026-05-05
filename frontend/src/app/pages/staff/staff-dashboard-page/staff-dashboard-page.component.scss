@@ -13,6 +13,22 @@
   padding-right: 2rem;
 }
 
+.staff-page__header {
+  margin-bottom: 2rem;
+}
+
+.staff-page__title {
+  margin: 0;
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #1c1917;
+}
+
+.staff-page__subtitle {
+  margin-top: 0.25rem;
+  color: #57534e;
+}
+
 .dashboard__stats {
   display: grid;
   grid-template-columns: 1fr;

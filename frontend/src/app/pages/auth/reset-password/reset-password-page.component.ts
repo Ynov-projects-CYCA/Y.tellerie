@@ -3,7 +3,12 @@ import { AbstractControl, ValidationErrors, ValidatorFn, FormBuilder, ReactiveFo
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { LucideKeyRound } from '@lucide/angular';
-import { AppHttpError, AuthApiService } from '@core';
+import {
+  AppHttpError,
+  AuthApiService,
+  PASSWORD_POLICY_MESSAGE,
+  strongPasswordValidator,
+} from '@core';
 import { AuthShellComponent } from '@pages/auth/shared/auth-shell.component';
 
 @Component({
@@ -25,10 +30,11 @@ export class ResetPasswordPageComponent implements OnDestroy {
     this.token ? null : 'Le lien de reinitialisation est incomplet ou invalide.',
   );
   protected readonly isSuccess = signal(false);
+  protected readonly passwordPolicyMessage = PASSWORD_POLICY_MESSAGE;
 
   protected readonly resetPasswordForm = this.formBuilder.nonNullable.group(
     {
-      password: ['', [Validators.required, Validators.minLength(8)]],
+      password: ['', [Validators.required, strongPasswordValidator()]],
       confirmPassword: ['', [Validators.required]],
     },
     {

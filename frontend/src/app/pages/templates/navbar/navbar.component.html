@@ -1,7 +1,7 @@
 <nav class="nav"
      [class.nav--scrolled]="isScrolled"
      [class.nav--customer]="currentMode() === 'client'"
-     [class.nav--staff]="currentMode() === 'staff'">
+     [class.nav--staff]="currentMode() === 'staff' || currentMode() === 'admin'">
 
   <div class="nav-container">
 
@@ -11,20 +11,20 @@
       <!-- Logo Section -->
       <div class="nav-brand-group">
         <a [routerLink]="
-            currentMode() === 'staff' ? '/staff' :
+            currentMode() === 'staff' || currentMode() === 'admin' ? '/staff' :
             currentMode() === 'client' ? '/client' : '/'
           "
            class="nav-brand">
 
           <div class="brand-icon-wrapper">
-            <svg lucideHouse class="brand-icon" *ngIf="currentMode() === 'staff'"></svg>
-            <svg lucideHotel class="brand-icon" *ngIf="currentMode() !== 'staff'"></svg>
+            <svg lucideHouse class="brand-icon" *ngIf="currentMode() === 'staff' || currentMode() === 'admin'"></svg>
+            <svg lucideHotel class="brand-icon" *ngIf="currentMode() !== 'staff' && currentMode() !== 'admin'"></svg>
           </div>
 
           <div class="brand-text">
             <span class="brand-name">Ytellerie</span>
             <span class="brand-subtitle" *ngIf="currentMode() === 'client'">Espace Client</span>
-            <span class="brand-subtitle" *ngIf="currentMode() === 'staff'">Espace Personnel</span>
+            <span class="brand-subtitle" *ngIf="currentMode() === 'staff' || currentMode() === 'admin'">Espace Personnel</span>
           </div>
         </a>
       </div>
@@ -55,27 +55,30 @@
       </ul>
 
       <!-- Staff Menu -->
-      <ul class="nav-menu" *ngIf="currentMode() === 'staff'">
+      <ul class="nav-menu" *ngIf="currentMode() === 'staff' || currentMode() === 'admin'">
         <li><a routerLink="/staff" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">
           <svg lucideHouse class="link-icon"></svg>
           Dashboard</a></li>
-        <li><a routerLink="/staff/chambres" routerLinkActive="active" class="nav-link">
+        <li><a routerLink="/staff/rooms" routerLinkActive="active" class="nav-link">
           <svg lucideBed class="link-icon"></svg>
           Chambres</a></li>
         <li><a routerLink="/staff/reservations" routerLinkActive="active" class="nav-link">
           <svg lucideCalendar class="link-icon"></svg>
           Réservations</a></li>
+        <li><a routerLink="/staff/emails" routerLinkActive="active" class="nav-link">
+          <svg lucideMail class="link-icon"></svg>
+          Emails</a></li>
       </ul>
 
       <!-- Divider for Staff and Customer -->
-      <div class="nav-divider" *ngIf="currentMode() === 'staff' || currentMode() === 'client'"></div>
+      <div class="nav-divider" *ngIf="currentMode() === 'staff' || currentMode() === 'client' || currentMode() === 'admin'"></div>
 
-      <!-- Admin Link (Staff only) -->
-<!--      <ul class="nav-menu" *ngIf="currentMode() === 'staff' && isAdmin()">-->
-<!--        <li><a routerLink="/staff/admin" routerLinkActive="active" class="nav-link">-->
-<!--          <svg lucideShield class="link-icon"></svg>-->
-<!--          Admin</a></li>-->
-<!--      </ul>-->
+      <!-- User management (admin only) -->
+      <ul class="nav-menu" *ngIf="currentMode() === 'admin'">
+        <li><a routerLink="/staff/admin" routerLinkActive="active" class="nav-link">
+          <svg lucideShield class="link-icon"></svg>
+          Utilisateurs</a></li>
+      </ul>
 
 
       <!-- Public Actions -->

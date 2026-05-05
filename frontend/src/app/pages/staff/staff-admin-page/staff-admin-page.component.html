@@ -1,18 +1,17 @@
-<div class="staff-page" *ngIf="currentUser.isAdmin; else accessDenied">
+<div class="staff-page" *ngIf="hasStaffAccess(); else accessDenied">
   <div class="staff-page__header">
     <div class="admin-heading">
-      <div class="admin-heading__icon">🛡️</div>
       <div>
         <h1 class="staff-page__title">Administration</h1>
-        <p class="staff-page__subtitle">Gestion du personnel</p>
+        <p class="staff-page__subtitle">Gestion des utilisateurs</p>
       </div>
     </div>
   </div>
 
   <div class="stats-grid stats-grid--three">
     <div class="card">
-      <div class="card__label">Total Personnel</div>
-      <div class="card__value">{{ employees.length }}</div>
+      <div class="card__label">Total utilisateurs</div>
+      <div class="card__value">{{ employees().length }}</div>
     </div>
 
     <div class="card">
@@ -26,69 +25,81 @@
     </div>
   </div>
 
-  <div class="card card--toolbar">
-    <div class="toolbar">
-      <input
-        class="input-field"
-        [(ngModel)]="searchTerm"
-        placeholder="Rechercher par nom, rôle ou shift..."
-      />
-
-      <button class="button button--primary" (click)="openAddDialog()">
-        Ajouter un employé
-      </button>
-    </div>
+  <div class="card">
+  <app-generic-data-table
+      title="Tableau des utilisateurs"
+      subtitle="Recherche globale, tri et filtre par champ"
+      addButtonLabel="Ajouter un utilisateur"
+      [data]="filteredEmployees"
+      [columns]="employeeColumns"
+      [actions]="employeeActions"
+      [emptyMessage]="isLoading() ? 'Chargement des utilisateurs...' : 'Aucun utilisateur trouvé.'"
+      (addClick)="openAddDialog()"
+      (actionClick)="onTableAction($event)"
+    ></app-generic-data-table>
   </div>
-
-  <div class="card card--toolbar">
-    <div class="card__header">
-      <h2 class="card__title">Tableau du personnel</h2>
-      <button class="button button--primary" (click)="openEmployeesModal()">Ouvrir le tableau</button>
-    </div>
-    <p class="card__text">Utilise cette modal pour consulter et gérer le tableau complet du personnel.</p>
-  </div>
-
-  <app-data-table-modal
-    *ngIf="isModalOpen"
-    [config]="modalConfig"
-    (close)="closeModal()"
-    (actionEvent)="onActionClick($event)"
-  ></app-data-table-modal>
 
   <div class="modal-backdrop" *ngIf="isAddDialogOpen || isEditDialogOpen"></div>
 
   <div class="modal" *ngIf="isAddDialogOpen">
     <div class="modal__content">
       <div class="modal__header">
-        <h2 class="modal__title">Ajouter un employé</h2>
+        <h2 class="modal__title">Ajouter un utilisateur</h2>
       </div>
 
       <div class="form-grid">
         <div class="form-field">
+          <label class="form-label">Prénom</label>
+          <input class="input-field" [(ngModel)]="employeeFormData.firstname" />
+        </div>
+
+        <div class="form-field">
           <label class="form-label">Nom</label>
-          <input class="input-field" [(ngModel)]="employeeFormData.name" />
+          <input class="input-field" [(ngModel)]="employeeFormData.lastname" />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Email</label>
+          <input class="input-field" type="email" [(ngModel)]="employeeFormData.email" />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Téléphone</label>
+          <input class="input-field" [(ngModel)]="employeeFormData.phone" />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Mot de passe temporaire</label>
+          <input class="input-field" type="password" [(ngModel)]="employeeFormData.password" />
+          <small>{{ passwordPolicyMessage }}</small>
         </div>
 
         <div class="form-field">
           <label class="form-label">Rôle</label>
-          <input class="input-field" [(ngModel)]="employeeFormData.role" />
-        </div>
-
-        <div class="form-field">
-          <label class="form-label">Shift</label>
-          <input class="input-field" [(ngModel)]="employeeFormData.shift" />
+          <select
+            class="select-field"
+            [ngModel]="employeeFormData.roles[0]"
+            (ngModelChange)="setRole($event)"
+          >
+            <option [ngValue]="'client'">Client</option>
+            <option [ngValue]="'personnel'">Personnel</option>
+            <option [ngValue]="'admin'">Administrateur</option>
+          </select>
         </div>
 
         <div class="form-field">
           <label class="form-label">Statut</label>
-          <select class="select-field" [(ngModel)]="employeeFormData.status">
-            <option value="active">Actif</option>
-            <option value="inactive">Inactif</option>
+          <select class="select-field" [(ngModel)]="employeeFormData.isActive">
+            <option [ngValue]="true">Actif</option>
+            <option [ngValue]="false">Inactif</option>
           </select>
         </div>
       </div>
 
       <div class="modal__footer">
+        @if (formError(); as message) {
+          <p class="auth-feedback is-error">{{ message }}</p>
+        }
         <button class="button button--secondary" (click)="closeAddDialog()">Annuler</button>
         <button class="button button--primary" (click)="addEmployee()">Ajouter</button>
       </div>
@@ -98,35 +109,56 @@
   <div class="modal" *ngIf="isEditDialogOpen">
     <div class="modal__content">
       <div class="modal__header">
-        <h2 class="modal__title">Modifier l'employé</h2>
+        <h2 class="modal__title">Modifier l'utilisateur</h2>
       </div>
 
       <div class="form-grid">
         <div class="form-field">
+          <label class="form-label">Prénom</label>
+          <input class="input-field" [(ngModel)]="employeeFormData.firstname" />
+        </div>
+
+        <div class="form-field">
           <label class="form-label">Nom</label>
-          <input class="input-field" [(ngModel)]="employeeFormData.name" />
+          <input class="input-field" [(ngModel)]="employeeFormData.lastname" />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Email</label>
+          <input class="input-field" type="email" [(ngModel)]="employeeFormData.email" />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Téléphone</label>
+          <input class="input-field" [(ngModel)]="employeeFormData.phone" />
         </div>
 
         <div class="form-field">
           <label class="form-label">Rôle</label>
-          <input class="input-field" [(ngModel)]="employeeFormData.role" />
-        </div>
-
-        <div class="form-field">
-          <label class="form-label">Shift</label>
-          <input class="input-field" [(ngModel)]="employeeFormData.shift" />
+          <select
+            class="select-field"
+            [ngModel]="employeeFormData.roles[0]"
+            (ngModelChange)="setRole($event)"
+          >
+            <option [ngValue]="'client'">Client</option>
+            <option [ngValue]="'personnel'">Personnel</option>
+            <option [ngValue]="'admin'">Administrateur</option>
+          </select>
         </div>
 
         <div class="form-field">
           <label class="form-label">Statut</label>
-          <select class="select-field" [(ngModel)]="employeeFormData.status">
-            <option value="active">Actif</option>
-            <option value="inactive">Inactif</option>
+          <select class="select-field" [(ngModel)]="employeeFormData.isActive">
+            <option [ngValue]="true">Actif</option>
+            <option [ngValue]="false">Inactif</option>
           </select>
         </div>
       </div>
 
       <div class="modal__footer">
+        @if (formError(); as message) {
+          <p class="auth-feedback is-error">{{ message }}</p>
+        }
         <button class="button button--secondary" (click)="closeEditDialog()">Annuler</button>
         <button class="button button--primary" (click)="editEmployee()">Enregistrer</button>
       </div>
@@ -139,7 +171,7 @@
     <div class="card access-denied">
       <div class="access-denied__icon">🛡️</div>
       <h2 class="access-denied__title">Accès refusé</h2>
-      <p class="access-denied__text">Vous n'avez pas les permissions nécessaires.</p>
+      <p class="access-denied__text">Cette page est réservée aux administrateurs.</p>
     </div>
   </div>
 </ng-template>

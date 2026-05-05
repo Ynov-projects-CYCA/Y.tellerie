@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { SearchAvailabilityQueryDto } from '@/bookings/application/dtos/search-availability-query.dto';
 import {
@@ -28,8 +28,12 @@ import {
 import { CancelBookingUseCase } from '@/bookings/application/use-cases/cancel-booking.use-case';
 import { ListBookingsResult } from "@/shared/model";
 import { JwtAuthGuard } from '@/auth/infrastructure/guards/jwt-auth.guard';
+import { RolesGuard } from '@/auth/infrastructure/guards/roles.guard';
+import { Roles } from '@/auth/infrastructure/decorators/roles.decorator';
 import { CurrentUser } from '@/auth/infrastructure/decorators/current-user.decorator';
 import { UserAggregate } from '@/auth/domain/user.aggregate';
+import { Role } from '@/shared/model';
+import { UpdateBookingUseCase } from '@/bookings/application/use-cases/update-booking.use-case';
 
 /**
  * Gère les interactions liées aux réservations de chambres.
@@ -45,6 +49,7 @@ export class BookingsController {
     private readonly getBookingUseCase: GetBookingUseCase,
     private readonly listBookingsUseCase: ListBookingsUseCase,
     private readonly cancelBookingUseCase: CancelBookingUseCase,
+    private readonly updateBookingUseCase: UpdateBookingUseCase,
   ) {}
 
   /**
@@ -53,7 +58,14 @@ export class BookingsController {
   @Get()
   @UseGuards(JwtAuthGuard)
   async findAll(@CurrentUser() user: UserAggregate): Promise<BookingResponseDto[]> {
-    const results = await this.listBookingsUseCase.execute(user.getProperties().email.toString());
+    const properties = user.getProperties();
+    const userRoles = properties.roles ?? [];
+    const canManageBookings =
+      userRoles.includes(Role.PERSONNEL) || userRoles.includes(Role.ADMIN);
+    const results = canManageBookings
+      ? await this.listBookingsUseCase.executeAll()
+      : await this.listBookingsUseCase.execute(properties.email.toString());
+
     return results.map((result) => this.toBookingListResponse(result));
   }
 
@@ -86,6 +98,18 @@ export class BookingsController {
   async findOne(@Param('id') id: string): Promise<BookingResponseDto> {
     const result = await this.getBookingUseCase.execute(id);
     return this.toBookingDetailResponse(result);
+  }
+
+  @Put(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.PERSONNEL)
+  async update(
+    @Param('id') id: string,
+    @Body() dto: BookingSummaryDto,
+  ): Promise<BookingResponseDto> {
+    const result = await this.updateBookingUseCase.execute(id, dto);
+    const detail = await this.getBookingUseCase.execute(result.booking.getId());
+    return this.toBookingDetailResponse(detail);
   }
 
   @Post(':id/cancel')

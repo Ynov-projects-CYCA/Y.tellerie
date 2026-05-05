@@ -1,0 +1,69 @@
+<div class="staff-page">
+  <div class="staff-page__header">
+    <div>
+      <h1 class="staff-page__title">Emails</h1>
+      <p class="staff-page__subtitle">Envoyer un message personnalisé à un client ou un membre de l'équipe</p>
+    </div>
+  </div>
+
+  <div class="card mail-card">
+    <div class="mail-card__content">
+      <div class="mail-card__form">
+        <div class="mail-card__header">
+          <h2 class="mail-card__title">Composer un email</h2>
+          <p class="mail-card__subtitle">Le message sera envoyé avec le template Ytellerie.</p>
+        </div>
+
+        <div class="mail-grid">
+          <div class="form-field">
+            <label class="form-label">Destinataire</label>
+            <input class="input-field" type="email" [(ngModel)]="customMail.to" placeholder="client@email.com" />
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Nom</label>
+            <input class="input-field" [(ngModel)]="customMail.toName" placeholder="Jean Dupont" />
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Objet</label>
+          <input class="input-field" [(ngModel)]="customMail.subject" placeholder="Information concernant votre séjour" />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Message</label>
+          <textarea
+            class="input-field mail-textarea"
+            rows="8"
+            [(ngModel)]="customMail.message"
+            placeholder="Bonjour, nous vous contactons au sujet de..."
+          ></textarea>
+        </div>
+
+        @if (mailFeedback(); as feedback) {
+          <p class="mail-feedback" [class.is-success]="feedback.type === 'success'" [class.is-error]="feedback.type === 'error'">
+            {{ feedback.message }}
+          </p>
+        }
+
+        <div class="mail-actions">
+          <button class="button button--secondary" type="button" (click)="resetCustomMail()">Réinitialiser</button>
+          <button class="button button--primary" type="button" [disabled]="isSendingMail" (click)="sendCustomMail()">
+            {{ isSendingMail ? 'Envoi...' : 'Envoyer' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="mail-preview">
+        <div class="mail-preview__brand">Ytellerie</div>
+        <div class="mail-preview__eyebrow">Message de l'équipe</div>
+        <div class="mail-preview__body">
+          <p>{{ customMail.toName ? 'Bonjour ' + customMail.toName + ',' : 'Bonjour,' }}</p>
+          <p>{{ customMail.message || 'Votre message apparaîtra ici avant l’envoi.' }}</p>
+        </div>
+        <div class="mail-preview__footer">L'équipe Ytellerie</div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -157,7 +157,11 @@ export class LoginPageComponent {
 
   private buildLoginErrorMessage(error: unknown): string {
     if (error instanceof AppHttpError && error.statusCode === 401) {
-      return 'Identifiants invalides. Verifiez votre email et votre mot de passe.';
+      return error.message || 'Email ou mot de passe invalide.';
+    }
+
+    if (error instanceof AppHttpError && error.statusCode === 403) {
+      return error.message;
     }
 
     return this.extractErrorMessage(error);

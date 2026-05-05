@@ -23,10 +23,11 @@ export class StripePaymentProvider implements IPaymentProvider {
     url: string;
   }> {
     const props = payment.getProperties();
-    const currency =
+    const currency = (
       props.amount.getCurrency() ??
       this.configService.get<string>('stripe.currency') ??
-      'usd';
+      'usd'
+    ).toLowerCase();
 
     const configuredSuccessUrl = this.configService.get<string>('stripe.successUrl');
     const configuredCancelUrl = this.configService.get<string>('stripe.cancelUrl');

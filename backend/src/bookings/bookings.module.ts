@@ -13,6 +13,7 @@ import { ConfirmBookingUseCase } from './application/use-cases/confirm-booking.u
 import { GetBookingUseCase } from './application/use-cases/get-booking.use-case';
 import { ListBookingsUseCase } from './application/use-cases/list-bookings.use-case';
 import { CancelBookingUseCase } from './application/use-cases/cancel-booking.use-case';
+import { UpdateBookingUseCase } from './application/use-cases/update-booking.use-case';
 
 @Module({
   imports: [TypeOrmModule.forFeature([BookingEntity]), RoomsModule, MailjetModule],
@@ -29,6 +30,7 @@ import { CancelBookingUseCase } from './application/use-cases/cancel-booking.use
     GetBookingUseCase,
     ListBookingsUseCase,
     CancelBookingUseCase,
+    UpdateBookingUseCase,
   ],
   exports: [BOOKING_REPOSITORY],
 })

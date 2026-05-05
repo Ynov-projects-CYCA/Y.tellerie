@@ -5,10 +5,12 @@ import { BookingRepositoryPort } from '@/bookings/application/ports/booking-repo
 import { Booking } from '@/bookings/domain/booking.entity';
 import { BookingEntity } from '@/bookings/infrastructure/persistence/booking.entity';
 import { BookingFactory } from '@/bookings/domain/booking.factory';
-import { BookingStatusVO } from '@/bookings/domain/booking-status.vo';
+import { BookingStatus, BookingStatusVO } from '@/bookings/domain/booking-status.vo';
 
 @Injectable()
 export class TypeOrmBookingRepositoryAdapter implements BookingRepositoryPort {
+  private readonly pendingPaymentHoldMinutes = 15;
+
   constructor(
     @InjectRepository(BookingEntity)
     private readonly repository: Repository<BookingEntity>,
@@ -26,6 +28,14 @@ export class TypeOrmBookingRepositoryAdapter implements BookingRepositoryPort {
     return entity ? this.toDomain(entity) : null;
   }
 
+  async findAll(): Promise<Booking[]> {
+    const entities = await this.repository.find({
+      order: { createdAt: 'DESC' },
+    });
+
+    return entities.map((entity) => this.toDomain(entity));
+  }
+
   async findOverlapping(
     checkInDate: Date,
     checkOutDate: Date,
@@ -38,9 +48,7 @@ export class TypeOrmBookingRepositoryAdapter implements BookingRepositoryPort {
       .andWhere('booking.checkOutDate > :checkInDate', {
         checkInDate: this.toDateColumn(checkInDate),
       })
-      .andWhere('booking.status NOT IN (:...excludedStatuses)', {
-        excludedStatuses: ['CANCELED', 'REFUNDED'],
-      })
+      .andWhere(this.blockingStatusCondition(), this.blockingStatusParams())
       .getMany();
 
     return entities.map((entity) => this.toDomain(entity));
@@ -60,9 +68,7 @@ export class TypeOrmBookingRepositoryAdapter implements BookingRepositoryPort {
       .andWhere('booking.checkOutDate > :checkInDate', {
         checkInDate: this.toDateColumn(checkInDate),
       })
-      .andWhere('booking.status NOT IN (:...excludedStatuses)', {
-        excludedStatuses: ['CANCELED', 'REFUNDED'],
-      })
+      .andWhere(this.blockingStatusCondition(), this.blockingStatusParams())
       .getMany();
 
     return entities.map((entity) => this.toDomain(entity));
@@ -118,5 +124,29 @@ export class TypeOrmBookingRepositoryAdapter implements BookingRepositoryPort {
 
   private toDateColumn(date: Date): string {
     return date.toISOString().slice(0, 10);
+  }
+
+  private blockingStatusCondition(): string {
+    return `(${[
+      'booking.status IN (:...blockingStatuses)',
+      '(booking.status = :pendingPaymentStatus AND booking.createdAt >= :pendingPaymentHoldCutoff)',
+    ].join(' OR ')})`;
+  }
+
+  private blockingStatusParams(): {
+    blockingStatuses: BookingStatus[];
+    pendingPaymentStatus: BookingStatus;
+    pendingPaymentHoldCutoff: Date;
+  } {
+    return {
+      blockingStatuses: [
+        BookingStatus.CONFIRMED,
+        BookingStatus.REFUND_REQUESTED,
+      ],
+      pendingPaymentStatus: BookingStatus.PENDING_PAYMENT,
+      pendingPaymentHoldCutoff: new Date(
+        Date.now() - this.pendingPaymentHoldMinutes * 60_000,
+      ),
+    };
   }
 }

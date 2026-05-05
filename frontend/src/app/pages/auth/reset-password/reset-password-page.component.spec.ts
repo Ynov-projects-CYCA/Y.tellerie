@@ -47,8 +47,8 @@ describe('ResetPasswordPageComponent', () => {
     authApiService.resetPassword.mockReturnValue(of(void 0));
 
     component['resetPasswordForm'].setValue({
-      password: 'newPassword123',
-      confirmPassword: 'newPassword123',
+      password: 'NewPassword1!',
+      confirmPassword: 'NewPassword1!',
     });
 
     component['submit']();
@@ -76,8 +76,8 @@ describe('ResetPasswordPageComponent', () => {
     );
 
     component['resetPasswordForm'].setValue({
-      password: 'newPassword123',
-      confirmPassword: 'newPassword123',
+      password: 'NewPassword1!',
+      confirmPassword: 'NewPassword1!',
     });
 
     component['submit']();
