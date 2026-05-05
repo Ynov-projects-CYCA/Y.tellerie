@@ -4,10 +4,10 @@ WORKDIR /app
 
 ENV NODE_ENV=development
 
-COPY package*.json ./
+COPY backend/package*.json ./
 RUN npm ci --legacy-peer-deps --include=dev
 
-COPY . .
+COPY backend/ .
 
 RUN npm run build
 

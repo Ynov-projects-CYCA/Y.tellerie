@@ -1,8 +1,8 @@
 services:
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.frontend
+frontend:
+  build:
+    context: .
+    dockerfile: frontend/Dockerfile.frontend
     restart: unless-stopped
     depends_on:
       backend:
@@ -10,10 +10,10 @@ services:
     ports:
       - '${FRONTEND_PORT:-4200}:80'
 
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.backend
+backend:
+  build:
+    context: .
+    dockerfile: backend/Dockerfile.backend
     restart: unless-stopped
     depends_on:
       postgres:
