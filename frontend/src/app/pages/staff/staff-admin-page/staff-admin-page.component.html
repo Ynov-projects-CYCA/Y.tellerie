@@ -1,4 +1,4 @@
-<div class="staff-page" *ngIf="currentUser.isAdmin; else accessDenied">
+<div class="staff-page" *ngIf="hasStaffAccess; else accessDenied">
   <div class="staff-page__header">
     <div class="admin-heading">
       <div class="admin-heading__icon">🛡️</div>
@@ -26,34 +26,19 @@
     </div>
   </div>
 
-  <div class="card card--toolbar">
-    <div class="toolbar">
-      <input
-        class="input-field"
-        [(ngModel)]="searchTerm"
-        placeholder="Rechercher par nom, rôle ou shift..."
-      />
-
-      <button class="button button--primary" (click)="openAddDialog()">
-        Ajouter un employé
-      </button>
-    </div>
+  <div class="card">
+  <app-generic-data-table
+      title="Tableau du personnel"
+      subtitle="Recherche globale, tri et filtre par champ"
+      addButtonLabel="Ajouter un employé"
+      [data]="filteredEmployees"
+      [columns]="employeeColumns"
+      [actions]="employeeActions"
+      emptyMessage="Aucun employé trouvé."
+      (addClick)="openAddDialog()"
+      (actionClick)="onTableAction($event)"
+    ></app-generic-data-table>
   </div>
-
-  <div class="card card--toolbar">
-    <div class="card__header">
-      <h2 class="card__title">Tableau du personnel</h2>
-      <button class="button button--primary" (click)="openEmployeesModal()">Ouvrir le tableau</button>
-    </div>
-    <p class="card__text">Utilise cette modal pour consulter et gérer le tableau complet du personnel.</p>
-  </div>
-
-  <app-data-table-modal
-    *ngIf="isModalOpen"
-    [config]="modalConfig"
-    (close)="closeModal()"
-    (actionEvent)="onActionClick($event)"
-  ></app-data-table-modal>
 
   <div class="modal-backdrop" *ngIf="isAddDialogOpen || isEditDialogOpen"></div>
 
@@ -65,25 +50,33 @@
 
       <div class="form-grid">
         <div class="form-field">
+          <label class="form-label">Prénom</label>
+          <input class="input-field" [(ngModel)]="employeeFormData.firstname" />
+        </div>
+
+        <div class="form-field">
           <label class="form-label">Nom</label>
-          <input class="input-field" [(ngModel)]="employeeFormData.name" />
+          <input class="input-field" [(ngModel)]="employeeFormData.lastname" />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Email</label>
+          <input class="input-field" type="email" [(ngModel)]="employeeFormData.email" />
         </div>
 
         <div class="form-field">
           <label class="form-label">Rôle</label>
-          <input class="input-field" [(ngModel)]="employeeFormData.role" />
-        </div>
-
-        <div class="form-field">
-          <label class="form-label">Shift</label>
-          <input class="input-field" [(ngModel)]="employeeFormData.shift" />
+          <select class="select-field" [(ngModel)]="employeeFormData.role">
+            <option [ngValue]="UserRole.STAFF">Personnel</option>
+            <option [ngValue]="UserRole.ADMIN">Administrateur</option>
+          </select>
         </div>
 
         <div class="form-field">
           <label class="form-label">Statut</label>
           <select class="select-field" [(ngModel)]="employeeFormData.status">
-            <option value="active">Actif</option>
-            <option value="inactive">Inactif</option>
+            <option [ngValue]="UserStatus.ACTIVE">Actif</option>
+            <option [ngValue]="UserStatus.INACTIVE">Inactif</option>
           </select>
         </div>
       </div>
@@ -103,25 +96,33 @@
 
       <div class="form-grid">
         <div class="form-field">
+          <label class="form-label">Prénom</label>
+          <input class="input-field" [(ngModel)]="employeeFormData.firstname" />
+        </div>
+
+        <div class="form-field">
           <label class="form-label">Nom</label>
-          <input class="input-field" [(ngModel)]="employeeFormData.name" />
+          <input class="input-field" [(ngModel)]="employeeFormData.lastname" />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Email</label>
+          <input class="input-field" type="email" [(ngModel)]="employeeFormData.email" />
         </div>
 
         <div class="form-field">
           <label class="form-label">Rôle</label>
-          <input class="input-field" [(ngModel)]="employeeFormData.role" />
-        </div>
-
-        <div class="form-field">
-          <label class="form-label">Shift</label>
-          <input class="input-field" [(ngModel)]="employeeFormData.shift" />
+          <select class="select-field" [(ngModel)]="employeeFormData.role">
+            <option [ngValue]="UserRole.STAFF">Personnel</option>
+            <option [ngValue]="UserRole.ADMIN">Administrateur</option>
+          </select>
         </div>
 
         <div class="form-field">
           <label class="form-label">Statut</label>
           <select class="select-field" [(ngModel)]="employeeFormData.status">
-            <option value="active">Actif</option>
-            <option value="inactive">Inactif</option>
+            <option [ngValue]="UserStatus.ACTIVE">Actif</option>
+            <option [ngValue]="UserStatus.INACTIVE">Inactif</option>
           </select>
         </div>
       </div>

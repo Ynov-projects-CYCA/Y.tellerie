@@ -4,10 +4,6 @@
       <h1 class="staff-page__title">Gestion des Chambres</h1>
       <p class="staff-page__subtitle">Gérez les chambres disponibles et occupées</p>
     </div>
-
-    <button class="button button--primary" (click)="openAddDialog()">
-      Ajouter une chambre
-    </button>
   </div>
 
   <div class="stats-grid stats-grid--three">
@@ -27,20 +23,20 @@
     </div>
   </div>
 
-  <div class="card card--toolbar">
-    <div class="card__header">
-      <h2 class="card__title">Liste des chambres</h2>
-      <button class="button button--primary" (click)="openRoomsModal()">Ouvrir le tableau</button>
-    </div>
-    <p class="card__text">Le tableau des chambres s’affiche dans une modal dédiée.</p>
-  </div>
+  <div class="card">
 
-  <app-data-table-modal
-    *ngIf="isModalOpen"
-    [config]="modalConfig"
-    (close)="closeModal()"
-    (actionEvent)="onActionClick($event)"
-  ></app-data-table-modal>
+  <app-generic-data-table
+      title="Liste des chambres"
+      subtitle="Recherche globale, tri et filtre par champ"
+      addButtonLabel="Ajouter une chambre"
+      [data]="tableRooms"
+      [columns]="roomColumns"
+      [actions]="roomActions"
+      emptyMessage="Aucune chambre disponible."
+      (addClick)="openAddDialog()"
+      (actionClick)="onTableAction($event)"
+    ></app-generic-data-table>
+  </div>
 
   <div class="modal-backdrop" *ngIf="isAddDialogOpen"></div>
 
@@ -48,22 +44,82 @@
     <div class="modal__content">
       <div class="modal__header">
         <h2 class="modal__title">Ajouter une chambre</h2>
-        <p class="modal__subtitle">Création simplifiée avec ton modèle de données actuel</p>
+        <p class="modal__subtitle">Renseignez les informations de la nouvelle chambre</p>
       </div>
 
       <div class="form-grid">
         <div class="form-field">
-          <label class="form-label" for="room-status">Statut</label>
-          <select id="room-status" class="select-field" [(ngModel)]="newRoom.status">
-            <option value="available">Disponible</option>
-            <option value="occupied">Occupée</option>
+          <label class="form-label" for="room-number">Numéro</label>
+          <input
+            id="room-number"
+            class="input-field"
+            name="roomNumber"
+            [(ngModel)]="newRoom.roomNumber"
+            required
+          />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="room-type">Type</label>
+          <select id="room-type" class="select-field" name="type" [(ngModel)]="newRoom.type">
+            <option [ngValue]="RoomType.SIMPLE">Simple</option>
+            <option [ngValue]="RoomType.DOUBLE">Double</option>
+            <option [ngValue]="RoomType.SUITE">Suite</option>
           </select>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="room-capacity">Capacité</label>
+          <input
+            id="room-capacity"
+            class="input-field"
+            type="number"
+            name="capacity"
+            min="1"
+            max="10"
+            [(ngModel)]="newRoom.capacity"
+            required
+          />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="room-price">Prix</label>
+          <input
+            id="room-price"
+            class="input-field"
+            type="number"
+            name="price"
+            min="0"
+            step="1"
+            [(ngModel)]="newRoom.price"
+            required
+          />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="room-currency">Devise</label>
+          <input
+            id="room-currency"
+            class="input-field"
+            name="currency"
+            maxlength="3"
+            [(ngModel)]="newRoom.currency"
+          />
         </div>
       </div>
 
+      <p class="form-error" *ngIf="addRoomError">{{ addRoomError }}</p>
+
       <div class="modal__footer">
-        <button class="button button--secondary" (click)="closeAddDialog()">Annuler</button>
-        <button class="button button--primary" (click)="addRoom()">Ajouter</button>
+        <button class="button button--secondary" type="button" (click)="closeAddDialog()">Annuler</button>
+        <button
+          class="button button--primary"
+          type="button"
+          [disabled]="isSaving || !newRoom.roomNumber || newRoom.capacity < 1 || newRoom.price < 0"
+          (click)="addRoom()"
+        >
+          {{ isSaving ? 'Ajout...' : 'Ajouter' }}
+        </button>
       </div>
     </div>
   </div>

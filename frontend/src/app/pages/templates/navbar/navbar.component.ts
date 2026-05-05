@@ -56,7 +56,7 @@ export class NavbarComponent implements OnInit {
   /**
    * Détermine le mode d'affichage de la navigation selon le rôle.
    */
-  protected readonly currentMode = computed<'public' | 'client' | 'staff'>(() => {
+  protected readonly currentMode = computed<'public' | 'client' | 'staff' | 'admin' >(() => {
     const user = this.currentUser();
     if (!user) return 'public';
     return user.roles.includes('personnel') ? 'staff' : 'client';

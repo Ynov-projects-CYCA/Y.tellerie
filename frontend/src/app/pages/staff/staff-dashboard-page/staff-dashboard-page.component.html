@@ -72,24 +72,24 @@
           [ngClass]="{ 'list-item--with-border': !last }"
         >
           <div class="list-item__content">
-            <div class="list-item__title">{{ reservation.guestName }}</div>
+            <div class="list-item__title">{{ reservation.guestFirstName }} {{ reservation.guestLastName }}</div>
             <div class="list-item__subtitle">
-              Chambre {{ reservation.roomNumber }}
+              Chambre {{ reservation.room.roomNumber }}
             </div>
           </div>
 
           <div class="list-item__aside list-item__aside--right">
-            <div class="list-item__price">{{ reservation.totalPrice }}€</div>
+            <div class="list-item__price">{{ reservation.room.price }}€</div>
             <div class="list-item__date">
-              {{ reservation.checkIn | date:'dd/MM/yyyy' }}
+              {{ reservation.checkInDate | date:'dd/MM/yyyy' }}
             </div>
           </div>
         </div>
       </div>
 
-      <button class="button button--secondary button--full" (click)="openReservationsModal()">
+      <a class="button button--secondary button--full" routerLink="/staff/reservations">
         Voir toutes les réservations
-      </button>
+      </a>
     </div>
 
     <!-- Personnel actif -->
@@ -104,24 +104,24 @@
           [ngClass]="{ 'list-item--with-border': !last }"
         >
           <div class="list-item__content">
-            <div class="list-item__title">{{ employee.name }}</div>
-            <div class="list-item__subtitle">{{ employee.role }}</div>
+            <div class="list-item__title">{{ employee.firstname }} {{ employee.lastname }}</div>
+            <div class="list-item__subtitle">{{ employee.email }}</div>
           </div>
 
           <div class="list-item__aside list-item__aside--right">
-            <div class="list-item__date">{{ employee.shift }}</div>
+            <div class="list-item__date">{{ employee.role }}</div>
           </div>
         </div>
       </div>
 
-      <ng-container *ngIf="currentUser.isAdmin">
-        <button class="button button--secondary button--full button--icon" (click)="openAdminModal()">
+      <ng-container *ngIf="currentUser?.roles?.includes('personnel')">
+        <a class="button button--secondary button--full button--icon" routerLink="/staff/admin">
           <span>🛡️</span>
           Gérer le personnel
-        </button>
+        </a>
       </ng-container>
 
-      <ng-container *ngIf="!currentUser.isAdmin">
+      <ng-container *ngIf="!currentUser?.roles?.includes('personnel')">
         <div class="panel__notice">
           <p class="panel__notice-text">
             Gestion du personnel réservée aux administrateurs
@@ -131,32 +131,4 @@
     </div>
   </div>
 
-  <!-- Actions rapides -->
-  <div class="panel">
-    <h2 class="panel__title">Actions rapides</h2>
-
-    <div class="quick-actions">
-      <button class="quick-actions__button" (click)="openRoomsModal()">
-        <span>🛏️</span>
-        Gérer les chambres
-      </button>
-
-      <button class="quick-actions__button" (click)="openReservationsModal()">
-        <span>📅</span>
-        Nouvelle réservation
-      </button>
-
-      <button *ngIf="currentUser.isAdmin" class="quick-actions__button" (click)="openAdminModal()">
-        <span>🛡️</span>
-        Administration
-      </button>
-    </div>
-  </div>
-
-  <app-data-table-modal
-    *ngIf="isModalOpen"
-    [config]="modalConfig"
-    (close)="closeModal()"
-    (actionEvent)="onModalAction($event)"
-  ></app-data-table-modal>
 </div>

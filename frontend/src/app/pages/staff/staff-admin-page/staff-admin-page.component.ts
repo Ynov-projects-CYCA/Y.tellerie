@@ -1,49 +1,80 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DataTableModalComponent, TableConfig, TableColumn, TableAction } from '../../../shared/components/data-table-modal/data-table-modal.component';
-import { currentUser, Employee, EmployeeStatus, mockEmployees } from '../../../data/mockData';
+import { UsersApiService, User, UserRole, UserStatus } from '../../../core/api';
+import { AuthSessionService } from '@core';
+import {
+  GenericDataTableComponent,
+  GenericTableAction,
+  GenericTableColumn
+} from '../../../shared/components/generic-data-table/generic-data-table.component';
 
 @Component({
   selector: 'app-staff-admin-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, DataTableModalComponent],
+  imports: [CommonModule, FormsModule, GenericDataTableComponent],
   templateUrl: './staff-admin-page.component.html',
   styleUrls: ['./staff-admin-page.component.scss']
 })
-export class StaffAdminPageComponent {
-  currentUser = currentUser;
-  employees: Employee[] = [...mockEmployees];
+export class StaffAdminPageComponent implements OnInit {
+  private usersApi = inject(UsersApiService);
+  private authSession = inject(AuthSessionService);
+  readonly UserRole = UserRole;
+  readonly UserStatus = UserStatus;
+  
+  currentUser = this.authSession.currentUser();
+  employees: User[] = [];
   searchTerm = '';
-  isModalOpen = false;
-  modalConfig!: TableConfig;
+  isLoading = false;
 
   isAddDialogOpen = false;
   isEditDialogOpen = false;
-  selectedEmployee: Employee | null = null;
+  selectedEmployee: User | null = null;
 
   employeeFormData: {
-    name: string;
-    role: string;
-    shift: string;
-    status: EmployeeStatus;
+    firstname: string;
+    lastname: string;
+    email: string;
+    role: UserRole;
+    status: UserStatus;
   } = this.getInitialForm();
 
-  get filteredEmployees(): Employee[] {
+  get hasStaffAccess(): boolean {
+    return this.currentUser?.roles.includes('personnel') ?? false;
+  }
+
+  ngOnInit(): void {
+    this.loadEmployees();
+  }
+
+  loadEmployees(): void {
+    this.isLoading = true;
+    this.usersApi.findAll().subscribe({
+      next: (users: User[]) => {
+        this.employees = users.filter(u => u.role !== 'USER');
+        this.isLoading = false;
+      },
+      error: (err: any) => {
+        console.error('Erreur lors du chargement des employés:', err);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  get filteredEmployees(): User[] {
     const value = this.searchTerm.toLowerCase();
     return this.employees.filter(emp =>
-      emp.name.toLowerCase().includes(value) ||
-      emp.role.toLowerCase().includes(value) ||
-      emp.shift.toLowerCase().includes(value)
+      `${emp.firstname} ${emp.lastname}`.toLowerCase().includes(value) ||
+      emp.email.toLowerCase().includes(value)
     );
   }
 
   get activeCount(): number {
-    return this.employees.filter(e => e.status === 'active').length;
+    return this.employees.filter(e => e.status === UserStatus.ACTIVE).length;
   }
 
   get inactiveCount(): number {
-    return this.employees.filter(e => e.status === 'inactive').length;
+    return this.employees.filter(e => e.status === UserStatus.INACTIVE).length;
   }
 
   openAddDialog(): void {
@@ -56,12 +87,13 @@ export class StaffAdminPageComponent {
     this.employeeFormData = this.getInitialForm();
   }
 
-  openEditDialog(employee: Employee): void {
+  openEditDialog(employee: User): void {
     this.selectedEmployee = employee;
     this.employeeFormData = {
-      name: employee.name,
+      firstname: employee.firstname,
+      lastname: employee.lastname,
+      email: employee.email,
       role: employee.role,
-      shift: employee.shift,
       status: employee.status
     };
     this.isEditDialogOpen = true;
@@ -74,133 +106,103 @@ export class StaffAdminPageComponent {
   }
 
   addEmployee(): void {
-    const newId = Math.max(...this.employees.map(e => e.id), 0) + 1;
-
-    this.employees = [
-      ...this.employees,
-      {
-        id: newId,
-        ...this.employeeFormData
-      }
-    ];
-
-    this.closeAddDialog();
+    this.usersApi.create(this.employeeFormData).subscribe({
+      next: () => {
+        this.loadEmployees();
+        this.closeAddDialog();
+      },
+      error: (err: any) => console.error('Erreur lors de l\'ajout:', err)
+    });
   }
 
   editEmployee(): void {
     if (!this.selectedEmployee) return;
 
-    this.employees = this.employees.map(emp =>
-      emp.id === this.selectedEmployee?.id
-        ? { ...emp, ...this.employeeFormData }
-        : emp
-    );
-
-    this.closeEditDialog();
+    this.usersApi.update(this.selectedEmployee.id, this.employeeFormData).subscribe({
+      next: () => {
+        this.loadEmployees();
+        this.closeEditDialog();
+      },
+      error: (err: any) => console.error('Erreur lors de la modification:', err)
+    });
   }
 
-  deleteEmployee(id: number): void {
+  deleteEmployee(id: string): void {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer cet employé ?")) {
-      this.employees = this.employees.filter(emp => emp.id !== id);
+      this.usersApi.delete(id).subscribe({
+        next: () => this.loadEmployees(),
+        error: (err: any) => console.error('Erreur lors de la suppression:', err)
+      });
     }
   }
 
-  toggleEmployeeStatus(id: number): void {
-    this.employees = this.employees.map(emp =>
-      emp.id === id
-        ? { ...emp, status: emp.status === 'active' ? 'inactive' : 'active' }
-        : emp
-    );
-  }
-
-  initializeModalConfig() {
-    const columns: TableColumn[] = [
-      { key: 'id', label: 'ID', width: '80px', sortable: true },
-      { key: 'name', label: 'Nom', sortable: true },
-      { key: 'role', label: 'Rôle', sortable: true },
-      { key: 'shift', label: 'Shift', sortable: true },
-      { key: 'status', label: 'Statut', type: 'status', sortable: true }
-    ];
-
-    const actions: TableAction[] = [
-      {
-        label: 'Activer',
-        action: 'activate',
-        color: 'success',
-        condition: item => item.status === 'inactive'
-      },
-      {
-        label: 'Désactiver',
-        action: 'deactivate',
-        color: 'secondary',
-        condition: item => item.status === 'active'
-      },
-      {
-        label: 'Modifier',
-        action: 'edit',
-        color: 'primary'
-      },
-      {
-        label: 'Supprimer',
-        action: 'delete',
-        color: 'danger'
-      }
-    ];
-
-    this.modalConfig = {
-      title: 'Tableau du personnel',
-      subtitle: 'Gère le personnel via cette modal',
-      columns,
-      actions,
-      data: this.filteredEmployees,
-      emptyMessage: 'Aucun employé trouvé'
-    };
-  }
-
-  openEmployeesModal(): void {
-    this.initializeModalConfig();
-    this.isModalOpen = true;
-  }
-
-  closeModal(): void {
-    this.isModalOpen = false;
-  }
-
-  onActionClick(event: { action: string; item: any }): void {
-    const { action, item } = event;
-
-    switch (action) {
-      case 'activate':
-        this.toggleEmployeeStatus(item.id);
-        break;
-      case 'deactivate':
-        this.toggleEmployeeStatus(item.id);
-        break;
-      case 'edit':
-        this.openEditDialog(item);
-        break;
-      case 'delete':
-        this.deleteEmployee(item.id);
-        break;
+  toggleEmployeeStatus(id: string): void {
+    const employee = this.employees.find(e => e.id === id);
+    if (employee) {
+      const newStatus = employee.status === UserStatus.ACTIVE ? UserStatus.INACTIVE : UserStatus.ACTIVE;
+      this.usersApi.update(id, { ...employee, status: newStatus }).subscribe({
+        next: () => this.loadEmployees(),
+        error: (err: any) => console.error('Erreur:', err)
+      });
     }
-
-    this.initializeModalConfig();
   }
 
-  getStatusLabel(status: EmployeeStatus): string {
-    return status === 'active' ? 'Actif' : 'Inactif';
+  getStatusLabel(status: UserStatus): string {
+    return status === UserStatus.ACTIVE ? 'Actif' : 'Inactif';
   }
 
-  getStatusClass(status: EmployeeStatus): string {
-    return status === 'active' ? 'badge badge--success' : 'badge badge--danger';
+  getStatusClass(status: UserStatus): string {
+    return status === UserStatus.ACTIVE ? 'badge badge--success' : 'badge badge--danger';
   }
 
   private getInitialForm() {
     return {
-      name: '',
-      role: '',
-      shift: '',
-      status: 'active' as EmployeeStatus
+      firstname: '',
+      lastname: '',
+      email: '',
+      role: UserRole.STAFF,
+      status: UserStatus.ACTIVE
     };
+  }
+
+  employeeColumns: GenericTableColumn<User>[] = [
+    { key: 'id', label: 'ID', type: 'number' },
+    { key: 'firstname', label: 'Prénom' },
+    { key: 'lastname', label: 'Nom' },
+    { key: 'email', label: 'Email' },
+    { key: 'role', label: 'Rôle' },
+    { key: 'status', label: 'Statut', type: 'status' }
+  ];
+
+  employeeActions: GenericTableAction<User>[] = [
+    {
+      label: 'Modifier',
+      action: 'edit',
+      color: 'secondary'
+    },
+    {
+      label: 'Activer/Désactiver',
+      action: 'toggle',
+      color: 'secondary'
+    },
+    {
+      label: 'Supprimer',
+      action: 'delete',
+      color: 'danger'
+    }
+  ];
+
+  onTableAction(event: { action: string; row: User }): void {
+    if (event.action === 'edit') {
+      this.openEditDialog(event.row);
+    }
+
+    if (event.action === 'toggle') {
+      this.toggleEmployeeStatus(event.row.id);
+    }
+
+    if (event.action === 'delete') {
+      this.deleteEmployee(event.row.id);
+    }
   }
 }

@@ -9,9 +9,9 @@
       <label class="staff-page__filter-label" for="statusFilter">Filtrer par statut</label>
       <select id="statusFilter" class="select-field" [(ngModel)]="filterStatus">
         <option value="all">Toutes</option>
-        <option value="confirmed">Confirmées</option>
-        <option value="pending">En attente</option>
-        <option value="completed">Terminées</option>
+        <option value="CONFIRMED">Confirmées</option>
+        <option value="PENDING_PAYMENT">En attente</option>
+        <option value="CANCELED">Annulées</option>
       </select>
     </div>
   </div>
@@ -38,18 +38,129 @@
     </div>
   </div>
 
-  <div class="card card--toolbar">
-    <div class="card__header">
-      <h2 class="card__title">Liste des réservations ({{ filteredReservations.length }})</h2>
-      <button class="button button--primary" (click)="openReservationsModal()">Ouvrir le tableau</button>
-    </div>
-    <p class="card__text">Le tableau complet des réservations s’ouvre dans une modal.</p>
-  </div>
+  <div class="card">
 
-  <app-data-table-modal
-    *ngIf="isModalOpen"
-    [config]="modalConfig"
-    (close)="closeModal()"
-    (actionEvent)="onActionClick($event)"
-  ></app-data-table-modal>
+    <app-generic-data-table
+        title="Liste des réservations"
+        subtitle="Recherche globale, tri et filtre par champ"
+        addButtonLabel="Ajouter une réservation"
+        [data]="filteredReservations"
+        [columns]="reservationColumns"
+        [actions]="reservationActions"
+        emptyMessage="Aucune réservation trouvée."
+        (addClick)="openAddDialog()"
+        (actionClick)="onTableAction($event)"
+      ></app-generic-data-table>
+    </div>
+
+  <div class="modal-backdrop" *ngIf="isAddDialogOpen"></div>
+
+  <div class="modal" *ngIf="isAddDialogOpen">
+    <div class="modal__content">
+      <div class="modal__header">
+        <h2 class="modal__title">Ajouter une réservation</h2>
+        <p class="modal__subtitle">Créez une réservation pour une chambre existante</p>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-field">
+          <label class="form-label" for="reservation-room">Chambre</label>
+          <select
+            id="reservation-room"
+            class="select-field"
+            name="roomId"
+            [(ngModel)]="newReservation.roomId"
+          >
+            <option value="">Sélectionner une chambre</option>
+            <option *ngFor="let room of rooms" [ngValue]="room.id">
+              Chambre {{ room.roomNumber }} - {{ room.type }} - {{ room.price }}{{ room.currency }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="guest-firstname">Prénom</label>
+          <input
+            id="guest-firstname"
+            class="input-field"
+            name="guestFirstName"
+            [(ngModel)]="newReservation.guestFirstName"
+            required
+          />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="guest-lastname">Nom</label>
+          <input
+            id="guest-lastname"
+            class="input-field"
+            name="guestLastName"
+            [(ngModel)]="newReservation.guestLastName"
+            required
+          />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="guest-email">Email</label>
+          <input
+            id="guest-email"
+            class="input-field"
+            type="email"
+            name="guestEmail"
+            [(ngModel)]="newReservation.guestEmail"
+            required
+          />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="check-in-date">Arrivée</label>
+          <input
+            id="check-in-date"
+            class="input-field"
+            type="date"
+            name="checkInDate"
+            [(ngModel)]="newReservation.checkInDate"
+            required
+          />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="check-out-date">Départ</label>
+          <input
+            id="check-out-date"
+            class="input-field"
+            type="date"
+            name="checkOutDate"
+            [(ngModel)]="newReservation.checkOutDate"
+            required
+          />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="special-requests">Demandes spéciales</label>
+          <textarea
+            id="special-requests"
+            class="input-field"
+            name="specialRequests"
+            rows="3"
+            [(ngModel)]="newReservation.specialRequests"
+          ></textarea>
+        </div>
+      </div>
+
+      <p class="form-error" *ngIf="addReservationError">{{ addReservationError }}</p>
+
+      <div class="modal__footer">
+        <button class="button button--secondary" type="button" (click)="closeAddDialog()">Annuler</button>
+        <button
+          class="button button--primary"
+          type="button"
+          [disabled]="isSaving"
+          (click)="addReservation()"
+        >
+          {{ isSaving ? 'Ajout...' : 'Ajouter' }}
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

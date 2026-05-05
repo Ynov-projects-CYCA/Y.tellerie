@@ -1,0 +1,112 @@
+<div class="data-card">
+  <div class="data-card__header">
+    <div>
+      <h2 class="data-card__title">{{ title }}</h2>
+      <p class="data-card__subtitle" *ngIf="subtitle">{{ subtitle }}</p>
+    </div>
+
+    <div class="data-card__header-actions">
+      <span class="data-card__count">
+        {{ displayedData.length }} / {{ data.length }}
+      </span>
+
+      <button
+        *ngIf="addButtonLabel"
+        class="button button--primary"
+        type="button"
+        (click)="emitAdd()"
+      >
+        {{ addButtonLabel }}
+      </button>
+    </div>
+  </div>
+
+  <div class="data-toolbar">
+    <input
+      class="data-toolbar__input"
+      [(ngModel)]="globalSearch"
+      placeholder="Recherche globale..."
+    />
+
+    <select class="data-toolbar__select" [(ngModel)]="fieldKey">
+      <option value="">Filtrer par champ</option>
+      <option *ngFor="let column of searchableColumns" [value]="column.key">
+        {{ column.label }}
+      </option>
+    </select>
+
+    <input
+      class="data-toolbar__input"
+      [(ngModel)]="fieldSearch"
+      [disabled]="!fieldKey"
+      placeholder="Valeur du champ..."
+    />
+
+    <button class="button button--secondary" type="button" (click)="clearFilters()">
+      Réinitialiser
+    </button>
+  </div>
+
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th *ngFor="let column of columns">
+            <div class="table-head">
+              <span>{{ column.label }}</span>
+
+              <div class="sort-buttons" *ngIf="column.sortable !== false">
+                <button type="button" (click)="setSort(column, 'asc')">↑</button>
+                <button type="button" (click)="setSort(column, 'desc')">↓</button>
+              </div>
+            </div>
+          </th>
+
+          <th *ngIf="actions.length > 0">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let row of displayedData">
+          <td *ngFor="let column of columns">
+            <span
+              *ngIf="column.type === 'status'; else normalValue"
+              [class]="getStatusClass(row[column.key])"
+            >
+              {{ formatValue(row, column) }}
+            </span>
+
+            <ng-template #normalValue>
+              {{ formatValue(row, column) }}
+            </ng-template>
+          </td>
+
+          <td class="actions-cell" *ngIf="actions.length > 0">
+            <ng-container *ngFor="let action of actions">
+              <button
+                *ngIf="!action.condition || action.condition(row)"
+                class="button button--small"
+                [ngClass]="{
+                  'button--primary': action.color === 'primary',
+                  'button--secondary': action.color === 'secondary',
+                  'button--success': action.color === 'success',
+                  'button--danger': action.color === 'danger'
+                }"
+                type="button"
+                (click)="emitAction(action.action, row)"
+              >
+                {{ action.label }}
+              </button>
+            </ng-container>
+          </td>
+        </tr>
+
+        <tr *ngIf="displayedData.length === 0">
+          <td class="empty-row" [attr.colspan]="columns.length + (actions.length ? 1 : 0)">
+            {{ emptyMessage }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -5,5 +5,4 @@ export * from './customer';
 export * from './home/home-page.component';
 export * from './not-found/not-found-page.component';
 export * from './profile/profile-page.component';
-export * from './staff/staff-dashbord-page.component';
 export * from './templates';
