@@ -20,6 +20,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: ${NODE_ENV:-production}
+      APP_ENV: ${APP_ENV:-production}
       PORT: 3000
 
       POSTGRES_HOST: postgres
@@ -59,13 +60,13 @@ services:
     image: postgres:15-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-hotel_db}
-      POSTGRES_USER: ${POSTGRES_USER:-hotel_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hotel_pass}
+      POSTGRES_DB: hotel_db
+      POSTGRES_USER: hotel_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-hotel_pass}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-hotel_user} -d ${POSTGRES_DB:-hotel_db}']
+      test: ['CMD-SHELL', 'pg_isready -U hotel_user -d hotel_db']
       interval: 10s
       timeout: 5s
       retries: 5
