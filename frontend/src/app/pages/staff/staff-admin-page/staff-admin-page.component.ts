@@ -182,11 +182,15 @@ export class StaffAdminPageComponent implements OnInit {
     }
   }
 
-  toggleEmployeeStatus(id: string): void {
-    const employee = this.employees().find(e => e.id === id);
+  toggleEmployeeStatus(employee: User): void {
     if (employee) {
-      this.usersApi.update(id, { isActive: !employee.isActive }).subscribe({
-        next: () => this.loadEmployees(),
+      this.usersApi.update(employee.id, { isActive: !employee.isActive }).subscribe({
+        next: (updatedEmployee) => {
+          this.employees.set(this.employees().map(current =>
+            current.id === updatedEmployee.id ? updatedEmployee : current,
+          ));
+          this.loadEmployees();
+        },
         error: (err: any) => console.error('Erreur:', err)
       });
     }
@@ -230,18 +234,23 @@ export class StaffAdminPageComponent implements OnInit {
     { key: 'lastname', label: 'Nom' },
     { key: 'email', label: 'Email' },
     { key: 'roles', label: 'Rôles' },
-    { key: 'isActive', label: 'Statut', type: 'status' }
+    {
+      key: 'isActive',
+      label: 'Statut',
+      type: 'toggle',
+      toggle: {
+        action: 'toggle-status',
+        checkedValue: false,
+        checkedLabel: 'Inactif',
+        uncheckedLabel: 'Actif'
+      }
+    }
   ];
 
   employeeActions: GenericTableAction<User>[] = [
     {
       label: 'Modifier',
       action: 'edit',
-      color: 'secondary'
-    },
-    {
-      label: 'Activer/Désactiver',
-      action: 'toggle',
       color: 'secondary'
     },
     {
@@ -256,8 +265,8 @@ export class StaffAdminPageComponent implements OnInit {
       this.openEditDialog(event.row);
     }
 
-    if (event.action === 'toggle') {
-      this.toggleEmployeeStatus(event.row.id);
+    if (event.action === 'toggle-status') {
+      this.toggleEmployeeStatus(event.row);
     }
 
     if (event.action === 'delete') {

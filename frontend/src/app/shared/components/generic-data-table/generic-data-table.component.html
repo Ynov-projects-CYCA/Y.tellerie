@@ -92,7 +92,9 @@
             </span>
 
             <ng-template #normalValue>
-              {{ formatValue(row, column) }}
+              <span class="cell-text" [title]="formatValue(row, column)">
+                {{ formatValue(row, column) }}
+              </span>
             </ng-template>
             </ng-template>
           </td>

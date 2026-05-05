@@ -28,6 +28,10 @@ export class BookingsApiService {
     return this.apiClient.post<Booking, BookingSummaryRequest>('/bookings', payload);
   }
 
+  update(id: string, payload: BookingSummaryRequest): Observable<Booking> {
+    return this.apiClient.put<Booking, BookingSummaryRequest>(`/bookings/${id}`, payload);
+  }
+
   findOne(id: string): Observable<Booking> {
     return this.apiClient.get<Booking>(`/bookings/${id}`);
   }

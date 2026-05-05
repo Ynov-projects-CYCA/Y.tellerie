@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { BookingsApiService, Booking, BookingStatus, BookingSummaryRequest, Room, RoomsApiService, RoomStatus } from '../../../core/api';
+import { BookingsApiService, Booking, BookingStatus, BookingSummaryRequest, Room, RoomsApiService, RoomStatus, StripeApiService } from '../../../core/api';
 import {
   GenericDataTableComponent,
   GenericTableAction,
@@ -18,6 +18,7 @@ import {
 export class StaffReservationsPageComponent implements OnInit {
   private bookingsApi = inject(BookingsApiService);
   private roomsApi = inject(RoomsApiService);
+  private stripeApi = inject(StripeApiService);
   private changeDetectorRef = inject(ChangeDetectorRef);
   
   reservations: Booking[] = [];
@@ -28,6 +29,8 @@ export class StaffReservationsPageComponent implements OnInit {
   isAddDialogOpen = false;
   isSaving = false;
   addReservationError = '';
+  editingReservationId: string | null = null;
+  editingReservationRoom: Room | null = null;
   newReservation = this.getInitialReservationForm();
 
   ngOnInit(): void {
@@ -109,7 +112,7 @@ export class StaffReservationsPageComponent implements OnInit {
   }
 
   reservationColumns: GenericTableColumn<Booking>[] = [
-    { key: 'id', label: 'ID', type: 'number' },
+    { key: 'id', label: 'ID', type: 'shortId' },
     { key: 'guestFirstName', label: 'Prénom' },
     { key: 'guestLastName', label: 'Nom' },
     { key: 'guestEmail', label: 'Email' },
@@ -120,10 +123,10 @@ export class StaffReservationsPageComponent implements OnInit {
 
   reservationActions: GenericTableAction<Booking>[] = [
     {
-      label: 'Confirmer',
-      action: 'confirm',
-      color: 'success',
-      condition: row => row.status === BookingStatus.PENDING_PAYMENT
+      label: 'Modifier',
+      action: 'edit',
+      color: 'secondary',
+      condition: row => row.status !== BookingStatus.CANCELED && row.status !== BookingStatus.REFUNDED
     },
     {
       label: 'Annuler',
@@ -134,8 +137,8 @@ export class StaffReservationsPageComponent implements OnInit {
   ];
 
   onTableAction(event: { action: string; row: Booking }): void {
-    if (event.action === 'confirm') {
-      this.updateStatus(event.row.id, BookingStatus.CONFIRMED);
+    if (event.action === 'edit') {
+      this.openEditDialog(event.row);
     }
 
     if (event.action === 'cancel') {
@@ -145,9 +148,30 @@ export class StaffReservationsPageComponent implements OnInit {
 
   openAddDialog(): void {
     this.addReservationError = '';
+    this.editingReservationId = null;
+    this.editingReservationRoom = null;
+    this.newReservation = this.getInitialReservationForm();
     this.availableRooms = [];
     this.isAddDialogOpen = true;
     this.loadSelectableRooms();
+  }
+
+  openEditDialog(booking: Booking): void {
+    this.addReservationError = '';
+    this.editingReservationId = booking.id;
+    this.editingReservationRoom = booking.room;
+    this.newReservation = {
+      roomId: booking.room.id,
+      guestFirstName: booking.guestFirstName,
+      guestLastName: booking.guestLastName,
+      guestEmail: booking.guestEmail,
+      checkInDate: this.toDateInputValue(booking.checkInDate),
+      checkOutDate: this.toDateInputValue(booking.checkOutDate),
+      specialRequests: booking.specialRequests ?? ''
+    };
+    this.availableRooms = [booking.room];
+    this.isAddDialogOpen = true;
+    this.onReservationDatesChange();
   }
 
   closeAddDialog(): void {
@@ -155,13 +179,19 @@ export class StaffReservationsPageComponent implements OnInit {
     this.isSaving = false;
     this.isLoadingAvailableRooms = false;
     this.addReservationError = '';
+    this.editingReservationId = null;
+    this.editingReservationRoom = null;
     this.availableRooms = [];
     this.newReservation = this.getInitialReservationForm();
     this.changeDetectorRef.detectChanges();
   }
 
   onReservationDatesChange(): void {
-    this.newReservation.roomId = '';
+    const currentRoom = this.editingReservationRoom;
+    const currentRoomId = currentRoom?.id;
+    if (!currentRoomId) {
+      this.newReservation.roomId = '';
+    }
     this.availableRooms = [];
     this.addReservationError = '';
 
@@ -176,7 +206,13 @@ export class StaffReservationsPageComponent implements OnInit {
       checkOutDate: this.newReservation.checkOutDate,
     }).subscribe({
       next: (results) => {
-        this.availableRooms = results.map(result => result.room);
+        const rooms = results.map(result => result.room);
+        this.availableRooms = currentRoom && !rooms.some(room => room.id === currentRoom.id)
+          ? [currentRoom, ...rooms]
+          : rooms;
+        if (currentRoomId) {
+          this.newReservation.roomId = currentRoomId;
+        }
         this.isLoadingAvailableRooms = false;
       },
       error: (err: any) => {
@@ -222,12 +258,48 @@ export class StaffReservationsPageComponent implements OnInit {
     }
 
     this.isSaving = true;
+    if (this.editingReservationId) {
+      this.bookingsApi.update(this.editingReservationId, payload).subscribe({
+        next: (booking: Booking) => {
+          this.reservations = this.reservations.map(current =>
+            current.id === booking.id ? booking : current,
+          );
+          this.closeAddDialog();
+          this.loadReservations();
+        },
+        error: (err: any) => {
+          console.error('Erreur lors de la modification de la réservation:', err);
+          this.addReservationError = err?.message ?? 'Impossible de modifier la réservation pour le moment.';
+          this.isSaving = false;
+        }
+      });
+      return;
+    }
+
     this.bookingsApi.confirm(payload).subscribe({
       next: (booking: Booking) => {
-        this.reservations = [...this.reservations, booking];
-        this.closeAddDialog();
-        this.loadReservations();
-        this.changeDetectorRef.detectChanges();
+        this.stripeApi.createCheckoutSession({
+          bookingId: booking.id,
+          description: `Réservation chambre ${booking.room.roomNumber} - ${payload.checkInDate} au ${payload.checkOutDate}`,
+        }).subscribe({
+          next: () => {
+            this.reservations = [...this.reservations, booking];
+            this.closeAddDialog();
+            this.loadReservations();
+            this.changeDetectorRef.detectChanges();
+          },
+          error: (err: any) => {
+            console.error('Erreur lors de l\'envoi du lien de paiement:', err);
+            this.bookingsApi.cancel(booking.id).subscribe({
+              next: () => this.loadReservations(),
+              error: () => this.loadReservations(),
+            });
+            this.addReservationError =
+              err?.message ??
+              'Le lien de paiement n\'a pas pu être créé. La réservation a été annulée pour libérer la chambre.';
+            this.isSaving = false;
+          }
+        });
       },
       error: (err: any) => {
         console.error('Erreur lors de l\'ajout de la réservation:', err);
@@ -255,6 +327,14 @@ export class StaffReservationsPageComponent implements OnInit {
       this.newReservation.checkOutDate &&
       this.newReservation.checkOutDate > this.newReservation.checkInDate
     );
+  }
+
+  get isEditingReservation(): boolean {
+    return this.editingReservationId !== null;
+  }
+
+  private toDateInputValue(value: string): string {
+    return value.slice(0, 10);
   }
 
   private getInitialReservationForm(): BookingSummaryRequest {

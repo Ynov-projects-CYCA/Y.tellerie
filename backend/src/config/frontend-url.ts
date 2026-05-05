@@ -1,13 +1,19 @@
 import { ConfigService } from '@nestjs/config';
 
+const LOCAL_FRONTEND_BASE_URL = 'http://localhost:4200';
+
 export function getFrontendBaseUrl(configService?: ConfigService): string {
   const configuredUrl = getOptionalFrontendBaseUrl(configService);
 
-  if (!configuredUrl) {
-    throw new Error('Missing FRONTEND_BASE_URL or FRONTEND_URL');
+  if (configuredUrl) {
+    return configuredUrl;
   }
 
-  return configuredUrl;
+  if ((process.env.NODE_ENV ?? 'development') !== 'production') {
+    return LOCAL_FRONTEND_BASE_URL;
+  }
+
+  throw new Error('Missing FRONTEND_BASE_URL or FRONTEND_URL');
 }
 
 export function getOptionalFrontendBaseUrl(configService?: ConfigService): string | undefined {

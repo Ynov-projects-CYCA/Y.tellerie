@@ -23,6 +23,7 @@ import { StaffReservationsPageComponent } from './pages/staff/staff-reservations
 import { StaffRoomsPageComponent } from './pages/staff/staff-rooms-page/staff-rooms-page.component';
 import { StaffAdminPageComponent } from './pages/staff/staff-admin-page/staff-admin-page.component';
 import { StaffDashboardPageComponent } from './pages/staff/staff-dashboard-page/staff-dashboard-page.component';
+import { StaffMailsPageComponent } from './pages/staff/staff-mails-page/staff-mails-page.component';
 
 export const routes: Routes = [
   {
@@ -59,6 +60,11 @@ export const routes: Routes = [
             path: 'rooms',
             title: 'Chambres',
             component: StaffRoomsPageComponent,
+          },
+          {
+            path: 'emails',
+            title: 'Emails',
+            component: StaffMailsPageComponent,
           },
           {
             path: 'admin',

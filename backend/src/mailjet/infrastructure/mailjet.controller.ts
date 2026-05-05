@@ -2,6 +2,11 @@ import { Body, Controller, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SendMailDto } from '@/mailjet/application/dtos/send-mail.dto';
 import { SendTransactionalEmailUseCase } from '@/mailjet/application/use-cases/send-transactional-email.use-case';
+import { JwtAuthGuard } from '@/auth/infrastructure/guards/jwt-auth.guard';
+import { RolesGuard } from '@/auth/infrastructure/guards/roles.guard';
+import { Roles } from '@/auth/infrastructure/decorators/roles.decorator';
+import { Role } from '@/shared/model/role.enum';
+import { UseGuards } from '@nestjs/common';
 
 @ApiTags('Mailjet')
 @Controller('mailjet')
@@ -11,6 +16,8 @@ export class MailjetController {
   ) {}
 
   @Post('send')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.PERSONNEL)
   @ApiOperation({ summary: 'Envoyer un email transactionnel via Mailjet' })
   @ApiBody({
     schema: {

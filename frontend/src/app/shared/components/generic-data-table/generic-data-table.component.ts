@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-export type TableColumnType = 'text' | 'number' | 'date' | 'currency' | 'status' | 'toggle';
+export type TableColumnType = 'text' | 'number' | 'date' | 'currency' | 'status' | 'toggle' | 'shortId';
 
 export interface GenericTableColumn<T = any> {
   key: keyof T & string;
@@ -138,8 +138,16 @@ export class GenericDataTableComponent<T extends Record<string, any>> {
       return `${value}€`;
     }
 
+    if (column.type === 'shortId') {
+      return String(value).slice(0, 8);
+    }
+
     if (column.type === 'status' && typeof value === 'boolean') {
       return value ? 'Actif' : 'Inactif';
+    }
+
+    if (column.type === 'status') {
+      return this.formatStatus(value);
     }
 
     if (Array.isArray(value)) {
@@ -184,6 +192,23 @@ export class GenericDataTableComponent<T extends Record<string, any>> {
     return this.isToggleChecked(row, column)
       ? column.toggle.checkedLabel
       : column.toggle.uncheckedLabel;
+  }
+
+  private formatStatus(value: unknown): string {
+    const labels: Record<string, string> = {
+      AVAILABLE: 'Disponible',
+      OCCUPIED: 'Occupée',
+      DIRTY: 'À nettoyer',
+      MAINTENANCE: 'Maintenance',
+      PENDING_PAYMENT: 'En attente',
+      CONFIRMED: 'Confirmée',
+      PAYMENT_FAILED: 'Échec paiement',
+      CANCELED: 'Annulée',
+      REFUND_REQUESTED: 'Remboursement',
+      REFUNDED: 'Remboursée',
+    };
+
+    return labels[String(value)] ?? String(value);
   }
 
   private normalize(value: unknown): string {

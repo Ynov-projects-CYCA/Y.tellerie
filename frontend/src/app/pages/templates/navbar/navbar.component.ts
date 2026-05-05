@@ -14,6 +14,7 @@ import {
   LucideBed,
   LucideHouse,
   LucideShield,
+  LucideMail,
 } from '@lucide/angular';
 import { AuthApiService, AuthSessionService } from '@core';
 import { ButtonComponent } from '@shared';
@@ -35,7 +36,8 @@ import { ButtonComponent } from '@shared';
     LucideCalendar,
     LucideBed,
     LucideHouse,
-    LucideShield
+    LucideShield,
+    LucideMail
   ],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss'],
