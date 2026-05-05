@@ -81,15 +81,15 @@ describe('AccountPanelComponent', () => {
 
     component['changePasswordForm'].setValue({
       oldPassword: 'oldPassword123',
-      newPassword: 'newPassword123',
-      confirmPassword: 'newPassword123',
+      newPassword: 'NewPassword1!',
+      confirmPassword: 'NewPassword1!',
     });
 
     component['submitPasswordChange']();
 
     expect(authApiService.changePassword).toHaveBeenCalledWith({
       oldPassword: 'oldPassword123',
-      newPassword: 'newPassword123',
+      newPassword: 'NewPassword1!',
     });
     expect(component['passwordSuccess']()).toContain('mot de passe');
   });
@@ -109,8 +109,8 @@ describe('AccountPanelComponent', () => {
 
     component['changePasswordForm'].setValue({
       oldPassword: 'wrong-password',
-      newPassword: 'newPassword123',
-      confirmPassword: 'newPassword123',
+      newPassword: 'NewPassword1!',
+      confirmPassword: 'NewPassword1!',
     });
 
     component['submitPasswordChange']();

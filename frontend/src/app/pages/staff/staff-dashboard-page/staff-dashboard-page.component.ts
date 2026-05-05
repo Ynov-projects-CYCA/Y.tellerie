@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { RoomsApiService, BookingsApiService, UsersApiService, Room, Booking, User, RoomStatus, BookingStatus, UserStatus } from '../../../core/api';
+import { RoomsApiService, BookingsApiService, UsersApiService, Room, Booking, User, RoomStatus, BookingStatus } from '../../../core/api';
 import { AuthSessionService } from '@core';
 
 @Component({
@@ -76,7 +76,9 @@ export class StaffDashboardPageComponent implements OnInit {
     // Charger les employés
     this.usersApi.findAll().subscribe({
       next: (users: User[]) => {
-        this.employees = users.filter(u => u.role !== 'USER');
+        this.employees = users.filter(
+          (u) => u.roles.includes('personnel') || u.roles.includes('admin'),
+        );
         loadCount++;
         if (loadCount === totalToLoad) {
           this.calculateStats();
@@ -102,7 +104,7 @@ export class StaffDashboardPageComponent implements OnInit {
   }
 
   getActiveEmployees() {
-    return this.employees.filter(e => e.status === UserStatus.ACTIVE).slice(0, 3);
+    return this.employees.filter((e) => e.isActive).slice(0, 3);
   }
 
   getPendingReservations() {

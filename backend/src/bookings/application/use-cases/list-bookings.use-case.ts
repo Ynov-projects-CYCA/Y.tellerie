@@ -14,7 +14,15 @@ export class ListBookingsUseCase {
 
   async execute(email: string): Promise<ListBookingsResult[]> {
     const bookings = await this.bookingRepository.findByGuestEmail(email);
-    
+    return this.withRooms(bookings);
+  }
+
+  async executeAll(): Promise<ListBookingsResult[]> {
+    const bookings = await this.bookingRepository.findAll();
+    return this.withRooms(bookings);
+  }
+
+  private async withRooms(bookings: Awaited<ReturnType<BookingRepositoryPort['findAll']>>): Promise<ListBookingsResult[]> {
     const results = await Promise.all(
       bookings.map(async (booking) => {
         const room = await this.roomRepository.findById(booking.getRoomId());

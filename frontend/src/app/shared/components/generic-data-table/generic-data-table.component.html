@@ -1,15 +1,16 @@
 <div class="data-card">
   <div class="data-card__header">
     <div>
-      <h2 class="data-card__title">{{ title }}</h2>
+      <div class="data-card__title-row">
+        <h2 class="data-card__title">{{ title }}</h2>
+        <span class="data-card__count">
+          {{ displayedData.length }} / {{ data.length }}
+        </span>
+      </div>
       <p class="data-card__subtitle" *ngIf="subtitle">{{ subtitle }}</p>
     </div>
 
     <div class="data-card__header-actions">
-      <span class="data-card__count">
-        {{ displayedData.length }} / {{ data.length }}
-      </span>
-
       <button
         *ngIf="addButtonLabel"
         class="button button--primary"
@@ -69,6 +70,20 @@
       <tbody>
         <tr *ngFor="let row of displayedData">
           <td *ngFor="let column of columns">
+            <button
+              *ngIf="column.type === 'toggle'; else nonToggleValue"
+              class="toggle-status"
+              [class.toggle-status--checked]="isToggleChecked(row, column)"
+              type="button"
+              (click)="emitToggle(column, row)"
+            >
+              <span class="toggle-status__track">
+                <span class="toggle-status__thumb"></span>
+              </span>
+              <span class="toggle-status__label">{{ getToggleLabel(row, column) }}</span>
+            </button>
+
+            <ng-template #nonToggleValue>
             <span
               *ngIf="column.type === 'status'; else normalValue"
               [class]="getStatusClass(row[column.key])"
@@ -78,6 +93,7 @@
 
             <ng-template #normalValue>
               {{ formatValue(row, column) }}
+            </ng-template>
             </ng-template>
           </td>
 

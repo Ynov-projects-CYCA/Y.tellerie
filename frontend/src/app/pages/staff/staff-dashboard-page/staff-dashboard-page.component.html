@@ -109,22 +109,22 @@
           </div>
 
           <div class="list-item__aside list-item__aside--right">
-            <div class="list-item__date">{{ employee.role }}</div>
+            <div class="list-item__date">{{ employee.roles.join(', ') }}</div>
           </div>
         </div>
       </div>
 
-      <ng-container *ngIf="currentUser?.roles?.includes('personnel')">
+      <ng-container *ngIf="currentUser?.roles?.includes('admin')">
         <a class="button button--secondary button--full button--icon" routerLink="/staff/admin">
           <span>🛡️</span>
-          Gérer le personnel
+          Gérer les utilisateurs
         </a>
       </ng-container>
 
-      <ng-container *ngIf="!currentUser?.roles?.includes('personnel')">
+      <ng-container *ngIf="!currentUser?.roles?.includes('admin')">
         <div class="panel__notice">
           <p class="panel__notice-text">
-            Gestion du personnel réservée aux administrateurs
+            Gestion des utilisateurs réservée aux administrateurs
           </p>
         </div>
       </ng-container>

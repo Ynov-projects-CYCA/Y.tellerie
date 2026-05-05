@@ -71,7 +71,10 @@ export class LoginUseCase {
       throw new UserCannotLoginError();
     }
 
-    if (command.requiredRole && !user.getProperties().roles.includes(command.requiredRole)) {
+    if (
+      command.requiredRole &&
+      !this.userHasRequiredRole(user.getProperties().roles, command.requiredRole)
+    ) {
       throw new UnauthorizedRoleError();
     }
 
@@ -85,5 +88,13 @@ export class LoginUseCase {
     await this.refreshTokenRepository.save(refreshToken);
 
     return { user, accessToken, refreshToken: refreshTokenValue };
+  }
+
+  private userHasRequiredRole(userRoles: Role[], requiredRole: Role): boolean {
+    if (userRoles.includes(requiredRole)) {
+      return true;
+    }
+
+    return requiredRole === Role.PERSONNEL && userRoles.includes(Role.ADMIN);
   }
 }

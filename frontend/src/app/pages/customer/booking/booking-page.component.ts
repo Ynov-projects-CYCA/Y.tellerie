@@ -196,13 +196,20 @@ export class BookingPageComponent implements OnInit {
             window.location.href = session.url;
           },
           error: () => {
+            this.bookingsApi.cancel(booking.id).subscribe({
+              error: () => undefined,
+            });
             this.bookingError.set('Réservation créée mais erreur lors de l\'initialisation du paiement.');
             this.isSubmitting.set(false);
           }
         });
       },
-      error: () => {
-        this.bookingError.set('Erreur lors de la confirmation de réservation.');
+      error: (error: unknown) => {
+        this.bookingError.set(
+          error instanceof Error
+            ? error.message
+            : 'Erreur lors de la confirmation de réservation.',
+        );
         this.isSubmitting.set(false);
       }
     });

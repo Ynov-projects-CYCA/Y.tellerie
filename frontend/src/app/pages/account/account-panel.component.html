@@ -71,7 +71,7 @@
           </label>
           @if (hasPasswordError('newPassword')) {
             <p class="feedback feedback--error">
-              Le nouveau mot de passe doit contenir au moins 8 caracteres.
+              {{ passwordPolicyMessage }}
             </p>
           }
 

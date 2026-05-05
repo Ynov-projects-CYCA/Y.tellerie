@@ -1,7 +1,7 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { BookingsApiService, Booking, BookingStatus, BookingSummaryRequest, Room, RoomsApiService } from '../../../core/api';
+import { BookingsApiService, Booking, BookingStatus, BookingSummaryRequest, Room, RoomsApiService, RoomStatus } from '../../../core/api';
 import {
   GenericDataTableComponent,
   GenericTableAction,
@@ -18,11 +18,13 @@ import {
 export class StaffReservationsPageComponent implements OnInit {
   private bookingsApi = inject(BookingsApiService);
   private roomsApi = inject(RoomsApiService);
+  private changeDetectorRef = inject(ChangeDetectorRef);
   
   reservations: Booking[] = [];
-  rooms: Room[] = [];
+  availableRooms: Room[] = [];
   filterStatus = 'all';
   isLoading = false;
+  isLoadingAvailableRooms = false;
   isAddDialogOpen = false;
   isSaving = false;
   addReservationError = '';
@@ -30,7 +32,6 @@ export class StaffReservationsPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadReservations();
-    this.loadRooms();
   }
 
   loadReservations(): void {
@@ -39,21 +40,12 @@ export class StaffReservationsPageComponent implements OnInit {
       next: (bookings: Booking[]) => {
         this.reservations = bookings;
         this.isLoading = false;
+        this.changeDetectorRef.detectChanges();
       },
       error: (err: any) => {
         console.error('Erreur lors du chargement des réservations:', err);
         this.isLoading = false;
-      }
-    });
-  }
-
-  loadRooms(): void {
-    this.roomsApi.findAll().subscribe({
-      next: (rooms: Room[]) => {
-        this.rooms = rooms;
-      },
-      error: (err: any) => {
-        console.error('Erreur lors du chargement des chambres:', err);
+        this.changeDetectorRef.detectChanges();
       }
     });
   }
@@ -153,18 +145,61 @@ export class StaffReservationsPageComponent implements OnInit {
 
   openAddDialog(): void {
     this.addReservationError = '';
+    this.availableRooms = [];
     this.isAddDialogOpen = true;
-
-    if (this.rooms.length === 0) {
-      this.loadRooms();
-    }
+    this.loadSelectableRooms();
   }
 
   closeAddDialog(): void {
     this.isAddDialogOpen = false;
     this.isSaving = false;
+    this.isLoadingAvailableRooms = false;
     this.addReservationError = '';
+    this.availableRooms = [];
     this.newReservation = this.getInitialReservationForm();
+    this.changeDetectorRef.detectChanges();
+  }
+
+  onReservationDatesChange(): void {
+    this.newReservation.roomId = '';
+    this.availableRooms = [];
+    this.addReservationError = '';
+
+    if (!this.canLoadAvailableRooms()) {
+      this.loadSelectableRooms();
+      return;
+    }
+
+    this.isLoadingAvailableRooms = true;
+    this.bookingsApi.searchAvailability({
+      checkInDate: this.newReservation.checkInDate,
+      checkOutDate: this.newReservation.checkOutDate,
+    }).subscribe({
+      next: (results) => {
+        this.availableRooms = results.map(result => result.room);
+        this.isLoadingAvailableRooms = false;
+      },
+      error: (err: any) => {
+        console.error('Erreur lors du chargement des chambres disponibles:', err);
+        this.addReservationError = err?.message ?? 'Impossible de charger les chambres disponibles.';
+        this.isLoadingAvailableRooms = false;
+      }
+    });
+  }
+
+  loadSelectableRooms(): void {
+    this.isLoadingAvailableRooms = true;
+    this.roomsApi.findAll().subscribe({
+      next: (rooms: Room[]) => {
+        this.availableRooms = rooms.filter(room => room.status === RoomStatus.AVAILABLE);
+        this.isLoadingAvailableRooms = false;
+      },
+      error: (err: any) => {
+        console.error('Erreur lors du chargement des chambres:', err);
+        this.addReservationError = err?.message ?? 'Impossible de charger les chambres.';
+        this.isLoadingAvailableRooms = false;
+      }
+    });
   }
 
   addReservation(): void {
@@ -192,6 +227,7 @@ export class StaffReservationsPageComponent implements OnInit {
         this.reservations = [...this.reservations, booking];
         this.closeAddDialog();
         this.loadReservations();
+        this.changeDetectorRef.detectChanges();
       },
       error: (err: any) => {
         console.error('Erreur lors de l\'ajout de la réservation:', err);
@@ -210,6 +246,14 @@ export class StaffReservationsPageComponent implements OnInit {
       payload.checkInDate &&
       payload.checkOutDate &&
       payload.checkOutDate > payload.checkInDate
+    );
+  }
+
+  private canLoadAvailableRooms(): boolean {
+    return Boolean(
+      this.newReservation.checkInDate &&
+      this.newReservation.checkOutDate &&
+      this.newReservation.checkOutDate > this.newReservation.checkInDate
     );
   }
 

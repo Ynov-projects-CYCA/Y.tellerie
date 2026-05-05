@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RoomsApiService, Room, RoomStatus, RoomType } from '../../../core/api';
@@ -7,6 +7,14 @@ import {
   GenericTableAction,
   GenericTableColumn
 } from '../../../shared/components/generic-data-table/generic-data-table.component';
+
+type RoomForm = {
+  roomNumber: string;
+  type: RoomType;
+  capacity: number;
+  price: number;
+  currency: string;
+};
 
 @Component({
   selector: 'app-staff-rooms-page',
@@ -17,14 +25,16 @@ import {
 })
 export class StaffRoomsPageComponent implements OnInit {
   private roomsApi = inject(RoomsApiService);
+  private changeDetectorRef = inject(ChangeDetectorRef);
   readonly RoomStatus = RoomStatus;
   readonly RoomType = RoomType;
   
-  rooms: Room[] = [];
+  rooms = signal<Room[]>([]);
   isAddDialogOpen = false;
-  isLoading = false;
+  isLoading = signal(false);
   isSaving = false;
   addRoomError = '';
+  editingRoomId: string | null = null;
 
   newRoom = this.getInitialRoomForm();
 
@@ -33,28 +43,49 @@ export class StaffRoomsPageComponent implements OnInit {
   }
 
   loadRooms(): void {
-    this.isLoading = true;
+    if (this.isLoading()) {
+      return;
+    }
+
+    this.isLoading.set(true);
     this.roomsApi.findAll().subscribe({
       next: (rooms: Room[]) => {
-        this.rooms = rooms;
-        this.isLoading = false;
+        this.rooms.set([...rooms]);
+        this.isLoading.set(false);
+        this.changeDetectorRef.detectChanges();
       },
       error: (err: any) => {
         console.error('Erreur lors du chargement des chambres:', err);
-        this.isLoading = false;
+        this.isLoading.set(false);
+        this.changeDetectorRef.detectChanges();
       }
     });
   }
 
   get availableCount(): number {
-    return this.rooms.filter(r => r.status === RoomStatus.AVAILABLE).length;
+    return this.rooms().filter(r => r.status === RoomStatus.AVAILABLE).length;
   }
 
   get occupiedCount(): number {
-    return this.rooms.filter(r => r.status === RoomStatus.OCCUPIED).length;
+    return this.rooms().filter(r => r.status === RoomStatus.OCCUPIED).length;
   }
 
   openAddDialog(): void {
+    this.editingRoomId = null;
+    this.newRoom = this.getInitialRoomForm();
+    this.addRoomError = '';
+    this.isAddDialogOpen = true;
+  }
+
+  openEditDialog(room: Room): void {
+    this.editingRoomId = room.id;
+    this.newRoom = {
+      roomNumber: room.roomNumber,
+      type: room.type,
+      capacity: room.capacity,
+      price: Number(room.price),
+      currency: room.currency
+    };
     this.addRoomError = '';
     this.isAddDialogOpen = true;
   }
@@ -63,10 +94,11 @@ export class StaffRoomsPageComponent implements OnInit {
     this.isAddDialogOpen = false;
     this.isSaving = false;
     this.addRoomError = '';
+    this.editingRoomId = null;
     this.newRoom = this.getInitialRoomForm();
   }
 
-  addRoom(): void {
+  saveRoom(): void {
     this.addRoomError = '';
 
     const roomPayload = {
@@ -83,9 +115,25 @@ export class StaffRoomsPageComponent implements OnInit {
     }
 
     this.isSaving = true;
+    if (this.editingRoomId) {
+      this.roomsApi.update(this.editingRoomId, roomPayload).subscribe({
+        next: (room: Room) => {
+          this.rooms.set(this.rooms().map(current => current.id === room.id ? room : current));
+          this.closeAddDialog();
+          this.loadRooms();
+        },
+        error: (err: any) => {
+          console.error('Erreur lors de la modification de la chambre:', err);
+          this.addRoomError = err?.message ?? 'Impossible de modifier la chambre pour le moment.';
+          this.isSaving = false;
+        }
+      });
+      return;
+    }
+
     this.roomsApi.create(roomPayload).subscribe({
       next: (room: Room) => {
-        this.rooms = [...this.rooms, room];
+        this.rooms.set([...this.rooms(), room]);
         this.closeAddDialog();
         this.loadRooms();
       },
@@ -108,9 +156,20 @@ export class StaffRoomsPageComponent implements OnInit {
 
   updateRoomStatus(id: string, status: RoomStatus): void {
     this.roomsApi.update(id, { status }).subscribe({
-      next: () => this.loadRooms(),
+      next: (room: Room) => {
+        this.rooms.set(this.rooms().map(current => current.id === room.id ? room : current));
+        this.loadRooms();
+      },
       error: (err: any) => console.error('Erreur lors de la mise à jour de la chambre:', err)
     });
+  }
+
+  toggleRoomStatus(room: Room): void {
+    const nextStatus = room.status === RoomStatus.OCCUPIED
+      ? RoomStatus.AVAILABLE
+      : RoomStatus.OCCUPIED;
+
+    this.updateRoomStatus(room.id, nextStatus);
   }
 
   getStatusLabel(status: RoomStatus): string {
@@ -122,7 +181,7 @@ export class StaffRoomsPageComponent implements OnInit {
   }
 
   get tableRooms() {
-    return this.rooms;
+    return this.rooms();
   }
 
   roomColumns: GenericTableColumn<Room>[] = [
@@ -131,21 +190,24 @@ export class StaffRoomsPageComponent implements OnInit {
     { key: 'type', label: 'Type' },
     { key: 'capacity', label: 'Capacité', type: 'number' },
     { key: 'price', label: 'Prix', type: 'currency' },
-    { key: 'status', label: 'Statut', type: 'status' }
+    {
+      key: 'status',
+      label: 'Statut',
+      type: 'toggle',
+      toggle: {
+        action: 'toggle-status',
+        checkedValue: RoomStatus.OCCUPIED,
+        checkedLabel: 'Occupée',
+        uncheckedLabel: 'Disponible'
+      }
+    }
   ];
 
   roomActions: GenericTableAction<Room>[] = [
     {
-      label: 'Disponible',
-      action: 'available',
-      color: 'success',
-      condition: row => row.status !== RoomStatus.AVAILABLE
-    },
-    {
-      label: 'Occupée',
-      action: 'occupied',
-      color: 'danger',
-      condition: row => row.status !== RoomStatus.OCCUPIED
+      label: 'Modifier',
+      action: 'edit',
+      color: 'secondary'
     },
     {
       label: 'Supprimer',
@@ -155,12 +217,12 @@ export class StaffRoomsPageComponent implements OnInit {
   ];
 
   onTableAction(event: { action: string; row: Room }): void {
-    if (event.action === 'available') {
-      this.updateRoomStatus(event.row.id, RoomStatus.AVAILABLE);
+    if (event.action === 'toggle-status') {
+      this.toggleRoomStatus(event.row);
     }
 
-    if (event.action === 'occupied') {
-      this.updateRoomStatus(event.row.id, RoomStatus.OCCUPIED);
+    if (event.action === 'edit') {
+      this.openEditDialog(event.row);
     }
 
     if (event.action === 'delete') {
@@ -168,13 +230,11 @@ export class StaffRoomsPageComponent implements OnInit {
     }
   }
 
-  private getInitialRoomForm(): {
-    roomNumber: string;
-    type: RoomType;
-    capacity: number;
-    price: number;
-    currency: string;
-  } {
+  get isEditingRoom(): boolean {
+    return this.editingRoomId !== null;
+  }
+
+  private getInitialRoomForm(): RoomForm {
     return {
       roomNumber: '',
       type: RoomType.SIMPLE,

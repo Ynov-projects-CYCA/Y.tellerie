@@ -4,7 +4,12 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { LucideUserPlus } from '@lucide/angular';
-import { AppHttpError, AuthApiService } from '@core';
+import {
+  AppHttpError,
+  AuthApiService,
+  PASSWORD_POLICY_MESSAGE,
+  strongPasswordValidator,
+} from '@core';
 import { AuthShellComponent } from '@pages/auth/shared/auth-shell.component';
 
 @Component({
@@ -20,6 +25,7 @@ export class RegisterPageComponent {
 
   protected readonly isSubmitting = signal(false);
   protected readonly submitError = signal<string | null>(null);
+  protected readonly passwordPolicyMessage = PASSWORD_POLICY_MESSAGE;
 
   protected readonly registerForm = this.formBuilder.nonNullable.group(
     {
@@ -33,7 +39,7 @@ export class RegisterPageComponent {
           Validators.pattern(/^[+0-9 ()-]{8,}$/),
         ],
       ],
-      password: ['', [Validators.required, Validators.minLength(8)]],
+      password: ['', [Validators.required, strongPasswordValidator()]],
       confirmPassword: ['', [Validators.required]],
       acceptTerms: [false, [Validators.requiredTrue]],
     },

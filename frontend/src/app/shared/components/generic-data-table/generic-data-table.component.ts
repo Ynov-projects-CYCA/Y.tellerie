@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-export type TableColumnType = 'text' | 'number' | 'date' | 'currency' | 'status';
+export type TableColumnType = 'text' | 'number' | 'date' | 'currency' | 'status' | 'toggle';
 
 export interface GenericTableColumn<T = any> {
   key: keyof T & string;
@@ -10,6 +10,12 @@ export interface GenericTableColumn<T = any> {
   type?: TableColumnType;
   sortable?: boolean;
   searchable?: boolean;
+  toggle?: {
+    action: string;
+    checkedValue: unknown;
+    checkedLabel: string;
+    uncheckedLabel: string;
+  };
 }
 
 export interface GenericTableAction<T = any> {
@@ -106,6 +112,11 @@ export class GenericDataTableComponent<T extends Record<string, any>> {
     this.actionClick.emit({ action, row });
   }
 
+  emitToggle(column: GenericTableColumn<T>, row: T): void {
+    if (!column.toggle) return;
+    this.emitAction(column.toggle.action, row);
+  }
+
   clearFilters(): void {
     this.globalSearch = '';
     this.fieldKey = '';
@@ -127,10 +138,26 @@ export class GenericDataTableComponent<T extends Record<string, any>> {
       return `${value}€`;
     }
 
+    if (column.type === 'status' && typeof value === 'boolean') {
+      return value ? 'Actif' : 'Inactif';
+    }
+
+    if (Array.isArray(value)) {
+      return value.join(', ');
+    }
+
     return String(value);
   }
 
   getStatusClass(value: unknown): string {
+    if (value === true) {
+      return 'status-badge status-badge--success';
+    }
+
+    if (value === false) {
+      return 'status-badge status-badge--danger';
+    }
+
     const status = String(value);
 
     if (['active', 'available', 'confirmed', 'completed'].includes(status)) {
@@ -146,6 +173,17 @@ export class GenericDataTableComponent<T extends Record<string, any>> {
     }
 
     return 'status-badge status-badge--neutral';
+  }
+
+  isToggleChecked(row: T, column: GenericTableColumn<T>): boolean {
+    return row[column.key] === column.toggle?.checkedValue;
+  }
+
+  getToggleLabel(row: T, column: GenericTableColumn<T>): string {
+    if (!column.toggle) return '';
+    return this.isToggleChecked(row, column)
+      ? column.toggle.checkedLabel
+      : column.toggle.uncheckedLabel;
   }
 
   private normalize(value: unknown): string {

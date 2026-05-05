@@ -30,6 +30,7 @@ import { ListBookingsResult } from "@/shared/model";
 import { JwtAuthGuard } from '@/auth/infrastructure/guards/jwt-auth.guard';
 import { CurrentUser } from '@/auth/infrastructure/decorators/current-user.decorator';
 import { UserAggregate } from '@/auth/domain/user.aggregate';
+import { Role } from '@/shared/model';
 
 /**
  * Gère les interactions liées aux réservations de chambres.
@@ -53,7 +54,14 @@ export class BookingsController {
   @Get()
   @UseGuards(JwtAuthGuard)
   async findAll(@CurrentUser() user: UserAggregate): Promise<BookingResponseDto[]> {
-    const results = await this.listBookingsUseCase.execute(user.getProperties().email.toString());
+    const properties = user.getProperties();
+    const userRoles = properties.roles ?? [];
+    const canManageBookings =
+      userRoles.includes(Role.PERSONNEL) || userRoles.includes(Role.ADMIN);
+    const results = canManageBookings
+      ? await this.listBookingsUseCase.executeAll()
+      : await this.listBookingsUseCase.execute(properties.email.toString());
+
     return results.map((result) => this.toBookingListResponse(result));
   }
 

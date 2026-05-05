@@ -65,8 +65,8 @@ describe('RegisterPageComponent', () => {
       lastname: 'Doe',
       email: 'john.doe@example.com',
       phone: '+33123456789',
-      password: 'password123',
-      confirmPassword: 'password123',
+      password: 'Password1!',
+      confirmPassword: 'Password1!',
       acceptTerms: true,
     });
 
@@ -98,8 +98,8 @@ describe('RegisterPageComponent', () => {
       lastname: 'Doe',
       email: 'john.doe@example.com',
       phone: '+33123456789',
-      password: 'password123',
-      confirmPassword: 'password123',
+      password: 'Password1!',
+      confirmPassword: 'Password1!',
       acceptTerms: true,
     });
 
@@ -134,8 +134,8 @@ describe('RegisterPageComponent', () => {
       lastname: 'Doe',
       email: 'john.doe@example.com',
       phone: '+33123456789',
-      password: 'password123',
-      confirmPassword: 'password123',
+      password: 'Password1!',
+      confirmPassword: 'Password1!',
       acceptTerms: true,
     });
 

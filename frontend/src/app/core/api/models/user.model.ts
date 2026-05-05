@@ -1,21 +1,14 @@
-export enum UserRole {
-  ADMIN = 'ADMIN',
-  STAFF = 'STAFF',
-  USER = 'USER',
-}
-
-export enum UserStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-}
+export type UserRole = 'client' | 'personnel' | 'admin';
 
 export interface User {
   id: string;
   firstname: string;
   lastname: string;
   email: string;
-  role: UserRole;
-  status: UserStatus;
+  phone: string;
+  phoneNumber: string;
+  roles: UserRole[];
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }

@@ -20,7 +20,7 @@ export class UsersApiService {
   }
 
   update(id: string, user: Partial<User>): Observable<User> {
-    return this.apiClient.put<User, Partial<User>>(`/users/${id}`, user);
+    return this.apiClient.patch<User, Partial<User>>(`/users/${id}`, user);
   }
 
   delete(id: string): Observable<void> {

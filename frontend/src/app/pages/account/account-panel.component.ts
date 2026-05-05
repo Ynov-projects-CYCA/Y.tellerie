@@ -2,7 +2,14 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
-import { AppHttpError, AuthAccountService, AuthApiService, AuthSessionService } from '@core';
+import {
+  AppHttpError,
+  AuthAccountService,
+  AuthApiService,
+  AuthSessionService,
+  PASSWORD_POLICY_MESSAGE,
+  strongPasswordValidator,
+} from '@core';
 
 @Component({
   selector: 'app-account-panel',
@@ -25,10 +32,11 @@ export class AccountPanelComponent {
   protected readonly isChangingPassword = signal(false);
   protected readonly passwordSuccess = signal<string | null>(null);
   protected readonly passwordError = signal<string | null>(null);
+  protected readonly passwordPolicyMessage = PASSWORD_POLICY_MESSAGE;
 
   protected readonly changePasswordForm = this.formBuilder.nonNullable.group({
     oldPassword: ['', [Validators.required]],
-    newPassword: ['', [Validators.required, Validators.minLength(8)]],
+    newPassword: ['', [Validators.required, strongPasswordValidator()]],
     confirmPassword: ['', [Validators.required]],
   });
 

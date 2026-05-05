@@ -1,8 +1,12 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { UsersApiService, User, UserRole, UserStatus } from '../../../core/api';
-import { AuthSessionService } from '@core';
+import { UsersApiService, User, UserRole } from '../../../core/api';
+import {
+  AuthSessionService,
+  isStrongPassword,
+  PASSWORD_POLICY_MESSAGE,
+} from '@core';
 import {
   GenericDataTableComponent,
   GenericTableAction,
@@ -19,13 +23,17 @@ import {
 export class StaffAdminPageComponent implements OnInit {
   private usersApi = inject(UsersApiService);
   private authSession = inject(AuthSessionService);
-  readonly UserRole = UserRole;
-  readonly UserStatus = UserStatus;
+  private changeDetectorRef = inject(ChangeDetectorRef);
+  protected readonly passwordPolicyMessage = PASSWORD_POLICY_MESSAGE;
   
-  currentUser = this.authSession.currentUser();
-  employees: User[] = [];
-  searchTerm = '';
-  isLoading = false;
+  readonly currentUser = computed(() => this.authSession.currentUser());
+  readonly hasStaffAccess = computed(
+    () => this.currentUser()?.roles.includes('admin') ?? false,
+  );
+  employees = signal<User[]>([]);
+  searchTerm = signal('');
+  isLoading = signal(false);
+  formError = signal<string | null>(null);
 
   isAddDialogOpen = false;
   isEditDialogOpen = false;
@@ -35,55 +43,63 @@ export class StaffAdminPageComponent implements OnInit {
     firstname: string;
     lastname: string;
     email: string;
-    role: UserRole;
-    status: UserStatus;
+    phone: string;
+    password: string;
+    roles: UserRole[];
+    isActive: boolean;
   } = this.getInitialForm();
 
-  get hasStaffAccess(): boolean {
-    return this.currentUser?.roles.includes('personnel') ?? false;
-  }
-
   ngOnInit(): void {
-    this.loadEmployees();
+    if (this.hasStaffAccess()) {
+      this.loadEmployees();
+    }
   }
 
   loadEmployees(): void {
-    this.isLoading = true;
+    if (this.isLoading()) {
+      return;
+    }
+
+    this.isLoading.set(true);
     this.usersApi.findAll().subscribe({
       next: (users: User[]) => {
-        this.employees = users.filter(u => u.role !== 'USER');
-        this.isLoading = false;
+        this.employees.set([...users]);
+        this.isLoading.set(false);
+        this.changeDetectorRef.detectChanges();
       },
       error: (err: any) => {
         console.error('Erreur lors du chargement des employés:', err);
-        this.isLoading = false;
+        this.isLoading.set(false);
+        this.changeDetectorRef.detectChanges();
       }
     });
   }
 
   get filteredEmployees(): User[] {
-    const value = this.searchTerm.toLowerCase();
-    return this.employees.filter(emp =>
+    const value = this.searchTerm().toLowerCase();
+    return this.employees().filter(emp =>
       `${emp.firstname} ${emp.lastname}`.toLowerCase().includes(value) ||
       emp.email.toLowerCase().includes(value)
     );
   }
 
   get activeCount(): number {
-    return this.employees.filter(e => e.status === UserStatus.ACTIVE).length;
+    return this.employees().filter((e) => e.isActive).length;
   }
 
   get inactiveCount(): number {
-    return this.employees.filter(e => e.status === UserStatus.INACTIVE).length;
+    return this.employees().filter((e) => !e.isActive).length;
   }
 
   openAddDialog(): void {
     this.employeeFormData = this.getInitialForm();
+    this.formError.set(null);
     this.isAddDialogOpen = true;
   }
 
   closeAddDialog(): void {
     this.isAddDialogOpen = false;
+    this.formError.set(null);
     this.employeeFormData = this.getInitialForm();
   }
 
@@ -93,20 +109,40 @@ export class StaffAdminPageComponent implements OnInit {
       firstname: employee.firstname,
       lastname: employee.lastname,
       email: employee.email,
-      role: employee.role,
-      status: employee.status
+      phone: employee.phone,
+      password: '',
+      roles: [...employee.roles],
+      isActive: employee.isActive,
     };
+    this.formError.set(null);
     this.isEditDialogOpen = true;
   }
 
   closeEditDialog(): void {
     this.isEditDialogOpen = false;
     this.selectedEmployee = null;
+    this.formError.set(null);
     this.employeeFormData = this.getInitialForm();
   }
 
   addEmployee(): void {
-    this.usersApi.create(this.employeeFormData).subscribe({
+    if (!isStrongPassword(this.employeeFormData.password)) {
+      this.formError.set(PASSWORD_POLICY_MESSAGE);
+      return;
+    }
+
+    this.formError.set(null);
+
+    this.usersApi.create({
+      firstname: this.employeeFormData.firstname,
+      lastname: this.employeeFormData.lastname,
+      email: this.employeeFormData.email,
+      phone: this.employeeFormData.phone,
+      phoneNumber: this.employeeFormData.phone,
+      roles: this.employeeFormData.roles,
+      isActive: this.employeeFormData.isActive,
+      password: this.employeeFormData.password,
+    } as Partial<User> & { password: string }).subscribe({
       next: () => {
         this.loadEmployees();
         this.closeAddDialog();
@@ -118,7 +154,17 @@ export class StaffAdminPageComponent implements OnInit {
   editEmployee(): void {
     if (!this.selectedEmployee) return;
 
-    this.usersApi.update(this.selectedEmployee.id, this.employeeFormData).subscribe({
+    this.formError.set(null);
+
+    this.usersApi.update(this.selectedEmployee.id, {
+      firstname: this.employeeFormData.firstname,
+      lastname: this.employeeFormData.lastname,
+      email: this.employeeFormData.email,
+      phone: this.employeeFormData.phone,
+      phoneNumber: this.employeeFormData.phone,
+      roles: this.employeeFormData.roles,
+      isActive: this.employeeFormData.isActive,
+    }).subscribe({
       next: () => {
         this.loadEmployees();
         this.closeEditDialog();
@@ -137,22 +183,33 @@ export class StaffAdminPageComponent implements OnInit {
   }
 
   toggleEmployeeStatus(id: string): void {
-    const employee = this.employees.find(e => e.id === id);
+    const employee = this.employees().find(e => e.id === id);
     if (employee) {
-      const newStatus = employee.status === UserStatus.ACTIVE ? UserStatus.INACTIVE : UserStatus.ACTIVE;
-      this.usersApi.update(id, { ...employee, status: newStatus }).subscribe({
+      this.usersApi.update(id, { isActive: !employee.isActive }).subscribe({
         next: () => this.loadEmployees(),
         error: (err: any) => console.error('Erreur:', err)
       });
     }
   }
 
-  getStatusLabel(status: UserStatus): string {
-    return status === UserStatus.ACTIVE ? 'Actif' : 'Inactif';
+  getStatusLabel(isActive: boolean): string {
+    return isActive ? 'Actif' : 'Inactif';
   }
 
-  getStatusClass(status: UserStatus): string {
-    return status === UserStatus.ACTIVE ? 'badge badge--success' : 'badge badge--danger';
+  getStatusClass(isActive: boolean): string {
+    return isActive ? 'badge badge--success' : 'badge badge--danger';
+  }
+
+  setRole(role: UserRole): void {
+    this.employeeFormData.roles = [role];
+  }
+
+  getPrimaryRole(user: User): string {
+    if (user.roles.includes('admin')) {
+      return 'Administrateur';
+    }
+
+    return user.roles.includes('personnel') ? 'Personnel' : 'Client';
   }
 
   private getInitialForm() {
@@ -160,8 +217,10 @@ export class StaffAdminPageComponent implements OnInit {
       firstname: '',
       lastname: '',
       email: '',
-      role: UserRole.STAFF,
-      status: UserStatus.ACTIVE
+      phone: '',
+      password: '',
+      roles: ['personnel'] as UserRole[],
+      isActive: true,
     };
   }
 
@@ -170,8 +229,8 @@ export class StaffAdminPageComponent implements OnInit {
     { key: 'firstname', label: 'Prénom' },
     { key: 'lastname', label: 'Nom' },
     { key: 'email', label: 'Email' },
-    { key: 'role', label: 'Rôle' },
-    { key: 'status', label: 'Statut', type: 'status' }
+    { key: 'roles', label: 'Rôles' },
+    { key: 'isActive', label: 'Statut', type: 'status' }
   ];
 
   employeeActions: GenericTableAction<User>[] = [

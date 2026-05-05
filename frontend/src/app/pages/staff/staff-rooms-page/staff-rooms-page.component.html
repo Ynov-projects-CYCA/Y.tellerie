@@ -9,7 +9,7 @@
   <div class="stats-grid stats-grid--three">
     <div class="card">
       <div class="card__label">Total Chambres</div>
-      <div class="card__value">{{ rooms.length }}</div>
+      <div class="card__value">{{ rooms().length }}</div>
     </div>
 
     <div class="card">
@@ -32,7 +32,7 @@
       [data]="tableRooms"
       [columns]="roomColumns"
       [actions]="roomActions"
-      emptyMessage="Aucune chambre disponible."
+      [emptyMessage]="isLoading() ? 'Chargement des chambres...' : 'Aucune chambre disponible.'"
       (addClick)="openAddDialog()"
       (actionClick)="onTableAction($event)"
     ></app-generic-data-table>
@@ -41,22 +41,27 @@
   <div class="modal-backdrop" *ngIf="isAddDialogOpen"></div>
 
   <div class="modal" *ngIf="isAddDialogOpen">
-    <div class="modal__content">
+      <div class="modal__content">
       <div class="modal__header">
-        <h2 class="modal__title">Ajouter une chambre</h2>
-        <p class="modal__subtitle">Renseignez les informations de la nouvelle chambre</p>
+        <div>
+          <p class="modal__eyebrow">{{ isEditingRoom ? 'Chambre existante' : 'Nouvelle chambre' }}</p>
+          <h2 class="modal__title">{{ isEditingRoom ? 'Modifier une chambre' : 'Ajouter une chambre' }}</h2>
+          <p class="modal__subtitle">Renseignez les informations visibles par le personnel et les clients.</p>
+        </div>
       </div>
 
       <div class="form-grid">
-        <div class="form-field">
+        <div class="form-field form-field--wide">
           <label class="form-label" for="room-number">Numéro</label>
           <input
             id="room-number"
             class="input-field"
             name="roomNumber"
+            placeholder="Ex. 204"
             [(ngModel)]="newRoom.roomNumber"
             required
           />
+          <span class="form-hint">Identifiant affiché dans les listes et réservations.</span>
         </div>
 
         <div class="form-field">
@@ -80,6 +85,7 @@
             [(ngModel)]="newRoom.capacity"
             required
           />
+          <span class="form-hint">Nombre maximal de voyageurs.</span>
         </div>
 
         <div class="form-field">
@@ -94,6 +100,7 @@
             [(ngModel)]="newRoom.price"
             required
           />
+          <span class="form-hint">Prix par nuit, hors taxes additionnelles.</span>
         </div>
 
         <div class="form-field">
@@ -105,6 +112,18 @@
             maxlength="3"
             [(ngModel)]="newRoom.currency"
           />
+          <span class="form-hint">Code ISO sur 3 lettres.</span>
+        </div>
+      </div>
+
+      <div class="room-preview">
+        <div>
+          <span class="room-preview__label">Aperçu</span>
+          <strong>Chambre {{ newRoom.roomNumber || '—' }}</strong>
+        </div>
+        <div>
+          <span class="room-preview__label">Tarif</span>
+          <strong>{{ newRoom.price || 0 }} {{ newRoom.currency || 'EUR' }}</strong>
         </div>
       </div>
 
@@ -116,9 +135,9 @@
           class="button button--primary"
           type="button"
           [disabled]="isSaving || !newRoom.roomNumber || newRoom.capacity < 1 || newRoom.price < 0"
-          (click)="addRoom()"
+          (click)="saveRoom()"
         >
-          {{ isSaving ? 'Ajout...' : 'Ajouter' }}
+          {{ isSaving ? (isEditingRoom ? 'Modification...' : 'Ajout...') : (isEditingRoom ? 'Modifier' : 'Ajouter') }}
         </button>
       </div>
     </div>
