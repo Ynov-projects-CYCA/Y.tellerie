@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+
+
 import { authGuard, clientGuard, guestGuard, personnelGuard } from '@core';
 import { AppShellComponent } from '@layout';
 import {
@@ -18,6 +20,10 @@ import {
   VerifyEmailPageComponent,
 } from '@pages';
 
+import { StaffReservationsPageComponent } from './pages/staff/staff-reservations-page/staff-reservations-page.component';
+import { StaffRoomsPageComponent } from './pages/staff/staff-rooms-page/staff-rooms-page.component';
+import { StaffAdminPageComponent } from './pages/staff/staff-admin-page/staff-admin-page.component';
+
 export const routes: Routes = [
   {
     path: '',
@@ -34,6 +40,32 @@ export const routes: Routes = [
         path: 'integration',
         title: 'Contrat API',
         component: ApiContractPageComponent,
+      },
+      {
+        path: 'staff',
+        canActivate: [authGuard, personnelGuard],
+        children: [
+          {
+            path: '',
+            title: 'Dashboard staff',
+            component: StaffDashboardPageComponent,
+          },
+          {
+            path: 'reservations',
+            title: 'Réservations',
+            component: StaffReservationsPageComponent,
+          },
+          {
+            path: 'rooms',
+            title: 'Chambres',
+            component: StaffRoomsPageComponent,
+          },
+          {
+            path: 'admin',
+            title: 'Administration',
+            component: StaffAdminPageComponent,
+          },
+        ],
       },
       {
         path: 'client',
@@ -84,12 +116,6 @@ export const routes: Routes = [
         canActivate: [authGuard],
       },
       {
-        path: 'staff',
-        title: 'Espace personnel',
-        component: StaffDashboardPageComponent,
-        canActivate: [authGuard, personnelGuard],
-      },
-      {
         path: 'connexion',
         title: 'Connexion',
         component: LoginPageComponent,
@@ -115,7 +141,7 @@ export const routes: Routes = [
       },
       {
         path: '**',
-        title: 'Introuvable',
+        title: 'Page introuvable',
         component: NotFoundPageComponent,
       },
     ],
