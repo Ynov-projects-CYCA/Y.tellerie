@@ -7,7 +7,7 @@ export class Roles {
 
   public static from(roles: Role[]): Roles {
     if (!roles || roles.length === 0) {
-      // Default role if none provided
+      // Un compte sans role explicite reste client par defaut.
       return new Roles([Role.CLIENT]);
     }
     return new Roles(roles);

@@ -14,7 +14,7 @@ export class StripePaymentProvider implements IPaymentProvider {
     if (!apiKey) {
       throw new Error('Missing STRIPE_SECRET_KEY');
     }
-    // Use Stripe's default API version (configured on your account) to avoid type literal mismatch
+    // On laisse Stripe utiliser la version API du compte pour eviter un conflit de typage.
     this.stripe = new Stripe(apiKey);
   }
 

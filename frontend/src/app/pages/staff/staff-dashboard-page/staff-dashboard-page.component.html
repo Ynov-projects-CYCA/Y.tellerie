@@ -67,7 +67,7 @@
 
       <div class="panel__list">
         <div
-          *ngFor="let reservation of reservations.slice(0, 3); let last = last"
+          *ngFor="let reservation of reservationSummaries.slice(0, 3); let last = last"
           class="list-item"
           [ngClass]="{ 'list-item--with-border': !last }"
         >
@@ -81,7 +81,7 @@
           <div class="list-item__aside list-item__aside--right">
             <div class="list-item__price">{{ reservation.totalPrice }}€</div>
             <div class="list-item__date">
-              {{ reservation.checkIn | date:'dd/MM/yyyy' }}
+              {{ reservation.checkInDate | date:'dd/MM/yyyy' }}
             </div>
           </div>
         </div>

@@ -15,11 +15,12 @@
     <nav class="footer-nav">
       <a
         *ngFor="let link of legalLinks"
-        [href]="link.href"
+        [routerLink]="link.route"
         class="footer-nav-link"
       >
         {{ link.label }}
       </a>
+      <a href="mailto:contact@ytellerie.fr" class="footer-nav-link">Support</a>
     </nav>
 
   </div>

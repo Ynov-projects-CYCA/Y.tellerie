@@ -95,12 +95,12 @@
       <input type="checkbox" formControlName="acceptTerms" />
       <span>
         J'accepte les
-        <a class="auth-link" href="#" (click)="$event.preventDefault()">
+        <a class="auth-link" routerLink="/conditions-utilisation">
           conditions d'utilisation
         </a>
         et la
-        <a class="auth-link" href="#" (click)="$event.preventDefault()">
-          politique de confidentialite
+        <a class="auth-link" routerLink="/confidentialite">
+          politique de confidentialité
         </a>
       </span>
     </label>

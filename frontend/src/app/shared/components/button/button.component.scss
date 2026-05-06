@@ -32,7 +32,7 @@
   &:hover:not(:disabled) {
     background: var(--color-amber-900);
     transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(120, 53, 15, 0.35); // Hardcoded color-amber-900 rgb
+    box-shadow: 0 6px 18px rgba(120, 53, 15, 0.35); // Equivalent visuel du brun principal.
   }
 }
 

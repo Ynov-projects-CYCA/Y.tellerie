@@ -79,13 +79,38 @@ export class DataTableModalComponent {
     this.actionEvent.emit({ action, item });
   }
 
-  handleDropdownAction(event: any, item: any): void {
-    const action = event.target.value;
+  handleDropdownAction(event: Event, item: any): void {
+    const select = event.target as HTMLSelectElement;
+    const action = select.value;
     if (action) {
       this.actionEvent.emit({ action, item });
-      // Reset the dropdown
-      event.target.value = '';
+      // On remet le select a zero pour que la meme action reste relancable.
+      select.value = '';
     }
+  }
+
+  getStatusBadgeClass(value: unknown): string {
+    const normalizedValue = String(value).toLowerCase();
+
+    if (
+      ['active', 'available', 'confirmed', 'actif', 'disponible', 'confirmée'].includes(normalizedValue)
+    ) {
+      return 'status-badge status-badge--success';
+    }
+
+    if (
+      ['occupied', 'inactive', 'canceled', 'payment_failed', 'occupée', 'inactif', 'annulée', 'paiement échoué'].includes(normalizedValue)
+    ) {
+      return 'status-badge status-badge--danger';
+    }
+
+    if (
+      ['pending_payment', 'refund_requested', 'dirty', 'en attente paiement', 'remboursement demandé', 'à nettoyer'].includes(normalizedValue)
+    ) {
+      return 'status-badge status-badge--warning';
+    }
+
+    return 'status-badge status-badge--neutral';
   }
 
   handleSort(column: TableColumn): void {

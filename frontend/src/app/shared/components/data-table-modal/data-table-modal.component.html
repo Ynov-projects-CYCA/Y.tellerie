@@ -43,16 +43,7 @@
               <ng-container [ngSwitch]="column.type">
                 <span
                   *ngSwitchCase="'status'"
-                  [class]="
-                    item[column.key] === 'active' ||
-                    item[column.key] === 'available' ||
-                    item[column.key] === 'confirmed'
-                      ? 'status-badge status-badge--success'
-                      : item[column.key] === 'occupied' ||
-                        item[column.key] === 'inactive'
-                          ? 'status-badge status-badge--danger'
-                          : 'status-badge status-badge--neutral'
-                  "
+                  [class]="getStatusBadgeClass(item[column.key])"
                 >
                   {{ item[column.key] }}
                 </span>

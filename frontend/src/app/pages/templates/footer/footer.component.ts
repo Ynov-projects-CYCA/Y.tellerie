@@ -12,8 +12,8 @@ import { LucideHotel } from '@lucide/angular';
 })
 export class FooterComponent {
   legalLinks = [
-    { label: 'Confidentialité', href: '#' },
-    { label: 'Conditions', href: '#' },
-    { label: 'Support', href: '#' },
+    { label: 'Mentions légales', route: '/mentions-legales' },
+    { label: 'Confidentialité', route: '/confidentialite' },
+    { label: 'Conditions', route: '/conditions-utilisation' },
   ];
 }
