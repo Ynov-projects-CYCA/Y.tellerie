@@ -14,7 +14,7 @@ import {
   LucideDownload,
   LucideAlertTriangle
 } from '@lucide/angular';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { Booking, BookingsApiService, BookingStatus, StripeApiService } from '@core';
 import { BadgeComponent, ButtonComponent, CardComponent, DialogComponent } from '@shared';
 
@@ -52,6 +52,7 @@ export class HistoryPageComponent implements OnInit {
   isModalOpen = signal(false);
   isPaying = signal(false);
   isCancelling = signal<string | null>(null);
+  private readonly syncingBookings = new Set<string>();
 
   // Nouvelles modales
   showCancelConfirm = signal(false);
@@ -63,7 +64,33 @@ export class HistoryPageComponent implements OnInit {
   }
 
   private loadBookings(): void {
-    this.bookings$ = this.bookingsApi.findAll();
+    this.bookings$ = this.bookingsApi.findAll().pipe(
+      tap((bookings) => this.syncPendingPaidBookings(bookings)),
+    );
+  }
+
+  private syncPendingPaidBookings(bookings: Booking[]): void {
+    bookings
+      .filter((booking) =>
+        booking.status === BookingStatus.PENDING_PAYMENT ||
+        booking.status === BookingStatus.PAYMENT_FAILED,
+      )
+      .forEach((booking) => {
+        if (this.syncingBookings.has(booking.id)) return;
+
+        this.syncingBookings.add(booking.id);
+        this.stripeApi.syncBookingPayment(booking.id).subscribe({
+          next: (status) => {
+            this.syncingBookings.delete(booking.id);
+            if (status.bookingStatus === BookingStatus.CONFIRMED) {
+              this.loadBookings();
+            }
+          },
+          error: () => {
+            this.syncingBookings.delete(booking.id);
+          },
+        });
+      });
   }
 
   /**
@@ -75,7 +102,8 @@ export class HistoryPageComponent implements OnInit {
     this.isPaying.set(true);
     this.stripeApi.createCheckoutSession({
       bookingId: booking.id,
-      description: `Paiement réservation chambre ${booking.room.roomNumber}`
+      description: `Paiement réservation chambre ${booking.room.roomNumber}`,
+      sendPaymentEmail: false,
     }).subscribe({
       next: (session) => {
         window.location.href = session.url;
@@ -140,10 +168,10 @@ export class HistoryPageComponent implements OnInit {
    */
   getStatusLabel(status: BookingStatus): string {
     const labels: Record<BookingStatus, string> = {
-      [BookingStatus.CONFIRMED]: 'Confirmée',
+      [BookingStatus.CONFIRMED]: 'Payée',
       [BookingStatus.PENDING_PAYMENT]: 'En attente',
       [BookingStatus.PAYMENT_FAILED]: 'Échouée',
-      [BookingStatus.CANCELED]: 'Annulée',
+      [BookingStatus.CANCELED]: 'En attente de réservation',
       [BookingStatus.REFUND_REQUESTED]: 'Remboursement demandé',
       [BookingStatus.REFUNDED]: 'Remboursée'
     };
@@ -158,7 +186,7 @@ export class HistoryPageComponent implements OnInit {
       [BookingStatus.CONFIRMED]: 'success',
       [BookingStatus.PENDING_PAYMENT]: 'warning',
       [BookingStatus.PAYMENT_FAILED]: 'danger',
-      [BookingStatus.CANCELED]: 'danger',
+      [BookingStatus.CANCELED]: 'warning',
       [BookingStatus.REFUND_REQUESTED]: 'warning',
       [BookingStatus.REFUNDED]: 'neutral'
     };

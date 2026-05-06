@@ -12,6 +12,7 @@ import { CreateCheckoutSessionUseCase } from './application/use-cases/create-che
 import { GetBookingPaymentStatusUseCase } from './application/use-cases/get-booking-payment-status.use-case';
 import { ProcessRefundUseCase } from './application/use-cases/process-refund.use-case';
 import { HandleWebhookUseCase } from './application/use-cases/handle-webhook.use-case';
+import { SyncBookingPaymentUseCase } from './application/use-cases/sync-booking-payment.use-case';
 import { IPaymentProvider as IPaymentProviderSymbol } from './application/ports/payment-provider.port';
 import { TypeOrmPaymentRepositoryAdapter } from './infrastructure/adapters/typeorm-payment-repository.adapter';
 import { StripePaymentProvider } from './infrastructure/adapters/stripe-payment.provider';
@@ -23,6 +24,7 @@ import { PaymentEntity } from './infrastructure/persistence/payment.entity';
   providers: [
     CreateCheckoutSessionUseCase,
     HandleWebhookUseCase,
+    SyncBookingPaymentUseCase,
     GetBookingPaymentStatusUseCase,
     CancelBookingPaymentUseCase,
     ProcessRefundUseCase,

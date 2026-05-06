@@ -34,6 +34,7 @@ export class CreateCheckoutSessionUseCase {
   async execute(command: {
     bookingId: string;
     description?: string;
+    sendPaymentEmail?: boolean;
   }): Promise<{ paymentId: string; bookingId: string; sessionId: string; url: string }> {
     const booking = await this.bookingRepository.findById(command.bookingId);
     if (!booking) {
@@ -69,11 +70,13 @@ export class CreateCheckoutSessionUseCase {
     payment.attachCheckoutSession(session.sessionId);
     await this.paymentRepository.save(payment);
 
-    await this.sendPaymentLinkEmail({
-      checkoutUrl: session.url,
-      description: payment.getProperties().description,
-      booking,
-    });
+    if (command.sendPaymentEmail !== false) {
+      await this.sendPaymentLinkEmail({
+        checkoutUrl: session.url,
+        description: payment.getProperties().description,
+        booking,
+      });
+    }
 
     return {
       paymentId: payment.getProperties().id,

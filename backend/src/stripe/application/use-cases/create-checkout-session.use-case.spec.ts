@@ -8,6 +8,7 @@ import { PaymentRepositoryPort } from '../ports/payment-repository.port';
 describe('CreateCheckoutSessionUseCase', () => {
   const paymentProviderMock: jest.Mocked<IPaymentProvider> = {
     createCheckoutSession: jest.fn(),
+    retrieveCheckoutSession: jest.fn(),
     retrieveEvent: jest.fn(),
     refund: jest.fn(),
   };
@@ -20,6 +21,9 @@ describe('CreateCheckoutSessionUseCase', () => {
   const bookingRepositoryMock = {
     findById: jest.fn(),
   };
+  const sendMailUseCaseMock = {
+    execute: jest.fn().mockResolvedValue({ messageId: '123' }),
+  };
 
   let useCase: CreateCheckoutSessionUseCase;
   let bookingFactory: BookingFactory;
@@ -31,6 +35,7 @@ describe('CreateCheckoutSessionUseCase', () => {
       paymentProviderMock,
       paymentRepositoryMock,
       bookingRepositoryMock as any,
+      sendMailUseCaseMock as any,
     );
   });
 
@@ -76,5 +81,33 @@ describe('CreateCheckoutSessionUseCase', () => {
     expect(props.description).toBe('Réservation chambre deluxe');
     expect(props.customerEmail).toBe('ada@example.com');
     expect(props.status).toBe('pending');
+    expect(sendMailUseCaseMock.execute).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not send payment email when disabled', async () => {
+    const booking = bookingFactory.createBooking(
+      'room-123',
+      'Ada',
+      'Lovelace',
+      'ada@example.com',
+      new Date('2026-04-10T00:00:00.000Z'),
+      new Date('2026-04-12T00:00:00.000Z'),
+      2,
+      399.99,
+      'EUR',
+    );
+    bookingRepositoryMock.findById.mockResolvedValue(booking);
+    paymentRepositoryMock.save.mockImplementation(async (payment) => payment);
+    paymentProviderMock.createCheckoutSession.mockResolvedValue({
+      sessionId: 'cs_test_123',
+      url: 'https://checkout.stripe.com/pay/cs_test_123',
+    });
+
+    await useCase.execute({
+      bookingId: booking.getId(),
+      sendPaymentEmail: false,
+    });
+
+    expect(sendMailUseCaseMock.execute).not.toHaveBeenCalled();
   });
 });

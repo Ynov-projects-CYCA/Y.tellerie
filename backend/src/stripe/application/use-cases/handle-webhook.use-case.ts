@@ -67,6 +67,7 @@ export class HandleWebhookUseCase {
       return;
     }
 
+    const wasConfirmed = booking.getStatus().getValue() === 'CONFIRMED';
     payment.markSucceeded();
     if (typeof session.payment_intent === 'string') {
       payment.setPaymentIntentId(session.payment_intent);
@@ -75,6 +76,13 @@ export class HandleWebhookUseCase {
 
     await this.paymentRepository.save(payment);
     await this.bookingRepository.save(booking);
+
+    if (wasConfirmed) {
+      this.logger.log(
+        `Booking ${booking.getId()} already confirmed; confirmation email skipped`,
+      );
+      return;
+    }
 
     try {
       const emailParams = {

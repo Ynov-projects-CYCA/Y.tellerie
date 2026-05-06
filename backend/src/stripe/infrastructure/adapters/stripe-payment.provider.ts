@@ -93,6 +93,10 @@ export class StripePaymentProvider implements IPaymentProvider {
     }
   }
 
+  retrieveCheckoutSession(sessionId: string): Promise<Stripe.Checkout.Session> {
+    return this.stripe.checkout.sessions.retrieve(sessionId);
+  }
+
   private addBookingIdToUrl(url: string, bookingId: string): string {
     const parsed = new URL(url);
     parsed.searchParams.set('booking_id', bookingId);
