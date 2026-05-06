@@ -4,13 +4,13 @@
   background: white;
   border: 1px solid var(--color-amber-200);
   border-radius: var(--radius-lg);
-  box-shadow: 0 4px 20px rgba(120, 53, 15, 0.08); // Hardcoded amber-900
+  box-shadow: 0 4px 20px rgba(120, 53, 15, 0.08); // Ombre legere reprise du brun de marque.
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 
   &.is-hoverable:hover {
     transform: translateY(-4px);
-    box-shadow: 0 16px 40px rgba(120, 53, 15, 0.14); // Hardcoded amber-900
+    box-shadow: 0 16px 40px rgba(120, 53, 15, 0.14); // Accent plus visible au survol.
   }
 }
 

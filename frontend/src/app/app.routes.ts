@@ -8,6 +8,7 @@ import {
   BookingPageComponent,
   HistoryPageComponent,
   HomePageComponent,
+  LegalPageComponent,
   LoginPageComponent,
   NotFoundPageComponent,
   PaymentCancelPageComponent,
@@ -40,6 +41,24 @@ export const routes: Routes = [
         path: 'integration',
         title: 'Contrat API',
         component: ApiContractPageComponent,
+      },
+      {
+        path: 'mentions-legales',
+        title: 'Mentions légales',
+        component: LegalPageComponent,
+        data: { legalPage: 'mentions' },
+      },
+      {
+        path: 'confidentialite',
+        title: 'Confidentialité',
+        component: LegalPageComponent,
+        data: { legalPage: 'privacy' },
+      },
+      {
+        path: 'conditions-utilisation',
+        title: 'Conditions d’utilisation',
+        component: LegalPageComponent,
+        data: { legalPage: 'terms' },
       },
       {
         path: 'staff',

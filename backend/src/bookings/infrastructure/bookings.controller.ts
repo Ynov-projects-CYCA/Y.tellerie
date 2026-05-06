@@ -25,9 +25,12 @@ import {
 import {
   ListBookingsUseCase,
 } from '@/bookings/application/use-cases/list-bookings.use-case';
+import { ListStaffBookingsUseCase } from '@/bookings/application/use-cases/list-staff-bookings.use-case';
 import { CancelBookingUseCase } from '@/bookings/application/use-cases/cancel-booking.use-case';
-import { ListBookingsResult } from "@/shared/model";
+import { ListBookingsResult, Role } from '@/shared/model';
 import { JwtAuthGuard } from '@/auth/infrastructure/guards/jwt-auth.guard';
+import { RolesGuard } from '@/auth/infrastructure/guards/roles.guard';
+import { Roles } from '@/auth/infrastructure/decorators';
 import { CurrentUser } from '@/auth/infrastructure/decorators/current-user.decorator';
 import { UserAggregate } from '@/auth/domain/user.aggregate';
 
@@ -44,16 +47,29 @@ export class BookingsController {
     private readonly confirmBookingUseCase: ConfirmBookingUseCase,
     private readonly getBookingUseCase: GetBookingUseCase,
     private readonly listBookingsUseCase: ListBookingsUseCase,
+    private readonly listStaffBookingsUseCase: ListStaffBookingsUseCase,
     private readonly cancelBookingUseCase: CancelBookingUseCase,
   ) {}
 
   /**
    * Récupère l'historique complet des réservations de l'utilisateur authentifié.
+   * La route staff separee garde ce endpoint centre sur le client connecte.
    */
   @Get()
   @UseGuards(JwtAuthGuard)
   async findAll(@CurrentUser() user: UserAggregate): Promise<BookingResponseDto[]> {
     const results = await this.listBookingsUseCase.execute(user.getProperties().email.toString());
+    return results.map((result) => this.toBookingListResponse(result));
+  }
+
+  /**
+   * Donne au personnel une vue globale sans modifier l'historique client.
+   */
+  @Get('staff')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.PERSONNEL)
+  async findAllForStaff(): Promise<BookingResponseDto[]> {
+    const results = await this.listStaffBookingsUseCase.execute();
     return results.map((result) => this.toBookingListResponse(result));
   }
 

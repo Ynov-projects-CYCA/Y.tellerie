@@ -3,6 +3,7 @@ import { Booking } from '@/bookings/domain/booking.entity';
 export interface BookingRepositoryPort {
   save(booking: Booking): Promise<Booking>;
   findById(id: string): Promise<Booking | null>;
+  findAll(): Promise<Booking[]>;
   findOverlapping(checkInDate: Date, checkOutDate: Date): Promise<Booking[]>;
   findRoomConflicts(
     roomId: string,

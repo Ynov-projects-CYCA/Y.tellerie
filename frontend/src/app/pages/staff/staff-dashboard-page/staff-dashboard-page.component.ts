@@ -1,18 +1,51 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DataTableModalComponent, TableConfig } from '../../../shared/components/data-table-modal/data-table-modal.component';
 import {
-  mockRooms,
-  mockReservations,
+  Booking,
+  BookingsApiService,
+  BookingStatus,
+  getRoomLabel,
+  getRoomStatusLabel,
+  Room,
+  RoomsApiService,
+  RoomStatus,
+} from '@core';
+import { DataTableModalComponent, TableAction, TableColumn, TableConfig } from '../../../shared/components/data-table-modal/data-table-modal.component';
+import {
   mockEmployees,
   currentUser,
-  Room,
-  Reservation,
   Employee,
-  RoomStatus,
-  ReservationStatus,
   EmployeeStatus
 } from '../../../data/mockData';
+
+interface ReservationSummary {
+  guestName: string;
+  roomNumber: string;
+  totalPrice: number;
+  checkInDate: string;
+}
+
+interface RoomTableRow {
+  id: string;
+  roomNumber: string;
+  type: string;
+  capacity: number;
+  price: number;
+  status: RoomStatus;
+  statusLabel: string;
+  raw: Room;
+}
+
+interface ReservationTableRow {
+  id: string;
+  guestName: string;
+  roomNumber: string;
+  checkInDate: string;
+  totalPrice: number;
+  status: BookingStatus;
+  statusLabel: string;
+  raw: Booking;
+}
 
 @Component({
   selector: 'app-staff-dashboard-page',
@@ -22,14 +55,17 @@ import {
   styleUrls: ['./staff-dashboard-page.component.scss']
 })
 export class StaffDashboardPageComponent implements OnInit {
+  private readonly roomsApi = inject(RoomsApiService);
+  private readonly bookingsApi = inject(BookingsApiService);
+
   availableRooms = 0;
   occupiedRooms = 0;
   activeReservations = 0;
   totalRevenue = 0;
   occupancyRate = 0;
 
-  rooms: Room[] = [...mockRooms];
-  reservations: Reservation[] = [...mockReservations];
+  rooms: Room[] = [];
+  reservations: Booking[] = [];
   employees: Employee[] = [...mockEmployees];
   currentUser = currentUser;
 
@@ -37,62 +73,55 @@ export class StaffDashboardPageComponent implements OnInit {
   activeModal: 'reservations' | 'rooms' | 'admin' | null = null;
   modalConfig!: TableConfig;
 
-  ngOnInit() {
-    this.calculateStats();
+  ngOnInit(): void {
+    this.loadDashboardData();
   }
 
-  calculateStats() {
-    this.availableRooms = this.rooms.filter(r => r.status === 'available').length;
-    this.occupiedRooms = this.rooms.filter(r => r.status === 'occupied').length;
-    this.activeReservations = this.reservations.filter(r => r.status === 'confirmed').length;
+  get reservationSummaries(): ReservationSummary[] {
+    return this.reservations.map((reservation) => ({
+      guestName: `${reservation.guestFirstName} ${reservation.guestLastName}`.trim(),
+      roomNumber: reservation.room.roomNumber,
+      totalPrice: reservation.totalPrice,
+      checkInDate: reservation.checkInDate,
+    }));
+  }
+
+  calculateStats(): void {
+    this.availableRooms = this.rooms.filter(r => r.status === RoomStatus.AVAILABLE).length;
+    this.occupiedRooms = this.rooms.filter(r => r.status === RoomStatus.OCCUPIED).length;
+    this.activeReservations = this.reservations.filter(r => r.status === BookingStatus.CONFIRMED).length;
     this.totalRevenue = this.reservations
-      .filter(r => r.status === 'confirmed' || r.status === 'completed')
+      .filter(r => r.status === BookingStatus.CONFIRMED)
       .reduce((sum, r) => sum + r.totalPrice, 0);
-    this.occupancyRate = Math.round((this.occupiedRooms / this.rooms.length) * 100);
+    this.occupancyRate = this.rooms.length
+      ? Math.round((this.occupiedRooms / this.rooms.length) * 100)
+      : 0;
   }
 
-  getActiveEmployees() {
+  getActiveEmployees(): Employee[] {
     return this.employees.filter(e => e.status === 'active').slice(0, 3);
   }
 
-  getPendingReservations() {
-    return this.reservations.filter(r => r.status === 'pending').length;
+  getPendingReservations(): number {
+    return this.reservations.filter(r => r.status === BookingStatus.PENDING_PAYMENT).length;
   }
 
   openReservationsModal(): void {
     this.activeModal = 'reservations';
     this.modalConfig = {
       title: 'Tableau des réservations',
-      subtitle: 'Gère les statuts et actions des réservations',
-      columns: [
-        { key: 'id', label: 'ID', width: '80px', sortable: true },
-        { key: 'guestName', label: 'Client', sortable: true },
-        { key: 'roomNumber', label: 'Chambre', width: '100px', sortable: true },
-        { key: 'checkIn', label: 'Arrivée', type: 'date', sortable: true },
-        { key: 'totalPrice', label: 'Prix', type: 'currency', sortable: true },
-        { key: 'status', label: 'Statut', type: 'status', sortable: true }
-      ],
+      subtitle: 'Vue globale réservée au personnel',
+      columns: this.getReservationColumns(),
       actions: [
-        {
-          label: 'Confirmer',
-          action: 'confirm',
-          color: 'success',
-          condition: item => item.status === 'pending'
-        },
         {
           label: 'Annuler',
           action: 'cancel',
           color: 'danger',
-          condition: item => item.status !== 'completed'
+          condition: (item: ReservationTableRow) =>
+            ![BookingStatus.CANCELED, BookingStatus.REFUNDED].includes(item.status),
         },
-        {
-          label: 'Terminer',
-          action: 'complete',
-          color: 'primary',
-          condition: item => item.status === 'confirmed'
-        }
       ],
-      data: this.reservations,
+      data: this.toReservationRows(),
       emptyMessage: 'Aucune réservation trouvée',
       useDropdownForActions: true
     };
@@ -104,30 +133,28 @@ export class StaffDashboardPageComponent implements OnInit {
     this.modalConfig = {
       title: 'Tableau des chambres',
       subtitle: 'Gère le statut des chambres',
-      columns: [
-        { key: 'id', label: 'ID', width: '80px', sortable: true },
-        { key: 'status', label: 'Statut', type: 'status', sortable: true }
-      ],
+      columns: this.getRoomColumns(),
       actions: [
         {
           label: 'Disponible',
           action: 'available',
           color: 'success',
-          condition: item => item.status !== 'available'
+          condition: (item: RoomTableRow) => item.status !== RoomStatus.AVAILABLE,
         },
         {
           label: 'Occupée',
           action: 'occupied',
           color: 'danger',
-          condition: item => item.status !== 'occupied'
+          condition: (item: RoomTableRow) => item.status !== RoomStatus.OCCUPIED,
         },
         {
-          label: 'Supprimer',
-          action: 'delete',
-          color: 'danger'
-        }
+          label: 'Nettoyée',
+          action: 'clean',
+          color: 'secondary',
+          condition: (item: RoomTableRow) => item.status === RoomStatus.DIRTY,
+        },
       ],
-      data: this.rooms,
+      data: this.toRoomRows(),
       emptyMessage: 'Aucune chambre disponible',
       useDropdownForActions: true
     };
@@ -151,13 +178,13 @@ export class StaffDashboardPageComponent implements OnInit {
           label: 'Activer',
           action: 'activate',
           color: 'success',
-          condition: item => item.status === 'inactive'
+          condition: (item: Employee) => item.status === 'inactive'
         },
         {
           label: 'Désactiver',
           action: 'deactivate',
           color: 'secondary',
-          condition: item => item.status === 'active'
+          condition: (item: Employee) => item.status === 'active'
         },
         {
           label: 'Supprimer',
@@ -177,47 +204,63 @@ export class StaffDashboardPageComponent implements OnInit {
     this.activeModal = null;
   }
 
-  onModalAction(event: { action: string; item: any }): void {
+  onModalAction(event: { action: string; item: RoomTableRow | ReservationTableRow | Employee }): void {
     if (this.activeModal === 'reservations') {
-      this.handleReservationAction(event.action, event.item);
+      this.handleReservationAction(event.action, event.item as ReservationTableRow);
     }
 
     if (this.activeModal === 'rooms') {
-      this.handleRoomAction(event.action, event.item);
+      this.handleRoomAction(event.action, event.item as RoomTableRow);
     }
 
     if (this.activeModal === 'admin') {
-      this.handleAdminAction(event.action, event.item);
-    }
-
-    this.calculateStats();
-  }
-
-  private handleReservationAction(action: string, item: Reservation): void {
-    switch (action) {
-      case 'confirm':
-        this.updateReservationStatus(item.id, 'confirmed');
-        break;
-      case 'cancel':
-        this.updateReservationStatus(item.id, 'pending');
-        break;
-      case 'complete':
-        this.updateReservationStatus(item.id, 'completed');
-        break;
+      this.handleAdminAction(event.action, event.item as Employee);
     }
   }
 
-  private handleRoomAction(action: string, item: Room): void {
-    switch (action) {
-      case 'available':
-        this.updateRoomStatus(item.id, 'available');
-        break;
-      case 'occupied':
-        this.updateRoomStatus(item.id, 'occupied');
-        break;
-      case 'delete':
-        this.deleteRoom(item.id);
-        break;
+  private loadDashboardData(): void {
+    this.roomsApi.findAll().subscribe({
+      next: (rooms) => {
+        this.rooms = rooms;
+        this.calculateStats();
+      },
+    });
+
+    this.bookingsApi.findAllForStaff().subscribe({
+      next: (reservations) => {
+        this.reservations = reservations;
+        this.calculateStats();
+      },
+    });
+  }
+
+  private handleReservationAction(action: string, item: ReservationTableRow): void {
+    if (action !== 'cancel') {
+      return;
+    }
+
+    this.bookingsApi.cancel(item.raw.id).subscribe({
+      next: () => this.reloadReservations(),
+    });
+  }
+
+  private handleRoomAction(action: string, item: RoomTableRow): void {
+    if (action === 'available') {
+      this.roomsApi.update(item.raw.id, { status: RoomStatus.AVAILABLE }).subscribe({
+        next: () => this.reloadRooms(),
+      });
+    }
+
+    if (action === 'occupied') {
+      this.roomsApi.checkin(item.raw.id).subscribe({
+        next: () => this.reloadRooms(),
+      });
+    }
+
+    if (action === 'clean') {
+      this.roomsApi.clean(item.raw.id).subscribe({
+        next: () => this.reloadRooms(),
+      });
     }
   }
 
@@ -233,28 +276,98 @@ export class StaffDashboardPageComponent implements OnInit {
         this.deleteEmployee(item.id);
         break;
     }
+
+    this.openAdminModal();
   }
 
-  private updateReservationStatus(id: number, status: ReservationStatus): void {
-    this.reservations = this.reservations.map(reservation =>
-      reservation.id === id ? { ...reservation, status } : reservation
-    );
+  private reloadRooms(): void {
+    this.roomsApi.findAll().subscribe({
+      next: (rooms) => {
+        this.rooms = rooms;
+        this.calculateStats();
+        if (this.isModalOpen && this.activeModal === 'rooms') {
+          this.openRoomsModal();
+        }
+      },
+    });
   }
 
-  private updateRoomStatus(id: number, status: RoomStatus): void {
-    this.rooms = this.rooms.map(room =>
-      room.id === id ? { ...room, status } : room
-    );
+  private reloadReservations(): void {
+    this.bookingsApi.findAllForStaff().subscribe({
+      next: (reservations) => {
+        this.reservations = reservations;
+        this.calculateStats();
+        if (this.isModalOpen && this.activeModal === 'reservations') {
+          this.openReservationsModal();
+        }
+      },
+    });
+  }
+
+  private getRoomColumns(): TableColumn[] {
+    return [
+      { key: 'roomNumber', label: 'Chambre', width: '100px', sortable: true },
+      { key: 'type', label: 'Type', sortable: true },
+      { key: 'capacity', label: 'Capacité', width: '100px', sortable: true },
+      { key: 'price', label: 'Prix', type: 'currency', sortable: true },
+      { key: 'statusLabel', label: 'Statut', type: 'status', sortable: true }
+    ];
+  }
+
+  private getReservationColumns(): TableColumn[] {
+    return [
+      { key: 'id', label: 'ID', width: '110px', sortable: true },
+      { key: 'guestName', label: 'Client', sortable: true },
+      { key: 'roomNumber', label: 'Chambre', width: '100px', sortable: true },
+      { key: 'checkInDate', label: 'Arrivée', type: 'date', sortable: true },
+      { key: 'totalPrice', label: 'Prix', type: 'currency', sortable: true },
+      { key: 'statusLabel', label: 'Statut', type: 'status', sortable: true }
+    ];
+  }
+
+  private toRoomRows(): RoomTableRow[] {
+    return this.rooms.map((room) => ({
+      id: room.id,
+      roomNumber: room.roomNumber,
+      type: getRoomLabel(room),
+      capacity: room.capacity,
+      price: room.price,
+      status: room.status,
+      statusLabel: getRoomStatusLabel(room.status),
+      raw: room,
+    }));
+  }
+
+  private toReservationRows(): ReservationTableRow[] {
+    return this.reservations.map((reservation) => ({
+      id: reservation.id.slice(0, 8).toUpperCase(),
+      guestName: `${reservation.guestFirstName} ${reservation.guestLastName}`.trim(),
+      roomNumber: reservation.room.roomNumber,
+      checkInDate: reservation.checkInDate,
+      totalPrice: reservation.totalPrice,
+      status: reservation.status,
+      statusLabel: this.getReservationStatusLabel(reservation.status),
+      raw: reservation,
+    }));
+  }
+
+  private getReservationStatusLabel(status: BookingStatus): string {
+    const labels: Record<BookingStatus, string> = {
+      [BookingStatus.CONFIRMED]: 'Confirmée',
+      [BookingStatus.PENDING_PAYMENT]: 'En attente paiement',
+      [BookingStatus.PAYMENT_FAILED]: 'Paiement échoué',
+      [BookingStatus.CANCELED]: 'Annulée',
+      [BookingStatus.REFUND_REQUESTED]: 'Remboursement demandé',
+      [BookingStatus.REFUNDED]: 'Remboursée',
+    };
+
+    return labels[status] ?? status;
   }
 
   private toggleEmployeeStatus(id: number, status: EmployeeStatus): void {
     this.employees = this.employees.map(employee =>
       employee.id === id ? { ...employee, status } : employee
     );
-  }
-
-  private deleteRoom(id: number): void {
-    this.rooms = this.rooms.filter(room => room.id !== id);
   }
 
   private deleteEmployee(id: number): void {

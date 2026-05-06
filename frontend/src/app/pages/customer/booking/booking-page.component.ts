@@ -9,8 +9,22 @@ import {
   LucideCheckCircle,
   LucideRotateCcw
 } from '@lucide/angular';
-import { AvailabilityResponse, BookingsApiService, Room, RoomsApiService, StripeApiService } from '@core';
+import {
+  AvailabilityResponse,
+  BookingsApiService,
+  getRoomImage,
+  getRoomLabel,
+  Room,
+  RoomsApiService,
+  StripeApiService,
+} from '@core';
 import { BadgeComponent, ButtonComponent, CardComponent, DialogComponent } from '@shared';
+
+interface DisplayRoom {
+  room: Room;
+  totalPrice: number;
+  isSearch: boolean;
+}
 
 @Component({
   selector: 'app-booking-page',
@@ -50,7 +64,7 @@ export class BookingPageComponent implements OnInit {
   availableRooms = signal<AvailabilityResponse[]>([]);
   allRooms = signal<Room[]>([]);
 
-  displayRooms = computed(() => {
+  displayRooms = computed<DisplayRoom[]>(() => {
     if (this.hasSearched()) {
       return this.availableRooms().map(ar => ({
         room: ar.room,
@@ -65,7 +79,7 @@ export class BookingPageComponent implements OnInit {
     }));
   });
 
-  selectedRoom = signal<any | null>(null);
+  selectedRoom = signal<DisplayRoom | null>(null);
   dialogOpen = signal(false);
   guestName = signal('');
   guestEmail = signal('');
@@ -135,7 +149,7 @@ export class BookingPageComponent implements OnInit {
   /**
    * Ouvre la modale de réservation pour une chambre sélectionnée.
    */
-  openDialog(roomData: any): void {
+  openDialog(roomData: DisplayRoom): void {
     if (!this.checkIn() || !this.checkOut()) {
       this.searchError.set('Veuillez sélectionner vos dates de séjour avant de réserver.');
       // Scroller vers le haut pour voir l'erreur
@@ -216,30 +230,11 @@ export class BookingPageComponent implements OnInit {
   }
 
   protected getRoomLabel(room: Room): string {
-    const labels = {
-      SIMPLE: 'Chambre Simple',
-      DOUBLE: 'Chambre Double',
-      SUITE: 'Suite Signature',
-    } as const;
-
-    return labels[room.type] ?? room.type;
+    return getRoomLabel(room);
   }
 
   protected getRoomImage(room: Room): string {
-    if (room.image) {
-      return room.image;
-    }
-
-    const fallbackByType = {
-      SIMPLE:
-        'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&q=80&w=800',
-      DOUBLE:
-        'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=800',
-      SUITE:
-        'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&q=80&w=800',
-    } as const;
-
-    return fallbackByType[room.type] ?? fallbackByType.SUITE;
+    return getRoomImage(room);
   }
 
   protected roomDetailsQueryParams(): { checkIn?: string; checkOut?: string; guests?: number } {

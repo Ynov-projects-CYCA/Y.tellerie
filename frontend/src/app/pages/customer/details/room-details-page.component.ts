@@ -11,7 +11,15 @@ import {
   LucideSparkles,
   LucideUsers,
 } from '@lucide/angular';
-import { AuthSessionService, BookingsApiService, Room, RoomsApiService, StripeApiService } from '@core';
+import {
+  AuthSessionService,
+  BookingsApiService,
+  getRoomImage,
+  getRoomLabel,
+  Room,
+  RoomsApiService,
+  StripeApiService,
+} from '@core';
 import { BadgeComponent, ButtonComponent, CardComponent, DialogComponent } from '@shared';
 
 @Component({
@@ -156,30 +164,11 @@ export class RoomDetailsPageComponent implements OnInit {
   }
 
   protected getRoomLabel(room: Room): string {
-    const labels = {
-      SIMPLE: 'Chambre Simple',
-      DOUBLE: 'Chambre Double',
-      SUITE: 'Suite Signature',
-    } as const;
-
-    return labels[room.type] ?? room.type;
+    return getRoomLabel(room);
   }
 
   protected getImageUrl(room: Room): string {
-    if (room.image) {
-      return room.image;
-    }
-
-    const fallbackByType = {
-      SIMPLE:
-        'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&q=80&w=1400',
-      DOUBLE:
-        'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=1400',
-      SUITE:
-        'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&q=80&w=1400',
-    } as const;
-
-    return fallbackByType[room.type] ?? fallbackByType.SUITE;
+    return getRoomImage(room, 'hero');
   }
 
   protected openDialog(): void {

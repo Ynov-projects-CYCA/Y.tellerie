@@ -25,7 +25,14 @@
       <div class="card__label">Occupées</div>
       <div class="card__value card__value--danger">{{ occupiedCount }}</div>
     </div>
+
+    <div class="card">
+      <div class="card__label">À nettoyer</div>
+      <div class="card__value card__value--warning">{{ dirtyCount }}</div>
+    </div>
   </div>
+
+  <p class="feedback feedback--error" *ngIf="errorMessage">{{ errorMessage }}</p>
 
   <div class="card card--toolbar">
     <div class="card__header">
@@ -48,22 +55,40 @@
     <div class="modal__content">
       <div class="modal__header">
         <h2 class="modal__title">Ajouter une chambre</h2>
-        <p class="modal__subtitle">Création simplifiée avec ton modèle de données actuel</p>
+        <p class="modal__subtitle">Création alignée avec le modèle backend actuel</p>
       </div>
 
       <div class="form-grid">
         <div class="form-field">
-          <label class="form-label" for="room-status">Statut</label>
-          <select id="room-status" class="select-field" [(ngModel)]="newRoom.status">
-            <option value="available">Disponible</option>
-            <option value="occupied">Occupée</option>
+          <label class="form-label" for="room-number">Numéro</label>
+          <input id="room-number" class="select-field" type="text" [(ngModel)]="newRoom.roomNumber">
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="room-type">Type</label>
+          <select id="room-type" class="select-field" [(ngModel)]="newRoom.type">
+            <option *ngFor="let type of roomTypes" [ngValue]="type">
+              {{ getRoomTypeLabel(type) }}
+            </option>
           </select>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="room-capacity">Capacité</label>
+          <input id="room-capacity" class="select-field" type="number" min="1" max="10" [(ngModel)]="newRoom.capacity">
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="room-price">Prix par nuit</label>
+          <input id="room-price" class="select-field" type="number" min="0" [(ngModel)]="newRoom.price">
         </div>
       </div>
 
       <div class="modal__footer">
         <button class="button button--secondary" (click)="closeAddDialog()">Annuler</button>
-        <button class="button button--primary" (click)="addRoom()">Ajouter</button>
+        <button class="button button--primary" (click)="addRoom()" [disabled]="isLoading || !newRoom.roomNumber">
+          {{ isLoading ? 'Ajout...' : 'Ajouter' }}
+        </button>
       </div>
     </div>
   </div>

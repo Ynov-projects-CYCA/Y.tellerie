@@ -1,0 +1,20 @@
+<main class="legal-page">
+  <section class="legal-hero">
+    <p class="eyebrow">{{ content().eyebrow }}</p>
+    <h1>{{ content().title }}</h1>
+    <p>{{ content().intro }}</p>
+  </section>
+
+  <section class="legal-content" aria-label="Contenu légal">
+    <article class="legal-section" *ngFor="let section of content().sections">
+      <h2>{{ section.title }}</h2>
+      <p *ngFor="let paragraph of section.paragraphs">{{ paragraph }}</p>
+    </article>
+  </section>
+
+  <nav class="legal-nav" aria-label="Pages légales">
+    <a routerLink="/mentions-legales">Mentions légales</a>
+    <a routerLink="/confidentialite">Confidentialité</a>
+    <a routerLink="/conditions-utilisation">Conditions</a>
+  </nav>
+</main>

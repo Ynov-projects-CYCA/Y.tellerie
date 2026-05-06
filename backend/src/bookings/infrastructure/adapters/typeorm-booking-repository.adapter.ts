@@ -26,6 +26,14 @@ export class TypeOrmBookingRepositoryAdapter implements BookingRepositoryPort {
     return entity ? this.toDomain(entity) : null;
   }
 
+  async findAll(): Promise<Booking[]> {
+    const entities = await this.repository.find({
+      order: { createdAt: 'DESC' },
+    });
+
+    return entities.map((entity) => this.toDomain(entity));
+  }
+
   async findOverlapping(
     checkInDate: Date,
     checkOutDate: Date,
