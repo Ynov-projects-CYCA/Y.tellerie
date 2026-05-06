@@ -1,13 +1,11 @@
-import { HandleWebhookUseCase } from './handle-webhook.use-case';
-import { BookingFactory } from '../../../bookings/domain/booking.factory';
-import { Payment } from '../../domain/payment.entity';
-import { Money } from '../../domain/money.vo';
-import {
-  IPaymentProvider,
-} from '../ports/payment-provider.port';
+import { BookingFactory } from '@/bookings/domain/booking.factory';
+import { Payment } from '@/stripe/domain/payment.entity';
+import { Money } from '@/stripe/domain/money.vo';
+import { IPaymentProvider } from '../ports/payment-provider.port';
 import { PaymentRepositoryPort } from '../ports/payment-repository.port';
+import { SyncBookingPaymentUseCase } from './sync-booking-payment.use-case';
 
-describe('HandleWebhookUseCase', () => {
+describe('SyncBookingPaymentUseCase', () => {
   const paymentProviderMock: jest.Mocked<IPaymentProvider> = {
     createCheckoutSession: jest.fn(),
     retrieveCheckoutSession: jest.fn(),
@@ -28,14 +26,14 @@ describe('HandleWebhookUseCase', () => {
     execute: jest.fn().mockResolvedValue({ messageId: '123' }),
   };
 
-  let useCase: HandleWebhookUseCase;
+  let useCase: SyncBookingPaymentUseCase;
   let bookingFactory: BookingFactory;
 
   beforeEach(() => {
     jest.clearAllMocks();
     process.env.FRONTEND_BASE_URL = 'http://frontend.test';
     bookingFactory = new BookingFactory();
-    useCase = new HandleWebhookUseCase(
+    useCase = new SyncBookingPaymentUseCase(
       paymentProviderMock,
       paymentRepositoryMock,
       bookingRepositoryMock as any,
@@ -43,7 +41,7 @@ describe('HandleWebhookUseCase', () => {
     );
   });
 
-  it('should mark payment and booking as confirmed when checkout completes', async () => {
+  it('should confirm booking when latest checkout session is paid', async () => {
     const booking = bookingFactory.createBooking(
       'room-123',
       'Ada',
@@ -62,34 +60,25 @@ describe('HandleWebhookUseCase', () => {
       status: 'pending',
       customerEmail: booking.getGuestEmail(),
     });
+    payment.attachCheckoutSession('cs_test_123');
 
-    paymentProviderMock.retrieveEvent.mockResolvedValue({
-      id: 'evt_123',
-      type: 'checkout.session.completed',
-      data: {
-        object: {
-          id: 'cs_test_123',
-          amount_total: 50000,
-          currency: 'eur',
-          metadata: { paymentId: 'payment-123' },
-        },
-      },
-    } as any);
-    paymentRepositoryMock.findById.mockResolvedValue(payment);
-    paymentRepositoryMock.save.mockImplementation(async (savedPayment) => savedPayment);
     bookingRepositoryMock.findById.mockResolvedValue(booking);
+    paymentRepositoryMock.findLatestByBookingId.mockResolvedValue(payment);
+    paymentRepositoryMock.save.mockImplementation(async (savedPayment) => savedPayment);
     bookingRepositoryMock.save.mockImplementation(async (savedBooking: any) => savedBooking);
+    paymentProviderMock.retrieveCheckoutSession.mockResolvedValue({
+      id: 'cs_test_123',
+      payment_status: 'paid',
+      payment_intent: 'pi_test_123',
+    } as any);
 
-    const res = await useCase.execute(Buffer.from('{}'), 'signature');
+    const result = await useCase.execute(booking.getId());
 
-    expect(paymentProviderMock.retrieveEvent).toHaveBeenCalledWith(
-      'signature',
-      expect.any(Buffer),
-    );
-    expect(paymentRepositoryMock.save).toHaveBeenCalledTimes(1);
-    expect(bookingRepositoryMock.save).toHaveBeenCalledTimes(1);
+    expect(paymentProviderMock.retrieveCheckoutSession).toHaveBeenCalledWith('cs_test_123');
     expect(payment.getProperties().status).toBe('succeeded');
+    expect(payment.getProperties().paymentIntentId).toBe('pi_test_123');
     expect(booking.getStatus().getValue()).toBe('CONFIRMED');
-    expect(res).toEqual({ received: true });
+    expect(result.synced).toBe(true);
+    expect(sendMailUseCaseMock.execute).toHaveBeenCalledTimes(1);
   });
 });

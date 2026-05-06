@@ -190,7 +190,8 @@ export class BookingPageComponent implements OnInit {
       next: (booking) => {
         this.stripeApi.createCheckoutSession({
           bookingId: booking.id,
-          description: `Réservation chambre ${roomData.room.roomNumber} - ${this.checkIn()} au ${this.checkOut()}`
+          description: `Réservation chambre ${roomData.room.roomNumber} - ${this.checkIn()} au ${this.checkOut()}`,
+          sendPaymentEmail: false,
         }).subscribe({
           next: (session) => {
             window.location.href = session.url;

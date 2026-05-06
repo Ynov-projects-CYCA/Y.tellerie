@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
 
 export class CreateCheckoutDto {
   @ApiProperty({
@@ -18,4 +18,12 @@ export class CreateCheckoutDto {
   @IsOptional()
   @Length(0, 140)
   description?: string;
+
+  @ApiPropertyOptional({
+    description: "Envoie ou non l'e-mail contenant le lien de paiement.",
+    example: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  sendPaymentEmail?: boolean;
 }

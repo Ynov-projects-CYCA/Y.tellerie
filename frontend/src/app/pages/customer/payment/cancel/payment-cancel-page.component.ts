@@ -36,7 +36,10 @@ export class PaymentCancelPageComponent implements OnInit {
     if (!id) return;
 
     this.isRetrying.set(true);
-    this.stripeApi.createCheckoutSession({ bookingId: id }).subscribe({
+    this.stripeApi.createCheckoutSession({
+      bookingId: id,
+      sendPaymentEmail: false,
+    }).subscribe({
       next: (response) => {
         window.location.href = response.url;
       },

@@ -11,5 +11,7 @@ export interface IPaymentProvider {
 
   refund(paymentId: string): Promise<void>;
 
+  retrieveCheckoutSession(sessionId: string): Promise<Stripe.Checkout.Session>;
+
   retrieveEvent(signature: string, payload: Buffer): Promise<Stripe.Event>;
 }

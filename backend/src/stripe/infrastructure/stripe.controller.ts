@@ -19,6 +19,7 @@ import { CreateCheckoutSessionUseCase } from '@/stripe/application/use-cases/cre
 import { GetBookingPaymentStatusUseCase } from '@/stripe/application/use-cases/get-booking-payment-status.use-case';
 import { ProcessRefundUseCase } from '@/stripe/application/use-cases/process-refund.use-case';
 import { HandleWebhookUseCase } from '@/stripe/application/use-cases/handle-webhook.use-case';
+import { SyncBookingPaymentUseCase } from '@/stripe/application/use-cases/sync-booking-payment.use-case';
 import { ApiTags, ApiOperation, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '@/auth/infrastructure/guards/jwt-auth.guard';
@@ -35,6 +36,7 @@ export class StripeController {
     private readonly getBookingPaymentStatusUseCase: GetBookingPaymentStatusUseCase,
     private readonly cancelBookingPaymentUseCase: CancelBookingPaymentUseCase,
     private readonly processRefundUseCase: ProcessRefundUseCase,
+    private readonly syncBookingPaymentUseCase: SyncBookingPaymentUseCase,
   ) {}
 
   @Post('checkout')
@@ -45,6 +47,7 @@ export class StripeController {
       example: {
         bookingId: '2f885cc5-2bcb-473b-95d1-14e6a25d97c8',
         description: 'Réservation chambre deluxe',
+        sendPaymentEmail: false,
       },
     },
   })
@@ -52,6 +55,7 @@ export class StripeController {
     const result = await this.createCheckoutSessionUseCase.execute({
       bookingId: body.bookingId,
       description: body.description,
+      sendPaymentEmail: body.sendPaymentEmail,
     });
     return result;
   }
@@ -62,6 +66,18 @@ export class StripeController {
   ): Promise<PaymentStatusResponseDto> {
     const result = await this.getBookingPaymentStatusUseCase.execute(bookingId);
     return this.toPaymentStatusResponse(result.booking.getId(), result.booking.getStatus().getValue(), result.payment ?? null);
+  }
+
+  @Post('bookings/:bookingId/sync-payment')
+  async syncBookingPayment(
+    @Param('bookingId') bookingId: string,
+  ): Promise<PaymentStatusResponseDto> {
+    const result = await this.syncBookingPaymentUseCase.execute(bookingId);
+    return this.toPaymentStatusResponse(
+      result.booking.getId(),
+      result.booking.getStatus().getValue(),
+      result.payment,
+    );
   }
 
   @Post('bookings/:bookingId/cancel')
